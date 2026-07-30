@@ -1,0 +1,211 @@
+// MinusVigo Web — esquema de base de datos
+// Proyecto independiente de la app móvil (Supabase). Esta es una base
+// PostgreSQL propia gestionada con Prisma.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth (modelos estándar de NextAuth + Prisma Adapter)
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  emailVerified   DateTime?
+  image           String?
+  password        String? // null si el usuario entró por OAuth
+  role            Role      @default(USER)
+  reputationScore Int       @default(100)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  reports       Report[]
+  favorites     Favorite[]
+  notifications Notification[]
+  events        Event[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+// ---------------------------------------------------------------------------
+// Dominio: plazas PMR, reportes, predicciones, favoritos, notificaciones
+// ---------------------------------------------------------------------------
+
+model ParkingSpot {
+  id        Int       @id // mismo id que el dataset oficial del Concello (compartido con la app móvil)
+  city      String    @default("Vigo")
+  street    String
+  lat       Float
+  lon       Float
+  spaces    Int       @default(1)
+
+  // Estado cacheado: se recalcula a partir de Report en cada escritura,
+  // para no tener que agregar reports en cada lectura del mapa.
+  status        SpotStatus @default(UNKNOWN)
+  confidence    Confidence @default(NONE)
+  lastReportAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports     Report[]
+  predictions Prediction[]
+  favorites   Favorite[]
+  notifications Notification[]
+
+  @@index([city])
+  @@index([status])
+  @@map("parking_spots")
+}
+
+enum SpotStatus {
+  FREE
+  OCCUPIED
+  UNKNOWN
+}
+
+enum Confidence {
+  NONE
+  LOW
+  CONFIRMED
+  DISPUTED
+}
+
+model Report {
+  id          String     @id @default(cuid())
+  spotId      Int
+  spot        ParkingSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      SpotStatus
+  weight      Int        @default(1)
+  lat         Float?
+  lon         Float?
+  accuracyM   Float?
+  reportedAt  DateTime   @default(now())
+
+  @@index([spotId, reportedAt])
+  @@index([userId, reportedAt])
+  @@map("reports")
+}
+
+// Probabilidad histórica de "libre" por plaza, día de la semana y hora.
+// Se recalcula con un job nocturno (ver lib/prediction.ts).
+model Prediction {
+  id              String     @id @default(cuid())
+  spotId          Int
+  spot            ParkingSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  dayOfWeek       Int // 0 = domingo .. 6 = sábado
+  hour            Int // 0-23
+  freeProbability Float // 0-1
+  sampleSize      Int        @default(0)
+  confidence      Confidence @default(NONE)
+  updatedAt       DateTime   @updatedAt
+
+  @@unique([spotId, dayOfWeek, hour])
+  @@index([spotId])
+  @@map("predictions")
+}
+
+model Favorite {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spotId    Int
+  spot      ParkingSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, spotId])
+  @@map("favorites")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  read      Boolean          @default(false)
+  spotId    Int?
+  spot      ParkingSpot?     @relation(fields: [spotId], references: [id], onDelete: SetNull)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  FAVORITE_FREED
+  NEARBY_FREE
+  REPORT_CONFIRMED
+  SYSTEM
+}
+
+// Log de eventos de producto (analítica propia, ligera).
+model Event {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  type      String // p.ej. "home_view", "llevame_tap", "spot_confirmed"
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@map("events")
+}
