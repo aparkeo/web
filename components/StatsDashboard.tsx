@@ -1,18 +1,25 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { StatsSummary } from '@/types';
+
+// recharts se carga de forma diferida (chunk aparte) con skeleton de fallback
+const StatusPieChart = dynamic(
+  () => import('@/components/StatusPieChart').then((m) => m.StatusPieChart),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-full w-full" />,
+  },
+);
 
 async function fetchStats(): Promise<StatsSummary> {
   const res = await fetch('/api/stats');
   if (!res.ok) throw new Error('No se pudieron cargar las estadísticas');
   return res.json();
 }
-
-const COLORS = { Libres: '#16A34A', Ocupadas: '#DC2626', 'Sin datos': '#94A3B8' };
 
 export function StatsDashboard() {
   const { data, isLoading } = useQuery({ queryKey: ['stats'], queryFn: fetchStats, refetchInterval: 60_000 });
@@ -26,12 +33,6 @@ export function StatsDashboard() {
       </div>
     );
   }
-
-  const pieData = [
-    { name: 'Libres', value: data.free },
-    { name: 'Ocupadas', value: data.occupied },
-    { name: 'Sin datos', value: data.unknown },
-  ];
 
   const cards = [
     { label: 'Plazas totales', value: data.totalSpots },
@@ -58,16 +59,7 @@ export function StatsDashboard() {
           <CardTitle>Estado actual de las plazas</CardTitle>
         </CardHeader>
         <CardContent className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={2}>
-                {pieData.map((entry) => (
-                  <Cell key={entry.name} fill={COLORS[entry.name as keyof typeof COLORS]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          <StatusPieChart free={data.free} occupied={data.occupied} unknown={data.unknown} />
         </CardContent>
       </Card>
     </div>

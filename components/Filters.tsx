@@ -1,5 +1,6 @@
 'use client';
 
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
 import { useFilterStore } from '@/store/useFilterStore';
@@ -13,7 +14,14 @@ const OPTIONS: { value: StatusFilter; label: string }[] = [
 ];
 
 export function Filters() {
-  const { status, setStatus, favoritesOnly, toggleFavoritesOnly } = useFilterStore();
+  const { status, setStatus, favoritesOnly, toggleFavoritesOnly } = useFilterStore(
+    useShallow((s) => ({
+      status: s.status,
+      setStatus: s.setStatus,
+      favoritesOnly: s.favoritesOnly,
+      toggleFavoritesOnly: s.toggleFavoritesOnly,
+    })),
+  );
 
   return (
     <div className="flex flex-wrap items-center gap-2">

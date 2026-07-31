@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useFilterStore } from '@/store/useFilterStore';
 
 export function SearchBar() {
-  const { search, setSearch } = useFilterStore();
+  const search = useFilterStore((s) => s.search);
+  const setSearch = useFilterStore((s) => s.setSearch);
 
   return (
     <div className="relative">

@@ -15,14 +15,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     const res = await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
 
     if (res?.error) {
+      setError('Email o contraseña incorrectos');
       toast.error('Email o contraseña incorrectos');
       return;
     }
@@ -42,18 +45,35 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? 'login-error' : undefined}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? 'login-error' : undefined}
               />
             </div>
+            {error ? (
+              <p id="login-error" role="alert" className="text-sm font-semibold text-destructive">
+                {error}
+              </p>
+            ) : null}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Entrando…' : 'Entrar'}
             </Button>

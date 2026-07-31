@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Flag } from 'lucide-react';
 import { SearchBar } from '@/components/SearchBar';
 import { ReportModal } from '@/components/ReportModal';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSpots } from '@/hooks/useSpots';
 import { labelForStatus, colorForStatus } from '@/lib/utils';
@@ -27,21 +26,23 @@ export default function ReportPage() {
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)
         ) : (
           spots.slice(0, 30).map((spot) => (
-            <Card
+            <button
               key={spot.id}
-              className="cursor-pointer transition-colors hover:bg-secondary/50"
+              type="button"
+              aria-pressed={target?.id === spot.id}
               onClick={() => setTarget({ id: spot.id, street: spot.street })}
+              className="block w-full cursor-pointer rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <CardContent className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-semibold">{spot.street}</p>
-                  <p className="text-xs" style={{ color: colorForStatus(spot.status) }}>
+              <span className="flex items-center justify-between p-4">
+                <span>
+                  <span className="block font-semibold">{spot.street}</span>
+                  <span className="block text-xs" style={{ color: colorForStatus(spot.status) }}>
                     {labelForStatus(spot.status)}
-                  </p>
-                </div>
-                <Flag className="h-4 w-4 text-muted-foreground" />
-              </CardContent>
-            </Card>
+                  </span>
+                </span>
+                <Flag className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              </span>
+            </button>
           ))
         )}
       </div>

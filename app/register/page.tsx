@@ -15,10 +15,20 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string; form?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validación cliente antes de llamar a la API
+    const nextErrors: typeof errors = {};
+    if (password.length < 8) nextErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    if (confirmPassword !== password) nextErrors.confirmPassword = 'Las contraseñas no coinciden';
+    setErrors(nextErrors);
+    if (nextErrors.password || nextErrors.confirmPassword) return;
+
     setLoading(true);
 
     const res = await fetch('/api/register', {
@@ -29,7 +39,9 @@ export default function RegisterPage() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({ error: 'Error al crear la cuenta' }));
-      toast.error(body.error ?? 'Error al crear la cuenta');
+      const message = body.error ?? 'Error al crear la cuenta';
+      setErrors({ form: message });
+      toast.error(message);
       setLoading(false);
       return;
     }
@@ -52,23 +64,65 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name">Nombre</Label>
-              <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+              <Input id="name" autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 minLength={8}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-describedby={errors.password ? 'password-hint password-error' : 'password-hint'}
+                aria-invalid={errors.password ? true : undefined}
               />
+              <p id="password-hint" className="text-xs text-muted-foreground">
+                Mínimo 8 caracteres
+              </p>
+              {errors.password ? (
+                <p id="password-error" role="alert" className="text-sm font-semibold text-destructive">
+                  {errors.password}
+                </p>
+              ) : null}
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="confirm-password">Confirmar contraseña</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                aria-invalid={errors.confirmPassword ? true : undefined}
+                aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
+              />
+              {errors.confirmPassword ? (
+                <p id="confirm-password-error" role="alert" className="text-sm font-semibold text-destructive">
+                  {errors.confirmPassword}
+                </p>
+              ) : null}
+            </div>
+            {errors.form ? (
+              <p role="alert" className="text-sm font-semibold text-destructive">
+                {errors.form}
+              </p>
+            ) : null}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Creando cuenta…' : 'Crear cuenta'}
             </Button>

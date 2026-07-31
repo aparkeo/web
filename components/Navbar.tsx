@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { MapPin, Menu, LayoutDashboard, BarChart3, User, LogOut, ShieldCheck } from 'lucide-react';
+import { MapPin, Menu, LayoutDashboard, BarChart3, User, LogOut, ShieldCheck, Flag } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 const NAV_LINKS = [
   { href: '/map', label: 'Mapa', icon: MapPin },
   { href: '/stats', label: 'Estadísticas', icon: BarChart3 },
+  { href: '/report', label: 'Reportar', icon: Flag },
 ];
 
 export function Navbar() {
@@ -45,6 +46,7 @@ export function Navbar() {
                 'flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold transition-colors hover:bg-secondary',
                 pathname?.startsWith(link.href) && 'bg-secondary',
               )}
+              aria-current={pathname?.startsWith(link.href) ? 'page' : undefined}
             >
               <link.icon className="h-4 w-4" /> {link.label}
             </Link>
@@ -93,20 +95,32 @@ export function Navbar() {
           )}
         </div>
 
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((v) => !v)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="min-h-11 min-w-11 md:hidden"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+        >
           <Menu className="h-5 w-5" />
         </Button>
       </div>
 
       {open ? (
-        <div className="border-t border-border md:hidden">
-          <nav className="container flex flex-col gap-1 py-3">
+        <div id="mobile-nav" className="border-t border-border md:hidden">
+          <nav className="container flex flex-col gap-1 py-3" aria-label="Navegación móvil">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-secondary"
+                className={cn(
+                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-secondary',
+                  pathname?.startsWith(link.href) && 'bg-secondary',
+                )}
+                aria-current={pathname?.startsWith(link.href) ? 'page' : undefined}
               >
                 <link.icon className="h-4 w-4" /> {link.label}
               </Link>
@@ -114,7 +128,11 @@ export function Navbar() {
             <Link
               href="/profile"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-secondary"
+              className={cn(
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-secondary',
+                pathname?.startsWith('/profile') && 'bg-secondary',
+              )}
+              aria-current={pathname?.startsWith('/profile') ? 'page' : undefined}
             >
               <User className="h-4 w-4" /> {session?.user ? 'Mi perfil' : 'Entrar'}
             </Link>
@@ -122,10 +140,26 @@ export function Navbar() {
               <Link
                 href="/admin"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-secondary"
+                className={cn(
+                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-secondary',
+                  pathname?.startsWith('/admin') && 'bg-secondary',
+                )}
+                aria-current={pathname?.startsWith('/admin') ? 'page' : undefined}
               >
                 <LayoutDashboard className="h-4 w-4" /> Panel admin
               </Link>
+            ) : null}
+            {session?.user ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  signOut();
+                }}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-semibold hover:bg-secondary"
+              >
+                <LogOut className="h-4 w-4" /> Cerrar sesión
+              </button>
             ) : null}
           </nav>
         </div>

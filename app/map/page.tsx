@@ -49,7 +49,7 @@ export default function MapPage() {
         role="region"
       >
         <MapErrorBoundary>
-          <MapView />
+          <MapView visible={mobileView === 'map'} />
         </MapErrorBoundary>
       </div>
 

@@ -3,6 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { NavigationButton } from '@/components/NavigationButton';
 import { DestinationInput } from '@/components/DestinationInput';
@@ -14,7 +15,7 @@ const CONFIDENCE_VARIANT = { Alta: 'success' as const, Media: 'warning' as const
 
 export function BestSpotCard() {
   const destination = useDestinationStore((s) => s.destination);
-  const { data: best, isLoading } = useBestSpot();
+  const { data: best, isLoading, isError, refetch, isRefetching } = useBestSpot();
 
   return (
     <div className="space-y-4">
@@ -26,6 +27,17 @@ export function BestSpotCard() {
         </p>
       ) : isLoading ? (
         <Skeleton className="h-48 w-full" />
+      ) : isError ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+            <p className="text-muted-foreground">
+              No se pudo buscar la mejor plaza cerca de «{destination.label}». Revisa tu conexión.
+            </p>
+            <Button type="button" variant="outline" onClick={() => refetch()} disabled={isRefetching}>
+              {isRefetching ? 'Reintentando…' : 'Reintentar'}
+            </Button>
+          </CardContent>
+        </Card>
       ) : !best ? (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
@@ -54,7 +66,7 @@ export function BestSpotCard() {
               ) : null}
             </div>
 
-            <NavigationButton lat={best.lat} lon={best.lon} />
+            <NavigationButton lat={best.lat} lon={best.lon} street={best.street} />
           </CardContent>
         </Card>
       )}

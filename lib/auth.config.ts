@@ -8,6 +8,8 @@ import type { NextAuthConfig } from 'next-auth';
  */
 export const authConfig: NextAuthConfig = {
   pages: { signIn: '/login' },
+  // Sesiones de 24 h.
+  session: { maxAge: 24 * 60 * 60 },
   providers: [],
   callbacks: {
     async jwt({ token, user }) {

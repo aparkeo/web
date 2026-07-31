@@ -110,6 +110,7 @@ model ParkingSpot {
 
   @@index([city])
   @@index([status])
+  @@index([lat, lon])
   @@map("parking_spots")
 }
 

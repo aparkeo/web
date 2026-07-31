@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { getClientIp, rateLimit } from '@/lib/rateLimit';
+
+const QuerySchema = z.object({
+  q: z.string().trim().min(3).max(120),
+});
 
 // Mismo centro/radio que usa la app móvil (src/utils/vigoBounds.ts) para
 // sesgar las búsquedas hacia Vigo sin tener que mantener dos definiciones.
@@ -18,11 +24,20 @@ export interface GeocodeResult {
  * para poder limitar/cachear sin depender de cada cliente.
  */
 export async function GET(req: NextRequest) {
+  const { success, retryAfterSec } = rateLimit(`geocode:${getClientIp(req)}`, 20, 60_000);
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Demasiadas búsquedas. Inténtalo de nuevo en unos segundos.' },
+      { status: 429, headers: { 'Retry-After': String(retryAfterSec) } },
+    );
+  }
+
   const { searchParams } = new URL(req.url);
-  const q = searchParams.get('q')?.trim();
-  if (!q || q.length < 3) {
+  const parsed = QuerySchema.safeParse({ q: searchParams.get('q') });
+  if (!parsed.success) {
     return NextResponse.json([]);
   }
+  const { q } = parsed.data;
 
   const viewbox = [
     VIGO_CENTER.lon - PAD_DEG,

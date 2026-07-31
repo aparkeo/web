@@ -3,6 +3,7 @@
 import { Brain } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePrediction } from '@/hooks/usePredictions';
 import { formatRelativeTime } from '@/lib/utils';
@@ -21,7 +22,7 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 export function PredictionCard({ spotId }: { spotId: number }) {
-  const { data: prediction, isLoading } = usePrediction(spotId);
+  const { data: prediction, isLoading, isError, refetch, isRefetching } = usePrediction(spotId);
 
   return (
     <Card>
@@ -31,10 +32,17 @@ export function PredictionCard({ spotId }: { spotId: number }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading || !prediction ? (
+        {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-24" />
             <Skeleton className="h-4 w-40" />
+          </div>
+        ) : isError || !prediction ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">No se pudo cargar la predicción.</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
+              {isRefetching ? 'Reintentando…' : 'Reintentar'}
+            </Button>
           </div>
         ) : (
           <div className="space-y-3">

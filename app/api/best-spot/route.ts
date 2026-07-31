@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { distanceMeters } from '@/lib/utils';
-import { getSpotPrediction, rankSpotsByRecommendation } from '@/lib/prediction';
+import { getSpotPrediction, rankSpotsByRecommendation, vigoNow } from '@/lib/prediction';
+import type { Prediction } from '@prisma/client';
 import type { SpotWithPrediction } from '@/types';
 
 const SEARCH_RADIUS_M = 2000;
@@ -32,9 +33,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ spot: null });
   }
 
+  // Una sola query para todas las predicciones históricas del bucket actual
+  // (hora local de Vigo), en lugar de un findUnique por plaza (N+1).
+  const { dayOfWeek, hour } = vigoNow();
+  const historicals = await prisma.prediction.findMany({
+    where: { spotId: { in: withDistance.map(({ spot }) => spot.id) }, dayOfWeek, hour },
+  });
+  const historicalBySpot = new Map<number, Prediction>(historicals.map((p) => [p.spotId, p]));
+
   const withPrediction = await Promise.all(
     withDistance.map(async ({ spot, distanceM }) => {
-      const prediction = await getSpotPrediction(spot);
+      const prediction = await getSpotPrediction(spot, historicalBySpot.get(spot.id) ?? null);
       const dto: SpotWithPrediction & { distanceM: number } = {
         id: spot.id,
         city: spot.city,

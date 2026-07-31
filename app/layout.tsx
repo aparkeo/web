@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   },
   description:
     'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.',
-  keywords: ['PMR', 'aparcamiento', 'Vigo', 'movilidad reducida', 'plazas discapacitados', 'parking accesible'],
+  keywords: ['PMR', 'aparcamiento', 'Vigo', 'movilidad reducida', 'parking accesible'],
   authors: [{ name: 'MinusVigo' }],
   robots: { index: true, follow: true },
   openGraph: {
@@ -23,24 +23,27 @@ export const metadata: Metadata = {
     siteName: 'MinusVigo',
     title: 'MinusVigo — Plazas PMR libres en Vigo',
     description: 'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'MinusVigo' }],
+    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'MinusVigo' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MinusVigo — Plazas PMR libres en Vigo',
     description: 'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real.',
-    images: ['/og-image.png'],
+    images: ['/og-image.svg'],
   },
-  icons: { icon: '/favicon.ico' },
+  icons: { icon: { url: '/icon.svg', type: 'image/svg+xml' } },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <body className="min-h-screen bg-background font-sans antialiased">
+        <a href="#main-content" className="skip-to-content">
+          Saltar al contenido principal
+        </a>
         <Providers>
           <Navbar />
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
         </Providers>
       </body>
     </html>

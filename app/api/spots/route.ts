@@ -1,15 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { distanceMeters } from '@/lib/utils';
-import type { SpotDTO, SpotStatus } from '@/types';
+import type { SpotDTO } from '@/types';
+
+const QuerySchema = z.object({
+  status: z.enum(['FREE', 'OCCUPIED', 'UNKNOWN']).optional(),
+  search: z.string().trim().min(1).optional(),
+  lat: z.coerce.number().refine(Number.isFinite).optional(),
+  lon: z.coerce.number().refine(Number.isFinite).optional(),
+});
+
+// Salvaguarda para no devolver la tabla completa si crece el dataset.
+const MAX_SPOTS_PER_QUERY = 1000;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get('status') as SpotStatus | null;
-  const search = searchParams.get('search')?.trim() || undefined;
-  const lat = searchParams.get('lat') ? Number(searchParams.get('lat')) : undefined;
-  const lon = searchParams.get('lon') ? Number(searchParams.get('lon')) : undefined;
+  const parsed = QuerySchema.safeParse({
+    status: searchParams.get('status') ?? undefined,
+    search: searchParams.get('search') ?? undefined,
+    lat: searchParams.get('lat') ?? undefined,
+    lon: searchParams.get('lon') ?? undefined,
+  });
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Parámetros de búsqueda inválidos' }, { status: 400 });
+  }
+  const { status, search, lat, lon } = parsed.data;
 
   const session = await auth();
 
@@ -22,6 +39,7 @@ export async function GET(req: NextRequest) {
       ? { favorites: { where: { userId: session.user.id }, select: { id: true } } }
       : undefined,
     orderBy: { street: 'asc' },
+    take: MAX_SPOTS_PER_QUERY,
   });
 
   const dto: SpotDTO[] = spots.map((s) => ({

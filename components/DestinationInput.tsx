@@ -10,7 +10,8 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDestinationStore } from '@/store/useDestinationStore';
 
 export function DestinationInput() {
-  const { destination, setDestination } = useDestinationStore();
+  const destination = useDestinationStore((s) => s.destination);
+  const setDestination = useDestinationStore((s) => s.setDestination);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -47,7 +48,7 @@ export function DestinationInput() {
         setLocError(err.code === 1 ? 'Permiso de ubicación denegado.' : 'No se pudo obtener la ubicación.');
         setLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 8000 },
+      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 30_000 },
     );
   };
 

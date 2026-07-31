@@ -1,5 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import type { ParkingSpot, Confidence, SpotStatus } from '@prisma/client';
+import type { ParkingSpot, Prediction, Confidence, SpotStatus } from '@prisma/client';
 
 /**
  * Módulo de predicción de MinusVigo Web.
@@ -29,6 +30,39 @@ export interface SpotPrediction {
 }
 
 const RECENT_WINDOW_MS = 15 * 60 * 1000;
+const REPUTATION_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+// Ciudad cuyo huso horario gobierna los buckets día/hora de las predicciones.
+const CITY_TIMEZONE = 'Europe/Madrid';
+
+const WEEKDAY_INDEX: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
+const vigoFormatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: CITY_TIMEZONE,
+  weekday: 'short',
+  hour: 'numeric',
+  hourCycle: 'h23',
+});
+
+/**
+ * Día de la semana (0 = domingo) y hora (0-23) en la zona horaria de Vigo.
+ * Sin esto, los buckets de Prediction dependían de la TZ del servidor
+ * (UTC en Vercel), desplazando las franjas horarias respecto a la realidad local.
+ */
+export function vigoNow(date: Date = new Date()): { dayOfWeek: number; hour: number } {
+  const parts = vigoFormatter.formatToParts(date);
+  const weekday = parts.find((p) => p.type === 'weekday')?.value ?? 'Sun';
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? '0');
+  return { dayOfWeek: WEEKDAY_INDEX[weekday] ?? 0, hour: Number.isFinite(hour) ? hour : 0 };
+}
 
 export async function recalculateSpotStatus(spotId: number): Promise<void> {
   const since = new Date(Date.now() - RECENT_WINDOW_MS);
@@ -68,6 +102,37 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
     where: { id: spotId },
     data: { status, confidence, lastReportAt: recent[0]?.reportedAt ?? undefined },
   });
+
+  // Reputación: cuando hay consenso fuerte (CONFIRMED) se compara con los
+  // reportes de las últimas 24 h. Los autores que lo contradijeron pierden
+  // 5 puntos (mínimo 0); los que acertaron ganan 1 (máximo 100). Se hace con
+  // GREATEST/LEAST en SQL para que el clamp sea atómico.
+  if (confidence === 'CONFIRMED') {
+    const reports24h = await prisma.report.findMany({
+      where: { spotId, reportedAt: { gte: new Date(Date.now() - REPUTATION_WINDOW_MS) } },
+      select: { userId: true, status: true },
+    });
+
+    const contradicting = [...new Set(reports24h.filter((r) => r.status !== status).map((r) => r.userId))];
+    const agreeing = [...new Set(reports24h.filter((r) => r.status === status).map((r) => r.userId))];
+
+    const updates: Promise<number>[] = [];
+    if (contradicting.length > 0) {
+      updates.push(
+        prisma.$executeRaw(
+          Prisma.sql`UPDATE users SET "reputationScore" = GREATEST(0, "reputationScore" - 5) WHERE id IN (${Prisma.join(contradicting)})`,
+        ),
+      );
+    }
+    if (agreeing.length > 0) {
+      updates.push(
+        prisma.$executeRaw(
+          Prisma.sql`UPDATE users SET "reputationScore" = LEAST(100, "reputationScore" + 1) WHERE id IN (${Prisma.join(agreeing)})`,
+        ),
+      );
+    }
+    await Promise.all(updates);
+  }
 }
 
 /** Recalcula la tabla Prediction para una plaza a partir de todo su historial de Report. */
@@ -76,8 +141,9 @@ export async function recomputeHistoricalPredictions(spotId: number): Promise<vo
   const buckets = new Map<string, { free: number; total: number }>();
 
   for (const r of reports) {
-    const d = new Date(r.reportedAt);
-    const key = `${d.getDay()}-${d.getHours()}`;
+    // Buckets en hora local de Vigo, no en la TZ del servidor.
+    const { dayOfWeek, hour } = vigoNow(r.reportedAt);
+    const key = `${dayOfWeek}-${hour}`;
     const bucket = buckets.get(key) ?? { free: 0, total: 0 };
     bucket.total += r.weight;
     if (r.status === 'FREE') bucket.free += r.weight;
@@ -103,8 +169,17 @@ function confidenceLabel(score: number): 'Alta' | 'Media' | 'Baja' {
   return 'Baja';
 }
 
-/** Predicción combinada para una plaza, lista para mostrar en PredictionCard. */
-export async function getSpotPrediction(spot: ParkingSpot): Promise<SpotPrediction> {
+/**
+ * Predicción combinada para una plaza, lista para mostrar en PredictionCard.
+ *
+ * `preloadedHistorical` permite pasar la fila de Prediction ya cargada
+ * (p.ej. por best-spot, que la trae en batch para evitar N+1). Si es
+ * `undefined` se consulta aquí; si es `null` se asume que no existe.
+ */
+export async function getSpotPrediction(
+  spot: ParkingSpot,
+  preloadedHistorical?: Prediction | null,
+): Promise<SpotPrediction> {
   const now = new Date();
   const isRecent = !!spot.lastReportAt && now.getTime() - spot.lastReportAt.getTime() < RECENT_WINDOW_MS;
 
@@ -119,9 +194,13 @@ export async function getSpotPrediction(spot: ParkingSpot): Promise<SpotPredicti
     };
   }
 
-  const historical = await prisma.prediction.findUnique({
-    where: { spotId_dayOfWeek_hour: { spotId: spot.id, dayOfWeek: now.getDay(), hour: now.getHours() } },
-  });
+  const { dayOfWeek, hour } = vigoNow(now);
+  const historical =
+    preloadedHistorical !== undefined
+      ? preloadedHistorical
+      : await prisma.prediction.findUnique({
+          where: { spotId_dayOfWeek_hour: { spotId: spot.id, dayOfWeek, hour } },
+        });
 
   if (historical && historical.sampleSize > 0) {
     let probabilityFree = historical.freeProbability;
