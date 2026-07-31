@@ -77,3 +77,26 @@ export interface StatsSummary {
   reportsLast24h: number;
   activeUsers: number;
 }
+
+export type NotificationType = 'FAVORITE_FREED' | 'NEARBY_FREE' | 'REPORT_CONFIRMED' | 'SYSTEM';
+
+export interface NotificationDTO {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  read: boolean;
+  spotId: number | null;
+  createdAt: string;
+  spot: { id: number; street: string } | null;
+}
+
+export interface NotificationsResponse {
+  notifications: NotificationDTO[];
+  unreadCount: number;
+}
+
+export interface MarkNotificationsReadInput {
+  id?: string;
+  all?: boolean;
+}

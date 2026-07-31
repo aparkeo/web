@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const NAV_LINKS = [
   { href: '/map', label: 'Mapa', icon: MapPin },
@@ -55,7 +56,9 @@ export function Navbar() {
 
         <div className="hidden items-center gap-2 md:flex">
           {session?.user ? (
-            <DropdownMenu>
+            <>
+              <NotificationBell />
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 px-2">
                   <Avatar className="h-7 w-7">
@@ -83,6 +86,7 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </>
           ) : (
             <>
               <Button variant="ghost" asChild>
@@ -95,17 +99,20 @@ export function Navbar() {
           )}
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="min-h-11 min-w-11 md:hidden"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-1 md:hidden">
+          {session?.user ? <NotificationBell /> : null}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="min-h-11 min-w-11"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {open ? (

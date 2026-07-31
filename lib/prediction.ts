@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { notifyFavoriteFreed } from '@/lib/notifications';
 import type { ParkingSpot, Prediction, Confidence, SpotStatus } from '@prisma/client';
 
 /**
@@ -98,10 +99,28 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
     confidence = 'LOW';
   }
 
+  // Estado previo: necesario para detectar la TRANSICIÓN a FREE (no basta
+  // con que el nuevo estado sea FREE — solo notificamos cuando cambia).
+  const previous = await prisma.parkingSpot.findUnique({
+    where: { id: spotId },
+    select: { status: true, street: true },
+  });
+
   await prisma.parkingSpot.update({
     where: { id: spotId },
     data: { status, confidence, lastReportAt: recent[0]?.reportedAt ?? undefined },
   });
+
+  // Disparador FAVORITE_FREED: la plaza acaba de quedar libre. Se hace tras
+  // el update, en el mismo hot path (con pocas plazas es barato), pero un
+  // fallo aquí no debe romper el reporte que originó el recálculo.
+  if (previous && previous.status !== 'FREE' && status === 'FREE') {
+    try {
+      await notifyFavoriteFreed(spotId, previous.street);
+    } catch (error) {
+      console.error('Error creando notificaciones FAVORITE_FREED', error);
+    }
+  }
 
   // Reputación: cuando hay consenso fuerte (CONFIRMED) se compara con los
   // reportes de las últimas 24 h. Los autores que lo contradijeron pierden
