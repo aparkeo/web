@@ -31,7 +31,17 @@ export const metadata: Metadata = {
     description: 'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real.',
     images: ['/og-image.svg'],
   },
-  icons: { icon: { url: '/icon.svg', type: 'image/svg+xml' } },
+  manifest: '/manifest.webmanifest',
+  themeColor: '#0D776B',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MinusVigo',
+  },
+  icons: {
+    icon: { url: '/icon.svg', type: 'image/svg+xml' },
+    apple: '/icons/icon-192.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
