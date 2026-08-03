@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { sendPushToUser } from '@/lib/push';
 
 /**
  * Crea notificaciones FAVORITE_FREED para todos los usuarios que tienen la
@@ -43,5 +44,26 @@ export async function notifyFavoriteFreed(spotId: number, street: string): Promi
   if (data.length === 0) return 0;
 
   const result = await prisma.notification.createMany({ data });
+
+  // Web Push: avisamos también fuera de la app a los dispositivos suscritos.
+  // El tag evita duplicados en la bandeja del SO si llega más de un push
+  // por la misma plaza. Envuelto en try/catch: el push NUNCA rompe el flujo.
+  try {
+    const title = `Plaza libre en ${street}`;
+    const body = `La plaza PMR de ${street} que sigues acaba de quedar libre.`;
+    await Promise.all(
+      data.map((n) =>
+        sendPushToUser(n.userId, {
+          title,
+          body,
+          url: `/spots/${spotId}`,
+          tag: `spot-free-${spotId}`,
+        }),
+      ),
+    );
+  } catch (err) {
+    console.error('[notifications] Error enviando Web Push:', err);
+  }
+
   return result.count;
 }

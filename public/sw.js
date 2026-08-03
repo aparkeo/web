@@ -18,7 +18,7 @@
  * ========================================================================== */
 
 // Cambiar esta versión fuerza la sustitución de todas las cachés en activate.
-const VERSION = '1';
+const VERSION = '2';
 const CACHE_NAME = `minusvigo-v${VERSION}`;
 
 // App shell mínimo precacheado en install.
@@ -185,6 +185,83 @@ async function navigationNetworkFirst(request) {
     return Response.error();
   }
 }
+
+/* --------------------------------------------------------------------------
+ * push: muestra una notificación del SO cuando el servidor envía un Web Push.
+ * Payload esperado (JSON): { title, body, url?, tag? }.
+ * ------------------------------------------------------------------------ */
+self.addEventListener('push', (event) => {
+  event.waitUntil(
+    (async () => {
+      // Fallback defensivo por si el payload no es JSON válido.
+      let data = { title: 'MinusVigo', body: '', url: '/', tag: undefined };
+      try {
+        if (event.data) {
+          const parsed = event.data.json();
+          data = { ...data, ...parsed };
+        }
+      } catch (err) {
+        console.warn('[SW] Payload push no válido:', err);
+        try {
+          const text = event.data ? event.data.text() : '';
+          if (text) data = { ...data, body: text };
+        } catch {
+          // Sin cuerpo utilizable: se muestra la notificación por defecto.
+        }
+      }
+
+      try {
+        await self.registration.showNotification(data.title, {
+          body: data.body,
+          // El tag agrupa/reemplaza notificaciones repetidas en la bandeja del SO.
+          tag: data.tag,
+          icon: '/icons/icon-192.png',
+          badge: '/icons/icon-192.png',
+          data: { url: data.url },
+        });
+      } catch (err) {
+        console.warn('[SW] No se pudo mostrar la notificación:', err);
+      }
+    })(),
+  );
+});
+
+/* --------------------------------------------------------------------------
+ * notificationclick: cierra la notificación y lleva al usuario a la URL
+ * del payload, reutilizando una ventana abierta si existe.
+ * ------------------------------------------------------------------------ */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    (async () => {
+      try {
+        const windowClients = await clients.matchAll({
+          type: 'window',
+          includeUncontrolled: true,
+        });
+        const client = windowClients.find((c) => 'focus' in c);
+        if (client) {
+          await client.focus();
+          if ('navigate' in client) {
+            await client.navigate(url);
+          }
+          return;
+        }
+        await clients.openWindow(url);
+      } catch (err) {
+        console.warn('[SW] Error en notificationclick:', err);
+        // Último recurso: intentar abrir ventana sin más comprobaciones.
+        try {
+          await clients.openWindow(url);
+        } catch {
+          // Nada más que hacer.
+        }
+      }
+    })(),
+  );
+});
 
 /* --------------------------------------------------------------------------
  * fetch: enrutado por tipo de recurso. Nunca lanzar excepciones aquí.

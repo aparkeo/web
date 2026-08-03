@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Bell, CircleParking, CheckCircle2, MapPin, Info, CheckCheck } from 'lucide-react';
+import { Bell, CircleParking, CheckCircle2, MapPin, Info, CheckCheck, BellRing, BellOff } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useMarkNotificationsRead } from '@/hooks/useMarkNotificationsRead';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { cn } from '@/lib/utils';
 import type { NotificationDTO, NotificationType } from '@/types';
 
@@ -36,9 +38,32 @@ export function NotificationBell() {
   const router = useRouter();
   const { data, isLoading } = useNotifications();
   const markRead = useMarkNotificationsRead();
+  const push = usePushSubscription();
 
   const unreadCount = data?.unreadCount ?? 0;
   const notifications = data?.notifications ?? [];
+
+  const handleTogglePush = async () => {
+    if (push.subscribed) {
+      const ok = await push.unsubscribe();
+      if (ok) {
+        toast.success('Avisos desactivados en este dispositivo');
+      } else {
+        toast.error('No se pudieron desactivar los avisos');
+      }
+    } else {
+      const ok = await push.subscribe();
+      if (ok) {
+        toast.success('Avisos activados en este dispositivo');
+      } else if (push.permission === 'denied' || Notification.permission === 'denied') {
+        toast.error(
+          'Has bloqueado las notificaciones en el navegador. Actívalas en los ajustes del sitio.',
+        );
+      } else {
+        toast.error('No se pudieron activar los avisos');
+      }
+    }
+  };
 
   const handleOpen = (notification: NotificationDTO) => {
     if (!notification.read) {
@@ -143,6 +168,33 @@ export function NotificationBell() {
             ))}
           </div>
         )}
+
+        {push.supported ? (
+          <>
+            <DropdownMenuSeparator />
+            <div className="p-1">
+              <button
+                type="button"
+                onClick={handleTogglePush}
+                disabled={push.loading}
+                aria-pressed={push.subscribed}
+                className="flex min-h-11 w-full items-center gap-2 rounded-sm px-2 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50"
+              >
+                {push.subscribed ? (
+                  <>
+                    <BellOff className="h-4 w-4 shrink-0" aria-hidden />
+                    Desactivar avisos
+                  </>
+                ) : (
+                  <>
+                    <BellRing className="h-4 w-4 shrink-0" aria-hidden />
+                    {push.loading ? 'Activando…' : 'Activar avisos en este dispositivo'}
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

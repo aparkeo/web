@@ -27,12 +27,13 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  reports       Report[]
-  favorites     Favorite[]
-  notifications Notification[]
-  events        Event[]
+  accounts          Account[]
+  sessions          Session[]
+  reports           Report[]
+  favorites         Favorite[]
+  notifications     Notification[]
+  events            Event[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -196,6 +197,21 @@ enum NotificationType {
   NEARBY_FREE
   REPORT_CONFIRMED
   SYSTEM
+}
+
+// Suscripciones Web Push por dispositivo del usuario (Notification API +
+// service worker). Un mismo usuario puede tener varias (móvil, PC...).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 // Log de eventos de producto (analítica propia, ligera).
