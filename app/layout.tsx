@@ -1,9 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Navbar } from '@/components/Navbar';
 import { Providers } from './providers';
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://minusvigo.app';
+
+export const viewport: Viewport = {
+  themeColor: '#0D776B',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,7 +36,6 @@ export const metadata: Metadata = {
     images: ['/og-image.svg'],
   },
   manifest: '/manifest.webmanifest',
-  themeColor: '#0D776B',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
