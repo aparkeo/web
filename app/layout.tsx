@@ -6,7 +6,10 @@ import './globals.css';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://minusvigo.app';
 
 export const viewport: Viewport = {
-  themeColor: '#0D776B',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0D776B' },
+    { media: '(prefers-color-scheme: dark)', color: '#0C0E1C' },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
         <a href="#main-content" className="skip-to-content">
           Saltar al contenido principal

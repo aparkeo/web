@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
+import { useTheme } from 'next-themes';
 import { LocateFixed, Loader2 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -46,6 +47,31 @@ function clusterIcon(cluster: L.MarkerCluster): L.DivIcon {
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
+}
+
+// Tiles CARTO: Voyager (claro) y Dark Matter (oscuro). Misma atribución en ambos.
+const TILE_URLS = {
+  light: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+} as const;
+const TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+// Capa de tiles reactiva al tema: la key fuerza el remount SOLO del TileLayer
+// (React Leaflet no actualiza la URL en caliente), sin tocar el MapContainer.
+function ThemedTileLayer() {
+  const { resolvedTheme } = useTheme();
+  const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
+
+  return (
+    <TileLayer
+      key={mode}
+      attribution={TILE_ATTRIBUTION}
+      url={TILE_URLS[mode]}
+      subdomains="abcd"
+      maxZoom={20}
+    />
+  );
 }
 
 function RecenterOnUser() {
@@ -117,12 +143,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
   return (
     <div className="relative h-full w-full">
       <MapContainer center={center} zoom={zoom} className="h-full w-full" zoomControl={false}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={20}
-        />
+        <ThemedTileLayer />
         <ZoomControl position="bottomright" />
         <RecenterOnUser />
         <InvalidateSizeOnVisible visible={visible} />

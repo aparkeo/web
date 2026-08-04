@@ -3,9 +3,16 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider, useTheme } from 'next-themes';
 import { Toaster } from 'sonner';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+
+// Sonner no detecta solo la clase .dark de next-themes: hay que pasarle el tema resuelto.
+function ThemedToaster() {
+  const { resolvedTheme } = useTheme();
+  return <Toaster position="top-center" richColors theme={resolvedTheme === 'dark' ? 'dark' : 'light'} />;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -18,10 +25,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        {children}
-        <OfflineIndicator />
-        <ServiceWorkerRegistration />
-        <Toaster position="top-center" richColors />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+          <OfflineIndicator />
+          <ServiceWorkerRegistration />
+          <ThemedToaster />
+        </ThemeProvider>
       </QueryClientProvider>
     </SessionProvider>
   );

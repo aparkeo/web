@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { NotificationBell } from '@/components/NotificationBell';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NAV_LINKS = [
   { href: '/map', label: 'Mapa', icon: MapPin },
@@ -55,6 +56,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle />
           {session?.user ? (
             <>
               <NotificationBell />
@@ -100,6 +102,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
           {session?.user ? <NotificationBell /> : null}
           <Button
             variant="ghost"
