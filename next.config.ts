@@ -14,10 +14,46 @@ const nextConfig: NextConfig = {
   // múltiples package-lock.json en rutas superiores.
   outputFileTracingRoot: process.cwd(),
   async headers() {
-    // TODO: Content-Security-Policy. Los tiles de OSM (y su carga dinámica
-    // desde subdominios a/b/c.tile.openstreetmap.org) complican una CSP
-    // estricta de img-src/connect-src; definirla cuando se audite bien el
-    // conjunto de orígenes que usa el mapa.
+    // Content-Security-Policy en modo REPORT-ONLY (P1 nº3 del roadmap de
+    // docs/AUDIT-2026-07-31.md): el navegador reporta violaciones en consola
+    // sin bloquear nada. Endurecer a `Content-Security-Policy` (enforce) tras
+    // 1-2 semanas sin violaciones inesperadas en producción.
+    //
+    // Decisiones:
+    // - script-src 'unsafe-inline': next-themes inyecta un script inline
+    //   anti-FOUC y Next.js App Router inyecta varios scripts inline de
+    //   hidratación; sin un sistema de nonces por request no hay alternativa
+    //   realista. TODO futuro: endurecer con nonce (middleware) y eliminar
+    //   'unsafe-inline'.
+    // - style-src 'unsafe-inline': Tailwind/shadcn/React Leaflet generan
+    //   atributos style inline (p. ej. posicionamiento del mapa y divIcons).
+    // - img-src: tiles CARTO (Voyager + Dark Matter) y satélite Esri; data:
+    //   y blob: los usa Leaflet para markers/previews.
+    // - connect-src 'self': el geocoding (Nominatim) va server-side vía
+    //   /api/geocode y Web Push usa PushManager del navegador (la entrega
+    //   FCM la gestiona el SO/navegador, no pasa por la CSP de la página);
+    //   todas las llamadas del cliente son same-origin.
+    // - Sin report-uri/report-to: los informes se revisan en consola durante
+    //   la fase report-only; un endpoint /api/csp-report añadiría superficie
+    //   de abuso (spam de reportes) sin valor real antes del enforce.
+    // - upgrade-insecure-requests NO se incluye en report-only: la spec lo
+    //   ignora en políticas Report-Only y Chromium loguea un error de consola
+    //   por página que ensuciaría la revisión de violaciones. Añadirlo al
+    //   endurecer a enforce en producción (https).
+    const contentSecurityPolicy = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "worker-src 'self'",
+      "manifest-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+    ].join('; ');
     return [
       {
         source: '/(.*)',
@@ -26,6 +62,10 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'Permissions-Policy', value: 'geolocation=(self)' },
+          {
+            key: 'Content-Security-Policy-Report-Only',
+            value: contentSecurityPolicy,
+          },
         ],
       },
     ];
