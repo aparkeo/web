@@ -34,3 +34,8 @@ next-env.d.ts
 
 # dev log
 .dev.log
+
+# tests
+/test-results/
+/playwright-report/
+/.env.test

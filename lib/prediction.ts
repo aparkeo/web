@@ -65,6 +65,64 @@ export function vigoNow(date: Date = new Date()): { dayOfWeek: number; hour: num
   return { dayOfWeek: WEEKDAY_INDEX[weekday] ?? 0, hour: Number.isFinite(hour) ? hour : 0 };
 }
 
+export interface ConsensusVote {
+  status: SpotStatus;
+  weight: number;
+}
+
+export interface ConsensusResult {
+  status: SpotStatus;
+  confidence: Confidence;
+}
+
+/**
+ * Consenso "live" puro a partir de los votos recientes (función pura,
+ * extraída de recalculateSpotStatus para ser testeable sin BD):
+ *  - >=2 de peso y mayoría → CONFIRMED
+ *  - votos contradictorios → DISPUTED (gana el lado con más peso; FREE en empate)
+ *  - un solo lado con peso >=1 → LOW
+ *  - sin votos → UNKNOWN/NONE
+ */
+export function computeConsensus(votes: ConsensusVote[]): ConsensusResult {
+  let freeVotes = 0;
+  let occupiedVotes = 0;
+  for (const r of votes) {
+    if (r.status === 'FREE') freeVotes += r.weight;
+    else if (r.status === 'OCCUPIED') occupiedVotes += r.weight;
+  }
+
+  if (freeVotes >= 2 && freeVotes > occupiedVotes) {
+    return { status: 'FREE', confidence: 'CONFIRMED' };
+  }
+  if (occupiedVotes >= 2 && occupiedVotes > freeVotes) {
+    return { status: 'OCCUPIED', confidence: 'CONFIRMED' };
+  }
+  if (freeVotes >= 1 && occupiedVotes >= 1) {
+    return { status: freeVotes >= occupiedVotes ? 'FREE' : 'OCCUPIED', confidence: 'DISPUTED' };
+  }
+  if (freeVotes >= 1) {
+    return { status: 'FREE', confidence: 'LOW' };
+  }
+  if (occupiedVotes >= 1) {
+    return { status: 'OCCUPIED', confidence: 'LOW' };
+  }
+  return { status: 'UNKNOWN', confidence: 'NONE' };
+}
+
+/**
+ * Clasifica los autores de reportes de las últimas 24 h según si coinciden
+ * con el estado confirmado (función pura). Devuelve listas de userId
+ * deduplicadas para el ajuste de reputación (±puntos con clamp en SQL).
+ */
+export function classifyReputationReports(
+  reports: { userId: string; status: SpotStatus }[],
+  status: SpotStatus,
+): { agreeing: string[]; contradicting: string[] } {
+  const contradicting = [...new Set(reports.filter((r) => r.status !== status).map((r) => r.userId))];
+  const agreeing = [...new Set(reports.filter((r) => r.status === status).map((r) => r.userId))];
+  return { agreeing, contradicting };
+}
+
 export async function recalculateSpotStatus(spotId: number): Promise<void> {
   const since = new Date(Date.now() - RECENT_WINDOW_MS);
   const recent = await prisma.report.findMany({
@@ -72,32 +130,7 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
     orderBy: { reportedAt: 'desc' },
   });
 
-  let freeVotes = 0;
-  let occupiedVotes = 0;
-  for (const r of recent) {
-    if (r.status === 'FREE') freeVotes += r.weight;
-    else if (r.status === 'OCCUPIED') occupiedVotes += r.weight;
-  }
-
-  let status: SpotStatus = 'UNKNOWN';
-  let confidence: Confidence = 'NONE';
-
-  if (freeVotes >= 2 && freeVotes > occupiedVotes) {
-    status = 'FREE';
-    confidence = 'CONFIRMED';
-  } else if (occupiedVotes >= 2 && occupiedVotes > freeVotes) {
-    status = 'OCCUPIED';
-    confidence = 'CONFIRMED';
-  } else if (freeVotes >= 1 && occupiedVotes >= 1) {
-    status = freeVotes >= occupiedVotes ? 'FREE' : 'OCCUPIED';
-    confidence = 'DISPUTED';
-  } else if (freeVotes >= 1) {
-    status = 'FREE';
-    confidence = 'LOW';
-  } else if (occupiedVotes >= 1) {
-    status = 'OCCUPIED';
-    confidence = 'LOW';
-  }
+  const { status, confidence } = computeConsensus(recent);
 
   // Estado previo: necesario para detectar la TRANSICIÓN a FREE (no basta
   // con que el nuevo estado sea FREE — solo notificamos cuando cambia).
@@ -132,8 +165,7 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
       select: { userId: true, status: true },
     });
 
-    const contradicting = [...new Set(reports24h.filter((r) => r.status !== status).map((r) => r.userId))];
-    const agreeing = [...new Set(reports24h.filter((r) => r.status === status).map((r) => r.userId))];
+    const { agreeing, contradicting } = classifyReputationReports(reports24h, status);
 
     const updates: Promise<number>[] = [];
     if (contradicting.length > 0) {
@@ -182,7 +214,7 @@ export async function recomputeHistoricalPredictions(spotId: number): Promise<vo
   }
 }
 
-function confidenceLabel(score: number): 'Alta' | 'Media' | 'Baja' {
+export function confidenceLabel(score: number): 'Alta' | 'Media' | 'Baja' {
   if (score >= 20) return 'Alta';
   if (score >= 8) return 'Media';
   return 'Baja';

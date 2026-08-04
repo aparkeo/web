@@ -1,0 +1,21 @@
+name: Tests unitarios
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Solo unitarios: los E2E dependen de la base de datos compartida y no
+      # corren en CI (ver docs/TESTS.md).
+      - run: npm run test
