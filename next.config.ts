@@ -30,10 +30,11 @@ const nextConfig: NextConfig = {
     // - img-src: tiles CARTO (Voyager + Dark Matter), satélite Esri y fotos
     //   de plazas en Supabase Storage (bucket público spot-photos); data:
     //   y blob: los usa Leaflet para markers/previews.
-    // - connect-src 'self': el geocoding (Nominatim) va server-side vía
-    //   /api/geocode y Web Push usa PushManager del navegador (la entrega
-    //   FCM la gestiona el SO/navegador, no pasa por la CSP de la página);
-    //   todas las llamadas del cliente son same-origin.
+    // - connect-src 'self' + Supabase (https REST y wss Realtime): el
+    //   geocoding (Nominatim) va server-side vía /api/geocode y Web Push usa
+    //   PushManager del navegador (la entrega FCM la gestiona el SO/navegador,
+    //   no pasa por la CSP de la página); el feed en tiempo real abre un
+    //   websocket wss://<proyecto>.supabase.co/realtime (roadmap nº14).
     // - Sin report-uri/report-to: los informes se revisan en consola durante
     //   la fase report-only; un endpoint /api/csp-report añadiría superficie
     //   de abuso (spam de reportes) sin valor real antes del enforce.
@@ -47,7 +48,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://*.supabase.co",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
       "worker-src 'self'",
       "manifest-src 'self'",
       "object-src 'none'",

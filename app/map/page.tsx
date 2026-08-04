@@ -7,9 +7,11 @@ import { SearchBar } from '@/components/SearchBar';
 import { Filters } from '@/components/Filters';
 import { SpotCard } from '@/components/SpotCard';
 import { MapErrorBoundary } from '@/components/MapErrorBoundary';
+import { LiveIndicator } from '@/components/LiveIndicator';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSpots } from '@/hooks/useSpots';
+import { useRealtimeSpots } from '@/hooks/useRealtimeSpots';
 
 const MapView = dynamic(() => import('@/components/MapView').then((m) => m.MapView), {
   ssr: false,
@@ -18,6 +20,7 @@ const MapView = dynamic(() => import('@/components/MapView').then((m) => m.MapVi
 
 export default function MapPage() {
   const { data: spots = [], isLoading } = useSpots();
+  const live = useRealtimeSpots();
   const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
 
   return (
@@ -31,6 +34,7 @@ export default function MapPage() {
         <div className="space-y-3 p-4">
           <SearchBar />
           <Filters />
+          <LiveIndicator live={live} />
         </div>
         <div className="space-y-2.5 p-4 pt-0">
           {isLoading ? (

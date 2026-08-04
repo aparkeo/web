@@ -12,12 +12,15 @@ import { NavigationButton } from '@/components/NavigationButton';
 import { ReportModal } from '@/components/ReportModal';
 import { SpotPhotos } from '@/components/SpotPhotos';
 import { SpotComments } from '@/components/SpotComments';
+import { LiveIndicator } from '@/components/LiveIndicator';
 import { useSpot } from '@/hooks/useSpot';
+import { useRealtimeSpot } from '@/hooks/useRealtimeSpot';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { formatRelativeTime, cn } from '@/lib/utils';
 
 export function SpotDetails({ spotId }: { spotId: number }) {
   const { data: spot, isLoading, isError, refetch, isRefetching } = useSpot(spotId);
+  const live = useRealtimeSpot(spotId);
   const favoriteToggle = useFavoriteToggle();
   const [reportOpen, setReportOpen] = useState(false);
 
@@ -64,6 +67,7 @@ export function SpotDetails({ spotId }: { spotId: number }) {
             <StatusBadge status={spot.status} />
             {spot.confidence === 'CONFIRMED' ? <Badge variant="outline">✓ Confirmada por la comunidad</Badge> : null}
             {spot.confidence === 'DISPUTED' ? <Badge variant="warning">Informes contradictorios</Badge> : null}
+            <LiveIndicator live={live} />
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
