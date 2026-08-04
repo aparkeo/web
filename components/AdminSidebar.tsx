@@ -18,16 +18,19 @@ export function AdminSidebar() {
 
   return (
     <aside className="hidden w-56 shrink-0 border-r border-border md:block">
-      <nav className="sticky top-16 flex flex-col gap-1 p-4">
+      <nav className="sidebar-scroll sticky top-16 flex max-h-[calc(100vh-4rem)] flex-col gap-1 overflow-y-auto p-4" aria-label="Navegación de administración">
         {LINKS.map((link) => {
           const active = pathname === link.href;
           return (
             <Link
               key={link.href}
               href={link.href}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors hover:bg-secondary',
-                active && 'bg-secondary text-primary',
+                'flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150',
+                active
+                  ? 'bg-secondary text-foreground'
+                  : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',
               )}
             >
               <link.icon className="h-4 w-4" /> {link.label}

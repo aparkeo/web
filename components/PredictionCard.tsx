@@ -25,9 +25,9 @@ export function PredictionCard({ spotId }: { spotId: number }) {
   const { data: prediction, isLoading, isError, refetch, isRefetching } = usePrediction(spotId);
 
   return (
-    <Card>
+    <Card className="rounded-2xl shadow-elevated">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2 text-base tracking-tight">
           <Brain className="h-4 w-4 text-primary" /> Predicción inteligente
         </CardTitle>
       </CardHeader>

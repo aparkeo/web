@@ -20,12 +20,12 @@ export function SpotDetails({ spotId }: { spotId: number }) {
   const [reportOpen, setReportOpen] = useState(false);
 
   if (isLoading) {
-    return <Card className="h-64 animate-pulse" />;
+    return <Card className="h-64 animate-pulse rounded-2xl shadow-elevated" />;
   }
 
   if (isError || !spot) {
     return (
-      <Card>
+      <Card className="rounded-2xl shadow-elevated">
         <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
           <p className="text-muted-foreground">No se pudo cargar la información de esta plaza.</p>
           <Button type="button" variant="outline" onClick={() => refetch()} disabled={isRefetching}>
@@ -38,10 +38,11 @@ export function SpotDetails({ spotId }: { spotId: number }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card>
+      <Card className="home-fade-up rounded-2xl shadow-elevated">
         <CardHeader>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Plaza PMR · Vigo</p>
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-xl">{spot.street}</CardTitle>
+            <CardTitle className="text-2xl font-extrabold tracking-tight">{spot.street}</CardTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -78,7 +79,7 @@ export function SpotDetails({ spotId }: { spotId: number }) {
           <Separator />
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <NavigationButton lat={spot.lat} lon={spot.lon} street={spot.street} />
+            <NavigationButton lat={spot.lat} lon={spot.lon} street={spot.street} className="btn-cta" />
             <Button variant="outline" size="lg" className="gap-2" type="button" onClick={() => setReportOpen(true)}>
               <Flag className="h-4 w-4" /> Reportar estado
             </Button>
@@ -86,7 +87,9 @@ export function SpotDetails({ spotId }: { spotId: number }) {
         </CardContent>
       </Card>
 
-      <PredictionCard spotId={spot.id} />
+      <div className="home-fade-up home-fade-up-delay">
+        <PredictionCard spotId={spot.id} />
+      </div>
 
       <ReportModal spotId={spot.id} street={spot.street} open={reportOpen} onOpenChange={setReportOpen} />
     </div>

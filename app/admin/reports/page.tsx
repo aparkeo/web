@@ -25,8 +25,14 @@ export default function AdminReportsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-extrabold">Reportes recientes</h1>
-      <Card>
+      <header className="mb-8">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Administración</p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Reportes recientes</h1>
+        <p className="mt-3 max-w-lg text-pretty leading-relaxed text-muted-foreground">
+          Últimos informes de la comunidad, con su peso en el consenso.
+        </p>
+      </header>
+      <Card className="rounded-2xl shadow-elevated">
         <CardHeader>
           <CardTitle>Últimos {reports.length} reportes</CardTitle>
         </CardHeader>
@@ -35,7 +41,7 @@ export default function AdminReportsPage() {
             <p className="text-sm text-muted-foreground">Cargando…</p>
           ) : (
             reports.map((r) => (
-              <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm">
+              <div key={r.id} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 text-sm transition-colors duration-150 hover:bg-secondary/40">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{r.spot.street}</p>
                   <p className="text-xs text-muted-foreground">

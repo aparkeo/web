@@ -89,11 +89,17 @@ export default function AdminSpotsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold">Gestionar plazas</h1>
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Administración</p>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Gestionar plazas</h1>
+          <p className="mt-3 max-w-lg text-pretty leading-relaxed text-muted-foreground">
+            Alta de plazas del dataset oficial y control manual de su estado.
+          </p>
+        </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-1.5">
+            <Button className="btn-cta gap-1.5">
               <Plus className="h-4 w-4" /> Nueva plaza
             </Button>
           </DialogTrigger>
@@ -132,9 +138,9 @@ export default function AdminSpotsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </header>
 
-      <Card>
+      <Card className="rounded-2xl shadow-elevated">
         <CardHeader>
           <CardTitle>{spots.length} plazas</CardTitle>
         </CardHeader>
@@ -143,7 +149,7 @@ export default function AdminSpotsPage() {
             <p className="text-sm text-muted-foreground">Cargando…</p>
           ) : (
             spots.map((spot) => (
-              <div key={spot.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+              <div key={spot.id} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 transition-colors duration-150 hover:bg-secondary/40">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{spot.street}</p>
                   <p className="text-xs text-muted-foreground">

@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function SpotPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container max-w-4xl pb-16 pt-10 sm:pt-14">
       <SpotDetails spotId={Number(id)} />
     </div>
   );

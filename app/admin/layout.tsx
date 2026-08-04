@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex">
       <AdminSidebar />
-      <div className="container max-w-5xl flex-1 py-8">{children}</div>
+      <div className="container max-w-5xl flex-1 pb-16 pt-10 sm:pt-14">{children}</div>
     </div>
   );
 }
