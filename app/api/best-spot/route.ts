@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { distanceMeters } from '@/lib/utils';
 import { getSpotPrediction, rankSpotsByRecommendation, vigoNow } from '@/lib/prediction';
@@ -7,6 +8,9 @@ import type { SpotWithPrediction } from '@/types';
 
 const SEARCH_RADIUS_M = 2000;
 const PAD_DEG = SEARCH_RADIUS_M / 111_000; // ~0.018 grados
+
+// Filtro opcional de estado (búsqueda en lenguaje natural: «plaza libre…»).
+const StatusSchema = z.enum(['FREE', 'OCCUPIED']);
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -17,11 +21,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'lat/lon requeridos' }, { status: 400 });
   }
 
+  const statusParam = searchParams.get('status');
+  const parsedStatus = StatusSchema.safeParse(statusParam ?? undefined);
+  if (statusParam !== null && !parsedStatus.success) {
+    return NextResponse.json({ error: 'status inválido (FREE | OCCUPIED)' }, { status: 400 });
+  }
+  const status = parsedStatus.success ? parsedStatus.data : undefined;
+
   // Filtrado en DB para no cargar ~843 plazas en memoria cada vez.
   const spots = await prisma.parkingSpot.findMany({
     where: {
       lat: { gte: lat - PAD_DEG, lte: lat + PAD_DEG },
       lon: { gte: lon - PAD_DEG, lte: lon + PAD_DEG },
+      ...(status ? { status } : {}),
     },
   });
 

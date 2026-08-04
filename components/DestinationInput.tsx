@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, Search, LocateFixed, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { searchAddress } from '@/services/geocode';
+import { parseNaturalQuery } from '@/lib/nlSearch';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDestinationStore } from '@/store/useDestinationStore';
 
@@ -18,9 +19,16 @@ export function DestinationInput() {
   const [locError, setLocError] = useState<string | null>(null);
   const debouncedQuery = useDebouncedValue(query, 350);
 
+  // Búsqueda en lenguaje natural: si el parser entiende la consulta
+  // («plaza libre cerca del Corte Inglés»), geocodificamos solo el lugar
+  // extraído y arrastramos el filtro de estado al destino. Si no, se usa el
+  // texto tal cual (flujo clásico, p.ej. una calle a secas).
+  const parsed = useMemo(() => parseNaturalQuery(debouncedQuery), [debouncedQuery]);
+  const geocodeQuery = parsed.place ?? debouncedQuery;
+
   const { data: results = [], isFetching } = useQuery({
-    queryKey: ['geocode', debouncedQuery],
-    queryFn: () => searchAddress(debouncedQuery),
+    queryKey: ['geocode', geocodeQuery],
+    queryFn: () => searchAddress(geocodeQuery),
     enabled: open && debouncedQuery.trim().length >= 3,
     staleTime: 60_000,
   });
@@ -81,7 +89,7 @@ export function DestinationInput() {
             setLocError(null);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="¿A dónde vas? (calle, zona, sitio en Vigo)"
+          placeholder="¿A dónde vas? (p. ej. «plaza libre cerca del Corte Inglés»)"
           className="h-12 rounded-xl pl-10 text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
         />
       </div>
@@ -113,7 +121,14 @@ export function DestinationInput() {
                   type="button"
                   key={`${r.lat}-${r.lon}-${i}`}
                   onClick={() => {
-                    setDestination({ label: r.label, latitude: r.lat, longitude: r.lon, source: 'search' });
+                    setDestination({
+                      label: r.label,
+                      latitude: r.lat,
+                      longitude: r.lon,
+                      source: 'search',
+                      statusFilter: parsed.status ?? undefined,
+                      interpretation: parsed.interpretation ?? undefined,
+                    });
                     setOpen(false);
                     setQuery('');
                   }}

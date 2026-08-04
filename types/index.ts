@@ -52,6 +52,10 @@ export interface Destination {
   latitude: number;
   longitude: number;
   source: 'search' | 'current-location';
+  /** Filtro de estado extraído de una búsqueda en lenguaje natural («plaza libre…»). */
+  statusFilter?: 'FREE' | 'OCCUPIED';
+  /** Frase legible de lo entendido por el parser de lenguaje natural. */
+  interpretation?: string;
 }
 
 export interface GeocodeResult {

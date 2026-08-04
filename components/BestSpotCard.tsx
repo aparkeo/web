@@ -1,6 +1,6 @@
 'use client';
 
-import { Footprints, MapPinOff, Sparkles, WifiOff } from 'lucide-react';
+import { Footprints, MapPinOff, Sparkles, WifiOff, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,11 +19,36 @@ const CTA_CLASS =
 
 export function BestSpotCard() {
   const destination = useDestinationStore((s) => s.destination);
+  const setDestination = useDestinationStore((s) => s.setDestination);
   const { data: best, isLoading, isError, refetch, isRefetching } = useBestSpot();
+
+  // Quita solo el filtro/interpretación de la búsqueda en lenguaje natural,
+  // conservando el destino elegido.
+  const clearInterpretation = () => {
+    if (!destination) return;
+    setDestination({ ...destination, statusFilter: undefined, interpretation: undefined });
+  };
 
   return (
     <div className="space-y-5">
       <DestinationInput />
+
+      {destination?.interpretation ? (
+        <p className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3.5 py-2 text-sm text-muted-foreground">
+          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+          <span className="flex-1">
+            Entendido: <strong className="font-semibold text-foreground">{destination.interpretation}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={clearInterpretation}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Quitar el filtro de la búsqueda"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </p>
+      ) : null}
 
       {!destination ? (
         <p className="mx-auto max-w-sm text-center text-sm leading-relaxed text-muted-foreground">

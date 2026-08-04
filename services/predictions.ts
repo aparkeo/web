@@ -6,11 +6,15 @@ export async function fetchPrediction(spotId: number): Promise<PredictionDTO> {
   return res.json();
 }
 
-export async function fetchBestSpot(location: UserLocation): Promise<SpotWithPrediction | null> {
+export async function fetchBestSpot(
+  location: UserLocation,
+  status?: 'FREE' | 'OCCUPIED',
+): Promise<SpotWithPrediction | null> {
   const params = new URLSearchParams({
     lat: String(location.latitude),
     lon: String(location.longitude),
   });
+  if (status) params.set('status', status);
   const res = await fetch(`/api/best-spot?${params.toString()}`);
   if (!res.ok) throw new Error('No se pudo calcular la mejor plaza');
   const data = await res.json();

@@ -11,8 +11,12 @@ export function useBestSpot() {
   const destination = useDestinationStore((s) => s.destination);
 
   return useQuery({
-    queryKey: ['best-spot', destination?.latitude, destination?.longitude],
-    queryFn: () => fetchBestSpot({ latitude: destination!.latitude, longitude: destination!.longitude }),
+    queryKey: ['best-spot', destination?.latitude, destination?.longitude, destination?.statusFilter],
+    queryFn: () =>
+      fetchBestSpot(
+        { latitude: destination!.latitude, longitude: destination!.longitude },
+        destination!.statusFilter,
+      ),
     enabled: !!destination,
     refetchInterval: 30_000,
   });
