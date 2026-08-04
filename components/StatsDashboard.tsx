@@ -28,7 +28,7 @@ export function StatsDashboard() {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28" />
+          <Skeleton key={i} className="h-28 rounded-2xl" />
         ))}
       </div>
     );
@@ -45,18 +45,18 @@ export function StatsDashboard() {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <Card key={c.label}>
+          <Card key={c.label} className="rounded-2xl shadow-elevated">
             <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">{c.label}</p>
-              <p className="mt-1 text-3xl font-extrabold">{c.value}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{c.label}</p>
+              <p className="mt-2 text-3xl font-extrabold tracking-tight">{c.value}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card>
+      <Card className="rounded-2xl shadow-elevated">
         <CardHeader>
-          <CardTitle>Estado actual de las plazas</CardTitle>
+          <CardTitle className="tracking-tight">Estado actual de las plazas</CardTitle>
         </CardHeader>
         <CardContent className="h-72">
           <StatusPieChart free={data.free} occupied={data.occupied} unknown={data.unknown} />

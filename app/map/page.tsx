@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { List, Map as MapIcon } from 'lucide-react';
+import { List, Map as MapIcon, MapPinOff } from 'lucide-react';
 import { SearchBar } from '@/components/SearchBar';
 import { Filters } from '@/components/Filters';
 import { SpotCard } from '@/components/SpotCard';
@@ -23,7 +23,7 @@ export default function MapPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:flex-row">
       <aside
-        className={`w-full shrink-0 overflow-y-auto border-r border-border bg-background md:block md:w-96 ${
+        className={`sidebar-scroll w-full shrink-0 overflow-y-auto border-r border-border bg-background md:block md:w-96 ${
           mobileView === 'list' ? 'block' : 'hidden'
         }`}
         aria-label="Lista de plazas"
@@ -32,11 +32,14 @@ export default function MapPage() {
           <SearchBar />
           <Filters />
         </div>
-        <div className="space-y-2 p-4 pt-0">
+        <div className="space-y-2.5 p-4 pt-0">
           {isLoading ? (
-            Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)
+            Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)
           ) : spots.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">Ninguna plaza coincide con los filtros.</p>
+            <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-8 text-center">
+              <MapPinOff className="h-7 w-7 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Ninguna plaza coincide con los filtros.</p>
+            </div>
           ) : (
             spots.map((spot) => <SpotCard key={spot.id} spot={spot} />)
           )}
@@ -54,7 +57,7 @@ export default function MapPage() {
       </div>
 
       <Button
-        className="fixed bottom-4 left-1/2 z-30 -translate-x-1/2 gap-2 shadow-lg md:hidden"
+        className="shadow-elevated fixed bottom-4 left-1/2 z-30 min-h-12 -translate-x-1/2 gap-2 rounded-full px-5 text-sm font-bold transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 md:hidden"
         onClick={() => setMobileView((v) => (v === 'map' ? 'list' : 'map'))}
         aria-label={mobileView === 'map' ? 'Ver lista de plazas' : 'Ver mapa'}
       >

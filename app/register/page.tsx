@@ -54,87 +54,103 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container flex min-h-[80vh] max-w-md items-center py-8">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Crear cuenta</CardTitle>
-          <CardDescription>Únete a la comunidad MinusVigo</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Nombre</Label>
-              <Input id="name" autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                minLength={8}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-describedby={errors.password ? 'password-hint password-error' : 'password-hint'}
-                aria-invalid={errors.password ? true : undefined}
-              />
-              <p id="password-hint" className="text-xs text-muted-foreground">
-                Mínimo 8 caracteres
-              </p>
-              {errors.password ? (
-                <p id="password-error" role="alert" className="text-sm font-semibold text-destructive">
-                  {errors.password}
+    <div className="home-hero">
+      <div className="container flex min-h-[80vh] max-w-md items-center py-8">
+        <Card className="home-fade-up w-full rounded-2xl shadow-elevated">
+          <CardHeader className="gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">MinusVigo</p>
+            <CardTitle className="text-2xl font-extrabold tracking-tight">Crear cuenta</CardTitle>
+            <CardDescription>Únete a la comunidad MinusVigo</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Nombre</Label>
+                <Input
+                  id="name"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-12 rounded-xl text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-12 rounded-xl text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-describedby={errors.password ? 'password-hint password-error' : 'password-hint'}
+                  aria-invalid={errors.password ? true : undefined}
+                  className="h-12 rounded-xl text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
+                />
+                <p id="password-hint" className="text-xs text-muted-foreground">
+                  Mínimo 8 caracteres
+                </p>
+                {errors.password ? (
+                  <p id="password-error" role="alert" className="text-sm font-semibold text-destructive">
+                    {errors.password}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-password">Confirmar contraseña</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  aria-invalid={errors.confirmPassword ? true : undefined}
+                  aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
+                  className="h-12 rounded-xl text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
+                />
+                {errors.confirmPassword ? (
+                  <p id="confirm-password-error" role="alert" className="text-sm font-semibold text-destructive">
+                    {errors.confirmPassword}
+                  </p>
+                ) : null}
+              </div>
+              {errors.form ? (
+                <p role="alert" className="text-sm font-semibold text-destructive">
+                  {errors.form}
                 </p>
               ) : null}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirm-password">Confirmar contraseña</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                autoComplete="new-password"
-                minLength={8}
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                aria-invalid={errors.confirmPassword ? true : undefined}
-                aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
-              />
-              {errors.confirmPassword ? (
-                <p id="confirm-password-error" role="alert" className="text-sm font-semibold text-destructive">
-                  {errors.confirmPassword}
-                </p>
-              ) : null}
-            </div>
-            {errors.form ? (
-              <p role="alert" className="text-sm font-semibold text-destructive">
-                {errors.form}
-              </p>
-            ) : null}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creando cuenta…' : 'Crear cuenta'}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="font-semibold text-primary hover:underline">
-              Entrar
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+              <Button type="submit" className="btn-cta min-h-12 w-full rounded-xl text-base font-bold" disabled={loading}>
+                {loading ? 'Creando cuenta…' : 'Crear cuenta'}
+              </Button>
+            </form>
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              ¿Ya tienes cuenta?{' '}
+              <Link
+                href="/login"
+                className="rounded font-semibold text-primary transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Entrar
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

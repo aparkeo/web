@@ -93,8 +93,9 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
               <button
                 type="button"
                 onClick={() => setChoice('FREE')}
-                className={`flex flex-col items-center gap-2 rounded-lg border p-4 transition-colors ${
-                  choice === 'FREE' ? 'border-free bg-free/10' : 'border-border hover:bg-secondary'
+                aria-pressed={choice === 'FREE'}
+                className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-[transform,box-shadow,background-color,border-color] duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-0 ${
+                  choice === 'FREE' ? 'border-free bg-free/10 shadow-md' : 'border-border hover:bg-secondary'
                 }`}
               >
                 <CheckCircle2 className="h-7 w-7 text-free" />
@@ -103,8 +104,9 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
               <button
                 type="button"
                 onClick={() => setChoice('OCCUPIED')}
-                className={`flex flex-col items-center gap-2 rounded-lg border p-4 transition-colors ${
-                  choice === 'OCCUPIED' ? 'border-destructive bg-destructive/10' : 'border-border hover:bg-secondary'
+                aria-pressed={choice === 'OCCUPIED'}
+                className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-[transform,box-shadow,background-color,border-color] duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-0 ${
+                  choice === 'OCCUPIED' ? 'border-destructive bg-destructive/10 shadow-md' : 'border-border hover:bg-secondary'
                 }`}
               >
                 <XCircle className="h-7 w-7 text-destructive" />
@@ -116,7 +118,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
               type="button"
               onClick={captureLocation}
               disabled={locating}
-              className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-secondary disabled:opacity-60"
+              className="flex min-h-11 w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left text-sm transition-[background-color,border-color] duration-150 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
             >
               <MapPin className="h-4 w-4 text-primary" />
               {locating
@@ -131,13 +133,14 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
         )}
 
         <DialogFooter>
-          <Button variant="ghost" type="button" onClick={() => handleClose(false)}>
+          <Button variant="ghost" type="button" onClick={() => handleClose(false)} className="rounded-xl">
             Cancelar
           </Button>
           <Button
             type="button"
             onClick={handleSubmit}
             disabled={!choice || sessionStatus !== 'authenticated' || reportSpot.isPending}
+            className="btn-cta min-h-11 rounded-xl font-bold"
           >
             {reportSpot.isPending ? 'Enviando…' : 'Enviar reporte'}
           </Button>

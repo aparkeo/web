@@ -33,31 +33,38 @@ export default async function ProfilePage() {
   }));
 
   return (
-    <div className="container max-w-3xl space-y-6 py-8">
-      <Card>
-        <CardContent className="flex items-center gap-4 p-6">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className="text-xl">{user.name?.[0]?.toUpperCase() ?? 'U'}</AvatarFallback>
+    <div className="container max-w-3xl space-y-6 pb-16 pt-10 sm:pt-14">
+      <Card className="home-fade-up rounded-2xl shadow-elevated">
+        <CardContent className="flex items-center gap-4 p-6 sm:gap-5 sm:p-7">
+          <Avatar className="h-16 w-16 ring-2 ring-primary/15">
+            <AvatarFallback className="bg-secondary text-xl font-extrabold text-primary">
+              {user.name?.[0]?.toUpperCase() ?? 'U'}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-xl font-extrabold">{user.name}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight">{user.name}</h1>
             <p className="text-sm text-muted-foreground">{user.email}</p>
-            <div className="mt-2 flex gap-2">
-              <Badge variant="outline">Fiabilidad: {user.reputationScore}</Badge>
-              <Badge variant="outline">{reportCount} reportes</Badge>
-              {user.role === 'ADMIN' ? <Badge>Administrador</Badge> : null}
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <Badge variant="outline" className="px-3 py-1">
+                Fiabilidad: {user.reputationScore}
+              </Badge>
+              <Badge variant="outline" className="px-3 py-1">
+                {reportCount} reportes
+              </Badge>
+              {user.role === 'ADMIN' ? <Badge className="px-3 py-1">Administrador</Badge> : null}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="home-fade-up home-fade-up-delay rounded-2xl shadow-elevated">
         <CardHeader>
-          <CardTitle>Mis plazas favoritas</CardTitle>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Comunidad</p>
+          <CardTitle className="tracking-tight">Mis plazas favoritas</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2.5">
           {favoriteSpots.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               Aún no tienes favoritas. Márcalas con ★ desde el mapa o la lista.
             </p>
           ) : (

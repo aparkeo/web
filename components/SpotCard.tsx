@@ -15,13 +15,16 @@ export function SpotCard({ spot }: { spot: SpotDTO }) {
   const walk = spot.distanceM !== undefined ? formatWalkTime(spot.distanceM) : null;
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
+    <Card className="card-lift rounded-2xl">
       <CardContent className="flex items-center gap-3 p-4">
-        <div className="flex-1 min-w-0">
-          <Link href={`/spots/${spot.id}`} className="font-semibold hover:underline">
+        <div className="min-w-0 flex-1">
+          <Link
+            href={`/spots/${spot.id}`}
+            className="rounded font-semibold tracking-tight transition-colors duration-150 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             {spot.street}
           </Link>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <StatusBadge status={spot.status} />
             {spot.confidence === 'CONFIRMED' ? <Badge variant="outline">✓ Confirmada</Badge> : null}
             {spot.distanceM !== undefined ? (
@@ -39,11 +42,12 @@ export function SpotCard({ spot }: { spot: SpotDTO }) {
           type="button"
           onClick={() => favoriteToggle.mutate(spot.id)}
           aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Añadir a favoritas'}
+          className="h-11 w-11 shrink-0 rounded-full transition-colors duration-150"
         >
           <Star className={spot.isFavorite ? 'h-5 w-5 fill-yellow-400 text-yellow-400' : 'h-5 w-5'} />
         </Button>
 
-        <Button asChild size="icon" aria-label="Cómo llegar">
+        <Button asChild size="icon" aria-label="Cómo llegar" className="h-11 w-11 shrink-0 rounded-full">
           <a
             href={`https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=;${spot.lat}%2C${spot.lon}`}
             target="_blank"

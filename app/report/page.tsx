@@ -13,38 +13,43 @@ export default function ReportPage() {
   const [target, setTarget] = useState<{ id: number; street: string } | null>(null);
 
   return (
-    <div className="container max-w-xl py-8">
-      <h1 className="mb-1 text-2xl font-extrabold">Reportar estado de una plaza</h1>
-      <p className="mb-6 text-muted-foreground">
-        Busca la plaza que has visto y dinos si está libre u ocupada. Cada reporte ayuda a toda la comunidad PMR.
-      </p>
+    <div className="container max-w-xl pb-16 pt-10 sm:pt-14">
+      <header className="home-fade-up mb-8">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Comunidad PMR</p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Reportar estado de una plaza</h1>
+        <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
+          Busca la plaza que has visto y dinos si está libre u ocupada. Cada reporte ayuda a toda la comunidad PMR.
+        </p>
+      </header>
 
-      <SearchBar />
+      <div className="home-fade-up home-fade-up-delay">
+        <SearchBar />
 
-      <div className="mt-4 space-y-2">
-        {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)
-        ) : (
-          spots.slice(0, 30).map((spot) => (
-            <button
-              key={spot.id}
-              type="button"
-              aria-pressed={target?.id === spot.id}
-              onClick={() => setTarget({ id: spot.id, street: spot.street })}
-              className="block w-full cursor-pointer rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <span className="flex items-center justify-between p-4">
-                <span>
-                  <span className="block font-semibold">{spot.street}</span>
-                  <span className="block text-xs" style={{ color: colorForStatus(spot.status) }}>
-                    {labelForStatus(spot.status)}
+        <div className="mt-4 space-y-2.5">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)
+          ) : (
+            spots.slice(0, 30).map((spot) => (
+              <button
+                key={spot.id}
+                type="button"
+                aria-pressed={target?.id === spot.id}
+                onClick={() => setTarget({ id: spot.id, street: spot.street })}
+                className="card-lift block min-h-16 w-full cursor-pointer rounded-2xl border border-border bg-card text-left text-card-foreground shadow-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-pressed:border-primary/50 aria-pressed:bg-primary/5"
+              >
+                <span className="flex items-center justify-between p-4">
+                  <span>
+                    <span className="block font-semibold tracking-tight">{spot.street}</span>
+                    <span className="block text-xs" style={{ color: colorForStatus(spot.status) }}>
+                      {labelForStatus(spot.status)}
+                    </span>
                   </span>
+                  <Flag className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </span>
-                <Flag className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              </span>
-            </button>
-          ))
-        )}
+              </button>
+            ))
+          )}
+        </div>
       </div>
 
       {target ? (
