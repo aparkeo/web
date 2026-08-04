@@ -16,7 +16,7 @@ const RegisterSchema = z.object({
 export async function POST(req: NextRequest) {
   // 5 registros por hora y IP. Frena tanto el spam de cuentas como el abuso
   // de fuerza bruta indirecto vía registro.
-  const { success, retryAfterSec } = rateLimit(`register:${getClientIp(req)}`, 5, 60 * 60_000);
+  const { success, retryAfterSec } = await rateLimit(`register:${getClientIp(req)}`, 5, 60 * 60_000);
   if (!success) {
     return NextResponse.json(
       { error: 'Demasiados intentos. Inténtalo de nuevo más tarde.' },

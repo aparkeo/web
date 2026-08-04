@@ -43,6 +43,14 @@ npx vercel --prod
 | `AUTH_TRUST_HOST` | `true` | Permite a NextAuth v5 confiar en el host de Vercel |
 | `PARKING_DATA_URL` | `https://datos.vigo.org/data/trafico/plazas_minusvalido.json` | Feed oficial del Concello |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | *(vacío)* | Opcional; sin él se usa OpenStreetMap |
+| `UPSTASH_REDIS_REST_URL` | URL REST de tu DB en https://console.upstash.com | Rate limiting distribuido (register/geocode/report). Sin ella se usa fallback en memoria (best-effort) |
+| `UPSTASH_REDIS_REST_TOKEN` | Token REST de la misma DB | Idem. Ambas deben estar presentes para activar Upstash; el plan gratuito sobra |
+
+> **Rate limiting**: con las dos envs de Upstash, el rate limit coordina entre
+> instancias serverless (`lib/rateLimit.ts`). Si faltan o Upstash no responde,
+> la app hace fail-open al limitador en memoria — no rompe nada, pero el límite
+> es best-effort. Añádelas también a tu `.env` local si quieres probar el modo
+> distribuido en desarrollo.
 
 ## Tras el primer deploy
 

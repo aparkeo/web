@@ -30,7 +30,7 @@ const COOLDOWN_MS = 60_000;
 const MAX_ONSITE_DISTANCE_M = 150;
 
 export async function POST(req: NextRequest) {
-  const { success, retryAfterSec } = rateLimit(`report:${getClientIp(req)}`, 15, 60_000);
+  const { success, retryAfterSec } = await rateLimit(`report:${getClientIp(req)}`, 15, 60_000);
   if (!success) {
     return NextResponse.json(
       { error: 'Demasiadas peticiones. Inténtalo de nuevo en unos segundos.' },

@@ -24,7 +24,7 @@ export interface GeocodeResult {
  * para poder limitar/cachear sin depender de cada cliente.
  */
 export async function GET(req: NextRequest) {
-  const { success, retryAfterSec } = rateLimit(`geocode:${getClientIp(req)}`, 20, 60_000);
+  const { success, retryAfterSec } = await rateLimit(`geocode:${getClientIp(req)}`, 20, 60_000);
   if (!success) {
     return NextResponse.json(
       { error: 'Demasiadas búsquedas. Inténtalo de nuevo en unos segundos.' },

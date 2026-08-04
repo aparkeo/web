@@ -27,7 +27,9 @@ npm run test:watch   # modo watch
   - `lib/prediction.ts` — consenso live (`computeConsensus`), reputación
     (`classifyReputationReports` + clamp SQL en `recalculateSpotStatus`),
     `vigoNow`, `getSpotPrediction`, `rankSpotsByRecommendation`.
-  - `lib/rateLimit.ts` — token bucket con fake timers, `getClientIp`.
+  - `lib/rateLimit.ts` — token bucket en memoria con fake timers, backend
+    Upstash con SDK mockeado (fixed window, reuso de limiters), fail-open a
+    memoria ante errores de Redis, `getClientIp`.
   - `components/StatusBadge.tsx` — patrón base de test de componentes con
     Testing Library.
 
