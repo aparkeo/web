@@ -18,14 +18,15 @@
  * ========================================================================== */
 
 // Cambiar esta versión fuerza la sustitución de todas las cachés en activate.
-const VERSION = '2';
+const VERSION = '3';
 const CACHE_NAME = `minusvigo-v${VERSION}`;
 
 // App shell mínimo precacheado en install.
 const APP_SHELL = ['/', '/map', '/manifest.webmanifest', '/icon.svg'];
 
-// Host de tiles del mapa y límite de entradas (expulsión FIFO simple).
-const TILE_HOST = 'basemaps.cartocdn.com';
+// Hosts de tiles del mapa (CARTO temático y Esri satélite) y límite de
+// entradas (expulsión FIFO simple).
+const TILE_HOSTS = ['basemaps.cartocdn.com', 'server.arcgisonline.com'];
 const TILE_CACHE_MAX = 600;
 
 /* --------------------------------------------------------------------------
@@ -120,7 +121,7 @@ async function tileCacheFirst(request) {
         const cache = await caches.open(CACHE_NAME);
         await cache.put(request, response.clone());
         const keys = await cache.keys();
-        const tileKeys = keys.filter((req) => new URL(req.url).host === TILE_HOST);
+        const tileKeys = keys.filter((req) => TILE_HOSTS.includes(new URL(req.url).host));
         if (tileKeys.length > TILE_CACHE_MAX) {
           const excess = tileKeys.length - TILE_CACHE_MAX;
           await Promise.all(tileKeys.slice(0, excess).map((req) => cache.delete(req)));
@@ -275,8 +276,8 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    // b. Tiles del mapa (único origen externo permitido).
-    if (url.host === TILE_HOST) {
+    // b. Tiles del mapa (únicos orígenes externos permitidos).
+    if (TILE_HOSTS.includes(url.host)) {
       event.respondWith(tileCacheFirst(request));
       return;
     }

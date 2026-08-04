@@ -5,13 +5,14 @@ import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from 'react-leaf
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { useTheme } from 'next-themes';
-import { LocateFixed, Loader2 } from 'lucide-react';
+import { LocateFixed, Loader2, Map as MapIcon, Satellite } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { useSpots } from '@/hooks/useSpots';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { useMapStore } from '@/store/useMapStore';
+import { useBaseLayerStore } from '@/store/useBaseLayerStore';
 import { colorForStatus } from '@/lib/utils';
 import { SpotMarker } from '@/components/SpotMarker';
 import type { SpotStatus } from '@/types';
@@ -74,6 +75,41 @@ function ThemedTileLayer() {
   );
 }
 
+// Tiles Esri: World Imagery (fotos aéreas) + etiquetas de referencia encima
+// (límites y topónimos) para que las calles se lean sobre el satélite.
+// En satélite no aplica el tema claro/oscuro: las fotos aéreas son las fotos.
+const SATELLITE_TILE_URL =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+const SATELLITE_LABELS_TILE_URL =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
+const SATELLITE_TILE_ATTRIBUTION =
+  'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community';
+
+function SatelliteTileLayers() {
+  return (
+    <>
+      <TileLayer
+        key="esri-world-imagery"
+        attribution={SATELLITE_TILE_ATTRIBUTION}
+        url={SATELLITE_TILE_URL}
+        maxZoom={20}
+      />
+      <TileLayer
+        key="esri-reference-labels"
+        attribution="Esri"
+        url={SATELLITE_LABELS_TILE_URL}
+        maxZoom={20}
+      />
+    </>
+  );
+}
+
+// Capa base según la preferencia persistida: CARTO temático o satélite Esri.
+function BaseLayers() {
+  const baseLayer = useBaseLayerStore((s) => s.baseLayer);
+  return baseLayer === 'satellite' ? <SatelliteTileLayers /> : <ThemedTileLayer />;
+}
+
 function RecenterOnUser() {
   const map = useMap();
   const userLocation = useMapStore((s) => s.userLocation);
@@ -121,6 +157,49 @@ function LocateButton() {
   );
 }
 
+// Selector de capa base: "Mapa" (CARTO temático) o "Satélite" (Esri).
+// Esquina superior derecha: no colisiona con el ZoomControl (abajo derecha)
+// ni con "Mi ubicación" (bottom-28 right-3). Botones reales con aria-pressed
+// y tap target >= 44px (h-11), estilos con tokens (válidos en ambos temas).
+function BaseLayerControl() {
+  const baseLayer = useBaseLayerStore((s) => s.baseLayer);
+  const setBaseLayer = useBaseLayerStore((s) => s.setBaseLayer);
+
+  const options = [
+    { value: 'map' as const, label: 'Mapa', ariaLabel: 'Vista de mapa', Icon: MapIcon },
+    { value: 'satellite' as const, label: 'Satélite', ariaLabel: 'Vista satélite', Icon: Satellite },
+  ];
+
+  return (
+    <div
+      role="group"
+      aria-label="Capa del mapa"
+      className="absolute right-3 top-3 z-[1000] flex overflow-hidden rounded-full border border-border bg-background shadow-lg"
+    >
+      {options.map(({ value, label, ariaLabel, Icon }) => {
+        const active = baseLayer === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={active}
+            aria-label={ariaLabel}
+            onClick={() => setBaseLayer(value)}
+            className={`flex h-11 items-center gap-1.5 px-4 text-sm font-medium transition-colors ${
+              active
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background text-foreground hover:bg-secondary'
+            }`}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function MapView({ visible = true }: { visible?: boolean }) {
   const { data: spots = [], isLoading } = useSpots();
   const center = useMapStore((s) => s.center);
@@ -143,7 +222,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
   return (
     <div className="relative h-full w-full">
       <MapContainer center={center} zoom={zoom} className="h-full w-full" zoomControl={false}>
-        <ThemedTileLayer />
+        <BaseLayers />
         <ZoomControl position="bottomright" />
         <RecenterOnUser />
         <InvalidateSizeOnVisible visible={visible} />
@@ -169,6 +248,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
             ))}
         </MarkerClusterGroup>
       </MapContainer>
+      <BaseLayerControl />
       <LocateButton />
     </div>
   );
