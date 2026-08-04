@@ -25,6 +25,26 @@ function weightFromScore(score: number): number {
 
 const COOLDOWN_MS = 60_000;
 
+const COOLDOWN_RESPONSE = { error: 'Espera antes de volver a reportar esta plaza.' };
+
+/**
+ * ¿Es una violación del cooldown de reportes? Cubre dos casos:
+ *  - P2002: constraint única (compatibilidad con la mitigación anterior).
+ *  - SQLSTATE 23P01: violation de la exclusion constraint
+ *    `reports_cooldown_excl` (la garantía real a nivel de DB, roadmap nº10).
+ *    Prisma no la mapea a P2002 (eso es solo para únicas): llega como error
+ *    raw, así que se detecta por el código 23P01 o el nombre de la constraint.
+ */
+function isReportCooldownViolation(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    return true;
+  }
+  const e = error as { code?: string; meta?: { code?: string }; message?: string } | null;
+  if (e?.code === '23P01' || e?.meta?.code === '23P01') return true;
+  const message = e?.message ?? String(error);
+  return message.includes('23P01') || message.includes('reports_cooldown_excl');
+}
+
 // Un reporte GPS a más de esta distancia de la plaza no es una observación
 // en sitio: vale menos y no se geolocaliza.
 const MAX_ONSITE_DISTANCE_M = 150;
@@ -93,7 +113,7 @@ export async function POST(req: NextRequest) {
     },
   });
   if (recentOwnReport) {
-    return NextResponse.json({ error: 'Espera antes de volver a reportar esta plaza.' }, { status: 429 });
+    return NextResponse.json(COOLDOWN_RESPONSE, { status: 429 });
   }
 
   try {
@@ -107,10 +127,13 @@ export async function POST(req: NextRequest) {
       }),
     ]);
   } catch (error) {
-    // P2002: si existe un constraint único de cooldown (spotId+userId+ventana),
-    // la carrera entre dos reportes simultáneos se resuelve aquí como 429.
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return NextResponse.json({ error: 'Espera antes de volver a reportar esta plaza.' }, { status: 429 });
+    // La comprobación de arriba es solo un fast-path de UX: la exclusion
+    // constraint `reports_cooldown_excl` es la que garantiza el cooldown
+    // incluso con escrituras concurrentes (race condition) o externas a la
+    // API. Su violación (23P01) se responde exactamente igual que el
+    // fast-path: 429 con el mismo mensaje, nunca un 500.
+    if (isReportCooldownViolation(error)) {
+      return NextResponse.json(COOLDOWN_RESPONSE, { status: 429 });
     }
     throw error;
   }
