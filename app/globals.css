@@ -131,6 +131,76 @@
   outline-offset: 2px;
 }
 
+/* ===== Home premium: gradiente de hero y elevación realista (tokens de marca) ===== */
+
+/* Gradiente editorial del hero: radiales teal tenues + fundido hacia el fondo.
+   Todo deriva de --accent/--primary/--secondary, así que ambos temas quedan coherentes. */
+.home-hero {
+  background:
+    radial-gradient(56rem 22rem at 50% -8rem, hsl(var(--accent) / 0.16), transparent 65%),
+    radial-gradient(36rem 18rem at 88% -4rem, hsl(var(--primary) / 0.1), transparent 60%),
+    linear-gradient(to bottom, hsl(var(--secondary) / 0.5), hsl(var(--background)) 82%);
+}
+
+.dark .home-hero {
+  background:
+    radial-gradient(56rem 22rem at 50% -8rem, hsl(var(--accent) / 0.18), transparent 65%),
+    radial-gradient(36rem 18rem at 88% -4rem, hsl(var(--accent) / 0.08), transparent 60%),
+    linear-gradient(to bottom, hsl(var(--secondary) / 0.35), hsl(var(--background)) 82%);
+}
+
+/* Sombras multicapa suaves: tinte teal en claro, negro profundo en oscuro */
+.shadow-elevated {
+  box-shadow:
+    0 1px 2px rgb(8 51 45 / 0.05),
+    0 4px 12px rgb(8 51 45 / 0.06),
+    0 16px 40px -12px rgb(8 51 45 / 0.16);
+}
+
+.shadow-elevated-hover {
+  box-shadow:
+    0 2px 4px rgb(8 51 45 / 0.06),
+    0 8px 20px rgb(8 51 45 / 0.08),
+    0 24px 56px -12px rgb(8 51 45 / 0.22);
+}
+
+.dark .shadow-elevated {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.5),
+    0 8px 24px rgb(0 0 0 / 0.4),
+    0 0 0 1px hsl(var(--border) / 0.5);
+}
+
+.dark .shadow-elevated-hover {
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 0.5),
+    0 16px 40px rgb(0 0 0 / 0.5),
+    0 0 0 1px hsl(var(--accent) / 0.3);
+}
+
+/* Entrada suave de las piezas de la home: solo transform/opacity y solo si el
+   usuario no ha pedido reducir movimiento */
+@keyframes home-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-fade-up {
+    animation: home-fade-up 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-fade-up-delay {
+    animation-delay: 100ms;
+  }
+}
+
 /* Respeta prefers-reduced-motion: sin animaciones ni transiciones de movimiento;
    se permite un fundido suave de opacidad, que no implica desplazamiento */
 @media (prefers-reduced-motion: reduce) {

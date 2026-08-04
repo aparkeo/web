@@ -54,13 +54,13 @@ export function DestinationInput() {
 
   if (destination) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2">
-        <MapPin className="h-4 w-4 shrink-0 text-primary" />
+      <div className="flex min-h-12 items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-1.5 shadow-sm">
+        <MapPin className="h-5 w-5 shrink-0 text-primary" />
         <span className="flex-1 truncate text-sm font-medium">{destination.label}</span>
         <button
           type="button"
           onClick={() => setDestination(null)}
-          className="rounded-full p-1 text-muted-foreground hover:bg-secondary"
+          className="-mr-1.5 grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Cambiar destino"
         >
           <X className="h-4 w-4" />
@@ -72,7 +72,7 @@ export function DestinationInput() {
   return (
     <div className="relative" onBlur={() => setTimeout(() => setOpen(false), 150)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
           onChange={(e) => {
@@ -82,17 +82,17 @@ export function DestinationInput() {
           }}
           onFocus={() => setOpen(true)}
           placeholder="¿A dónde vas? (calle, zona, sitio en Vigo)"
-          className="pl-9"
+          className="h-12 rounded-xl pl-10 text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
         />
       </div>
 
       {open ? (
-        <Card className="absolute z-20 mt-1 w-full overflow-hidden p-1 shadow-lg">
+        <Card className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl p-1.5 shadow-elevated">
           <button
             type="button"
             onClick={useCurrentLocation}
             disabled={locating}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-secondary disabled:opacity-60"
+            className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none disabled:opacity-60"
           >
             <LocateFixed className="h-4 w-4 text-primary" />
             {locating ? 'Localizando…' : 'Usar mi ubicación actual'}
@@ -104,9 +104,9 @@ export function DestinationInput() {
 
           {debouncedQuery.trim().length >= 3 ? (
             isFetching ? (
-              <p className="px-3 py-2 text-sm text-muted-foreground">Buscando…</p>
+              <p className="px-3 py-2.5 text-sm text-muted-foreground">Buscando…</p>
             ) : results.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-muted-foreground">Sin resultados en Vigo.</p>
+              <p className="px-3 py-2.5 text-sm text-muted-foreground">Sin resultados en Vigo.</p>
             ) : (
               results.map((r, i) => (
                 <button
@@ -117,7 +117,7 @@ export function DestinationInput() {
                     setOpen(false);
                     setQuery('');
                   }}
-                  className="flex w-full items-start gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-secondary"
+                  className="flex min-h-11 w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none"
                 >
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                   <span className="truncate">{r.label}</span>
