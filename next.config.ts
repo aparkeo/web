@@ -27,7 +27,8 @@ const nextConfig: NextConfig = {
     //   'unsafe-inline'.
     // - style-src 'unsafe-inline': Tailwind/shadcn/React Leaflet generan
     //   atributos style inline (p. ej. posicionamiento del mapa y divIcons).
-    // - img-src: tiles CARTO (Voyager + Dark Matter) y satélite Esri; data:
+    // - img-src: tiles CARTO (Voyager + Dark Matter), satélite Esri y fotos
+    //   de plazas en Supabase Storage (bucket público spot-photos); data:
     //   y blob: los usa Leaflet para markers/previews.
     // - connect-src 'self': el geocoding (Nominatim) va server-side vía
     //   /api/geocode y Web Push usa PushManager del navegador (la entrega
@@ -44,7 +45,7 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com",
+      "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://*.supabase.co",
       "font-src 'self' data:",
       "connect-src 'self'",
       "worker-src 'self'",

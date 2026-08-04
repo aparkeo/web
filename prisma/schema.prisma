@@ -34,6 +34,8 @@ model User {
   notifications     Notification[]
   events            Event[]
   pushSubscriptions PushSubscription[]
+  spotPhotos        SpotPhoto[]
+  spotComments      SpotComment[]
 
   @@map("users")
 }
@@ -108,6 +110,8 @@ model ParkingSpot {
   predictions Prediction[]
   favorites   Favorite[]
   notifications Notification[]
+  photos      SpotPhoto[]
+  comments    SpotComment[]
 
   @@index([city])
   @@index([status])
@@ -225,4 +229,49 @@ model Event {
 
   @@index([type, createdAt])
   @@map("events")
+}
+
+// ---------------------------------------------------------------------------
+// Contenido de comunidad: fotos y comentarios de plazas (roadmap nº9)
+// ---------------------------------------------------------------------------
+
+// Fotos de una plaza subidas por usuarios. El archivo vive en Supabase
+// Storage (bucket público `spot-photos`); aquí se guarda la URL pública y el
+// path dentro del bucket para poder borrarlo. La subida/borrado del archivo
+// pasa exclusivamente por la API del servidor (service role de Supabase);
+// ver lib/supabaseStorage.ts.
+//
+// Moderación: `hidden` es soft-hide. Solo el autor puede borrar en firme
+// (bucket + fila); MODERATOR/ADMIN ocultan con hidden=true (PATCH).
+model SpotPhoto {
+  id          String      @id @default(cuid())
+  spotId      Int
+  spot        ParkingSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url         String
+  storagePath String
+  hidden      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  @@index([spotId, hidden, createdAt])
+  @@index([userId, createdAt])
+  @@map("spot_photos")
+}
+
+// Comentarios de una plaza. Misma convención de moderación que SpotPhoto:
+// el autor borra (hard delete) y MODERATOR/ADMIN ocultan (hidden=true).
+model SpotComment {
+  id        String      @id @default(cuid())
+  spotId    Int
+  spot      ParkingSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String      @db.VarChar(500)
+  hidden    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+
+  @@index([spotId, hidden, createdAt])
+  @@index([userId, createdAt])
+  @@map("spot_comments")
 }

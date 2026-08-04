@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { PredictionCard } from '@/components/PredictionCard';
 import { NavigationButton } from '@/components/NavigationButton';
 import { ReportModal } from '@/components/ReportModal';
+import { SpotPhotos } from '@/components/SpotPhotos';
+import { SpotComments } from '@/components/SpotComments';
 import { useSpot } from '@/hooks/useSpot';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { formatRelativeTime, cn } from '@/lib/utils';
@@ -37,9 +39,10 @@ export function SpotDetails({ spotId }: { spotId: number }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card className="home-fade-up rounded-2xl shadow-elevated">
-        <CardHeader>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="home-fade-up rounded-2xl shadow-elevated">
+          <CardHeader>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Plaza PMR · Vigo</p>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-2xl font-extrabold tracking-tight">{spot.street}</CardTitle>
@@ -90,6 +93,10 @@ export function SpotDetails({ spotId }: { spotId: number }) {
       <div className="home-fade-up home-fade-up-delay">
         <PredictionCard spotId={spot.id} />
       </div>
+      </div>
+
+      <SpotPhotos spotId={spot.id} />
+      <SpotComments spotId={spot.id} />
 
       <ReportModal spotId={spot.id} street={spot.street} open={reportOpen} onOpenChange={setReportOpen} />
     </div>

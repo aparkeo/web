@@ -12,3 +12,8 @@ export async function requireAdmin() {
   }
   return { ok: true as const, session };
 }
+
+/** True si el rol puede moderar contenido de comunidad (ocultar fotos/comentarios). */
+export function isModeratorRole(role: string | undefined): boolean {
+  return role === 'MODERATOR' || role === 'ADMIN';
+}
