@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github } from 'lucide-react';
+import { Github, Heart } from 'lucide-react';
 import { SITE_GITHUB_URL } from '@/lib/site';
 import { TourRelaunchButton } from '@/components/TourRelaunchButton';
 
@@ -26,6 +26,12 @@ export function Footer() {
           </a>
           <Link href="/analytics" className="transition-colors hover:text-foreground">
             Analítica
+          </Link>
+          <Link
+            href="/apoyo"
+            className="flex min-h-11 items-center gap-1.5 transition-colors hover:text-foreground"
+          >
+            <Heart className="h-4 w-4" aria-hidden="true" /> Apoya el proyecto
           </Link>
           <TourRelaunchButton />
         </nav>

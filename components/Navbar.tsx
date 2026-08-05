@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { MapPin, Menu, LayoutDashboard, BarChart3, LineChart, User, LogOut, ShieldCheck, Flag, Download } from 'lucide-react';
+import { MapPin, Menu, LayoutDashboard, BarChart3, LineChart, User, LogOut, ShieldCheck, Flag, Download, Heart } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -80,6 +80,11 @@ export function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
                     <User className="mr-2 h-4 w-4" /> Mi perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/apoyo">
+                    <Heart className="mr-2 h-4 w-4" /> Apoya el proyecto
                   </Link>
                 </DropdownMenuItem>
                 {session.user.role === 'ADMIN' ? (
@@ -172,6 +177,19 @@ export function Navbar() {
               aria-current={pathname?.startsWith('/profile') ? 'page' : undefined}
             >
               <User className="h-4 w-4" /> {session?.user ? 'Mi perfil' : 'Entrar'}
+            </Link>
+            <Link
+              href="/apoyo"
+              onClick={() => setOpen(false)}
+              className={cn(
+                'flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150',
+                pathname?.startsWith('/apoyo')
+                  ? 'bg-secondary text-foreground'
+                  : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',
+              )}
+              aria-current={pathname?.startsWith('/apoyo') ? 'page' : undefined}
+            >
+              <Heart className="h-4 w-4" /> Apoya el proyecto
             </Link>
             {session?.user?.role === 'ADMIN' ? (
               <Link
