@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { MapPin, Menu, LayoutDashboard, BarChart3, LineChart, User, LogOut, ShieldCheck, Flag } from 'lucide-react';
+import { MapPin, Menu, LayoutDashboard, BarChart3, LineChart, User, LogOut, ShieldCheck, Flag, Download } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { NotificationBell } from '@/components/NotificationBell';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useInstallMenu } from '@/components/InstallPrompt';
 
 const NAV_LINKS = [
   { href: '/map', label: 'Mapa', icon: MapPin },
@@ -29,6 +30,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
+  const { canInstall, openInstall } = useInstallMenu();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
@@ -83,6 +85,11 @@ export function Navbar() {
                     <Link href="/admin">
                       <ShieldCheck className="mr-2 h-4 w-4" /> Panel admin
                     </Link>
+                  </DropdownMenuItem>
+                ) : null}
+                {canInstall ? (
+                  <DropdownMenuItem onClick={openInstall}>
+                    <Download className="mr-2 h-4 w-4" /> Instalar app
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuSeparator />
@@ -167,6 +174,18 @@ export function Navbar() {
               >
                 <LayoutDashboard className="h-4 w-4" /> Panel admin
               </Link>
+            ) : null}
+            {canInstall ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  openInstall();
+                }}
+                className="flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-left text-sm font-semibold text-muted-foreground transition-colors duration-150 hover:bg-secondary/70 hover:text-foreground"
+              >
+                <Download className="h-4 w-4" /> Instalar app
+              </button>
             ) : null}
             {session?.user ? (
               <button

@@ -7,6 +7,7 @@ import { ThemeProvider, useTheme } from 'next-themes';
 import { Toaster } from 'sonner';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+import { InstallPromptProvider } from '@/components/InstallPrompt';
 
 // Sonner no detecta solo la clase .dark de next-themes: hay que pasarle el tema resuelto.
 function ThemedToaster() {
@@ -26,7 +27,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          <InstallPromptProvider>
+            {children}
+          </InstallPromptProvider>
           <OfflineIndicator />
           <ServiceWorkerRegistration />
           <ThemedToaster />
