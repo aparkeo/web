@@ -54,6 +54,24 @@ export function colorForStatus(status: 'FREE' | 'OCCUPIED' | 'UNKNOWN'): string 
     case 'OCCUPIED':
       return '#DC2626';
     default:
-      return '#94A3B8';
+      // slate-500: #94A3B8 solo daba 2.8:1 con blanco encima (contador de
+      // clusters); slate-500 llega a 4.8:1 (AA) y se lee mejor sobre el mapa
+      return '#64748B';
+  }
+}
+
+/**
+ * Clases de color de TEXTO por estado, conscientes del tema (un único color
+ * hex no puede dar AA a la vez en claro y oscuro). Para gráficos del mapa
+ * usa colorForStatus; para texto usa estas clases.
+ */
+export function statusTextClass(status: 'FREE' | 'OCCUPIED' | 'UNKNOWN'): string {
+  switch (status) {
+    case 'FREE':
+      return 'text-[#15803D] dark:text-[#4ADE80]';
+    case 'OCCUPIED':
+      return 'text-[#B91C1C] dark:text-[#F87171]';
+    default:
+      return 'text-[#475569] dark:text-[#94A3B8]';
   }
 }

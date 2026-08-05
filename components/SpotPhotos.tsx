@@ -17,7 +17,7 @@ import type { SpotPhotoDTO } from '@/lib/spotContent';
  * subida con preview local (solo usuarios logueados) y moderación
  * (el autor borra; MODERATOR/ADMIN ocultan).
  */
-export function SpotPhotos({ spotId }: { spotId: number }) {
+export function SpotPhotos({ spotId, street }: { spotId: number; street: string }) {
   const { data: session } = useSession();
   const { data: photos, isLoading } = useSpotPhotos(spotId);
   const [lightbox, setLightbox] = useState<SpotPhotoDTO | null>(null);
@@ -57,6 +57,7 @@ export function SpotPhotos({ spotId }: { spotId: number }) {
                 key={photo.id}
                 photo={photo}
                 spotId={spotId}
+                street={street}
                 canDelete={session?.user.id === photo.authorId}
                 canHide={isModerator && session?.user.id !== photo.authorId}
                 onOpen={() => setLightbox(photo)}
@@ -68,13 +69,13 @@ export function SpotPhotos({ spotId }: { spotId: number }) {
 
       <Dialog open={lightbox !== null} onOpenChange={(open) => !open && setLightbox(null)}>
         <DialogContent className="max-w-3xl p-2 sm:p-4" aria-describedby={undefined}>
-          <DialogTitle className="sr-only">Foto de la plaza</DialogTitle>
+          <DialogTitle className="sr-only">Foto de la plaza en {street}</DialogTitle>
           {lightbox ? (
             <div className="space-y-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- URL dinámica de Supabase Storage */}
               <img
                 src={lightbox.url}
-                alt={`Foto de la plaza subida por ${lightbox.authorName}`}
+                alt={`Foto de la plaza en ${street} subida por ${lightbox.authorName}`}
                 className="max-h-[75vh] w-full rounded-xl object-contain"
               />
               <p className="text-center text-xs text-muted-foreground">
@@ -91,12 +92,14 @@ export function SpotPhotos({ spotId }: { spotId: number }) {
 function PhotoTile({
   photo,
   spotId,
+  street,
   canDelete,
   canHide,
   onOpen,
 }: {
   photo: SpotPhotoDTO;
   spotId: number;
+  street: string;
   canDelete: boolean;
   canHide: boolean;
   onOpen: () => void;
@@ -110,7 +113,7 @@ function PhotoTile({
         type="button"
         onClick={onOpen}
         className="block aspect-square w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label={`Ver foto subida por ${photo.authorName}`}
+        aria-label={`Ver foto de la plaza en ${street} subida por ${photo.authorName}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- URL dinámica de Supabase Storage */}
         <img

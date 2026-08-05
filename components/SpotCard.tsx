@@ -44,7 +44,15 @@ export function SpotCard({ spot }: { spot: SpotDTO }) {
           aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Añadir a favoritas'}
           className="h-11 w-11 shrink-0 rounded-full transition-colors duration-150"
         >
-          <Star className={spot.isFavorite ? 'h-5 w-5 fill-yellow-400 text-yellow-400' : 'h-5 w-5'} />
+          {/* amber-600 (3.5:1) en claro / amber-400 en oscuro: yellow-400 no
+              llegaba ni al 3:1 de contraste no-textual sobre fondo claro */}
+          <Star
+            className={
+              spot.isFavorite
+                ? 'h-5 w-5 fill-amber-500 text-amber-600 dark:fill-amber-400 dark:text-amber-400'
+                : 'h-5 w-5'
+            }
+          />
         </Button>
 
         <Button asChild size="icon" aria-label="Cómo llegar" className="h-11 w-11 shrink-0 rounded-full">

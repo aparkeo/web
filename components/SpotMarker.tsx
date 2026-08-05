@@ -4,7 +4,7 @@ import { memo, useCallback } from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import Link from 'next/link';
-import { colorForStatus, labelForStatus, formatDistance } from '@/lib/utils';
+import { colorForStatus, labelForStatus, statusTextClass, formatDistance } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import type { SpotDTO, SpotStatus } from '@/types';
 
@@ -18,7 +18,9 @@ function spotIcon(status: SpotStatus, selected: boolean): L.DivIcon {
   if (cached) return cached;
 
   const color = colorForStatus(status);
-  const size = selected ? 30 : 22;
+  // Tap target WCAG 2.2 AA: mínimo 24x24 px (antes 22 px, lo que hacía fallar
+  // la auditoría target-size de Lighthouse en /map)
+  const size = selected ? 32 : 24;
   const icon = L.divIcon({
     className: '',
     html: `<div class="spot-marker" style="width:${size}px;height:${size}px;background:${color};${selected ? 'box-shadow:0 0 0 4px ' + color + '55, 0 2px 6px rgba(0,0,0,.35);' : ''}"></div>`,
@@ -40,13 +42,21 @@ export const SpotMarker = memo(function SpotMarker({ spot, selected, onSelect }:
   const handleClick = useCallback(() => onSelect(spot.id), [onSelect, spot.id]);
 
   return (
-    <Marker position={[spot.lat, spot.lon]} icon={icon} eventHandlers={{ click: handleClick }}>
+    // title da nombre accesible al marcador: Leaflet pone tabindex=0 +
+    // role="button" al icono (keyboard: true por defecto) y title actúa como
+    // accessible name; con Enter se abre el popup y el foco entra en él.
+    <Marker
+      position={[spot.lat, spot.lon]}
+      icon={icon}
+      title={`Plaza PMR en ${spot.street} — ${labelForStatus(spot.status)}`}
+      eventHandlers={{ click: handleClick }}
+    >
       {/* El contenido del popup solo se monta para el marcador seleccionado */}
       {selected ? (
         <Popup>
           <div className="flex flex-col gap-1 text-sm">
             <span className="font-semibold">{spot.street}</span>
-            <span style={{ color: colorForStatus(spot.status) }} className="font-medium">
+            <span className={`font-medium ${statusTextClass(spot.status)}`}>
               {labelForStatus(spot.status)}
             </span>
             {spot.distanceM !== undefined ? (

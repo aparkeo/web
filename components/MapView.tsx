@@ -221,14 +221,29 @@ export function MapView({ visible = true }: { visible?: boolean }) {
 
   return (
     <div className="relative h-full w-full">
-      <MapContainer center={center} zoom={zoom} className="h-full w-full" zoomControl={false}>
+      {/* keyboard es true por defecto en Leaflet (pan/zoom con teclado y
+          marcadores focuseables); se declara explícito a modo de contrato a11y */}
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        className="h-full w-full"
+        zoomControl={false}
+        keyboard
+        aria-label="Mapa interactivo de plazas de movilidad reducida en Vigo"
+      >
         <BaseLayers />
         <ZoomControl position="bottomright" />
         <RecenterOnUser />
         <InvalidateSizeOnVisible visible={visible} />
 
         {userLocation ? (
-          <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon} />
+          // keyboard={false}: el punto de ubicación no es interactivo, no debe
+          // entrar en el orden de tabulación ni ocupar un target de 16 px
+          <Marker
+            position={[userLocation.latitude, userLocation.longitude]}
+            icon={userIcon}
+            keyboard={false}
+          />
         ) : null}
 
         <MarkerClusterGroup

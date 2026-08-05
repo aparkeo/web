@@ -89,7 +89,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
           </p>
         ) : (
           <div className="space-y-3 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3" role="group" aria-label="Estado actual de la plaza">
               <button
                 type="button"
                 onClick={() => setChoice('FREE')}
@@ -128,7 +128,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
                   : 'Añadir mi ubicación (mejora la fiabilidad)'}
             </button>
 
-            {locError ? <p className="text-xs text-destructive">{locError}</p> : null}
+            {locError ? <p role="alert" className="text-xs text-destructive">{locError}</p> : null}
           </div>
         )}
 

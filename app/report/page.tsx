@@ -6,7 +6,8 @@ import { SearchBar } from '@/components/SearchBar';
 import { ReportModal } from '@/components/ReportModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSpots } from '@/hooks/useSpots';
-import { labelForStatus, colorForStatus } from '@/lib/utils';
+import { labelForStatus, statusTextClass } from '@/lib/utils';
+import { spotsCountAnnouncement } from '@/lib/a11y';
 
 export default function ReportPage() {
   const { data: spots = [], isLoading } = useSpots();
@@ -26,6 +27,10 @@ export default function ReportPage() {
         <SearchBar />
 
         <div className="mt-4 space-y-2.5">
+          {/* Región live: anuncia cuántas plazas coinciden con la búsqueda */}
+          <p className="sr-only" role="status">
+            {isLoading ? '' : spotsCountAnnouncement(spots.length)}
+          </p>
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)
           ) : (
@@ -40,7 +45,7 @@ export default function ReportPage() {
                 <span className="flex items-center justify-between p-4">
                   <span>
                     <span className="block font-semibold tracking-tight">{spot.street}</span>
-                    <span className="block text-xs" style={{ color: colorForStatus(spot.status) }}>
+                    <span className={`block text-xs ${statusTextClass(spot.status)}`}>
                       {labelForStatus(spot.status)}
                     </span>
                   </span>

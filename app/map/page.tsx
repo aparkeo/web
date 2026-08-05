@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSpots } from '@/hooks/useSpots';
 import { useRealtimeSpots } from '@/hooks/useRealtimeSpots';
+import { spotsCountAnnouncement } from '@/lib/a11y';
 
 const MapView = dynamic(() => import('@/components/MapView').then((m) => m.MapView), {
   ssr: false,
@@ -37,6 +38,11 @@ export default function MapPage() {
           <LiveIndicator live={live} />
         </div>
         <div className="space-y-2.5 p-4 pt-0">
+          {/* Región live: anuncia cuántas plazas hay tras cargar/filtrar o
+              cuando el feed en tiempo real actualiza la lista */}
+          <p className="sr-only" role="status">
+            {isLoading ? '' : spotsCountAnnouncement(spots.length)}
+          </p>
           {isLoading ? (
             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)
           ) : spots.length === 0 ? (

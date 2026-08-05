@@ -66,7 +66,12 @@ export function SpotDetails({ spotId }: { spotId: number }) {
                 aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Marcar como favorita'}
                 aria-pressed={spot.isFavorite}
               >
-                <Star className={cn('h-5 w-5', spot.isFavorite && 'fill-yellow-400 text-yellow-400')} />
+                <Star
+                  className={cn(
+                    'h-5 w-5',
+                    spot.isFavorite && 'fill-amber-500 text-amber-600 dark:fill-amber-400 dark:text-amber-400',
+                  )}
+                />
               </Button>
             </div>
           </div>
@@ -123,7 +128,7 @@ export function SpotDetails({ spotId }: { spotId: number }) {
       </div>
       </div>
 
-      <SpotPhotos spotId={spot.id} />
+      <SpotPhotos spotId={spot.id} street={spot.street} />
       <SpotComments spotId={spot.id} />
 
       <ReportModal spotId={spot.id} street={spot.street} open={reportOpen} onOpenChange={setReportOpen} />

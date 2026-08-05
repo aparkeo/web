@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { searchAddress } from '@/services/geocode';
 import { parseNaturalQuery } from '@/lib/nlSearch';
+import { geocodeResultsAnnouncement } from '@/lib/a11y';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDestinationStore } from '@/store/useDestinationStore';
 
@@ -80,7 +81,7 @@ export function DestinationInput() {
   return (
     <div className="relative" onBlur={() => setTimeout(() => setOpen(false), 150)}>
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
         <Input
           value={query}
           onChange={(e) => {
@@ -89,25 +90,47 @@ export function DestinationInput() {
             setLocError(null);
           }}
           onFocus={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setOpen(false);
+          }}
           placeholder="¿A dónde vas? (p. ej. «plaza libre cerca del Corte Inglés»)"
+          aria-label="Destino: dirección o lugar de Vigo"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="destination-results"
+          aria-autocomplete="list"
           className="h-12 rounded-xl pl-10 text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
         />
       </div>
 
+      {/* Región live: anuncia a lectores de pantalla cuántos resultados hay */}
+      <p className="sr-only" role="status">
+        {open && debouncedQuery.trim().length >= 3 && !isFetching
+          ? geocodeResultsAnnouncement(results.length)
+          : ''}
+      </p>
+
       {open ? (
-        <Card className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl p-1.5 shadow-elevated">
+        <Card
+          id="destination-results"
+          role="listbox"
+          aria-label="Resultados de búsqueda de destino"
+          className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl p-1.5 shadow-elevated"
+        >
           <button
             type="button"
+            role="option"
+            aria-selected={false}
             onClick={useCurrentLocation}
             disabled={locating}
-            className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none disabled:opacity-60"
+            className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
           >
-            <LocateFixed className="h-4 w-4 text-primary" />
+            <LocateFixed className="h-4 w-4 text-primary" aria-hidden="true" />
             {locating ? 'Localizando…' : 'Usar mi ubicación actual'}
           </button>
 
           {locError ? (
-            <p className="px-3 py-1.5 text-xs text-destructive">{locError}</p>
+            <p role="alert" className="px-3 py-1.5 text-xs text-destructive">{locError}</p>
           ) : null}
 
           {debouncedQuery.trim().length >= 3 ? (
@@ -119,6 +142,8 @@ export function DestinationInput() {
               results.map((r, i) => (
                 <button
                   type="button"
+                  role="option"
+                  aria-selected={false}
                   key={`${r.lat}-${r.lon}-${i}`}
                   onClick={() => {
                     setDestination({
@@ -132,9 +157,9 @@ export function DestinationInput() {
                     setOpen(false);
                     setQuery('');
                   }}
-                  className="flex min-h-11 w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none"
+                  className="flex min-h-11 w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                   <span className="truncate">{r.label}</span>
                 </button>
               ))

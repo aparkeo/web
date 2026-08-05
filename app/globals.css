@@ -54,6 +54,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Indicador de foco global de respaldo: cualquier elemento interactivo sin
+     estilo :focus-visible propio recibe un outline con el color --ring de la
+     marca (5.2:1 en claro, 9.3:1 en oscuro). Los componentes con
+     focus-visible:outline-none + ring de Tailwind ganan por capas de cascada
+     (utilities > base), así que conservan su anillo y no se duplica. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
 }
 
 /* leaflet.css se importa en MapView.tsx (vía JS) para no cargarlo en páginas sin mapa */
@@ -63,6 +73,21 @@
   height: 100%;
   font-family: inherit;
   background: hsl(var(--muted));
+}
+
+/* Tap targets AA en la atribución de Leaflet: los enlaces nativos miden 14 px
+   de alto; se elevan a >=24 px sin cambiar el aspecto visual */
+.leaflet-control-attribution {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 6px;
+}
+
+.leaflet-control-attribution a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 
 .spot-marker {
@@ -285,4 +310,14 @@
     transition-duration: 150ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Contraste AA en modo oscuro: el token --destructive (rojo 45% L) solo da
+   2.6:1 sobre --card, por debajo del 4.5:1 exigido para texto. Se aclara el
+   rojo cuando se usa como color de TEXTO (errores de formulario, badge
+   destructive, iconos de borrado). Los fondos bg-destructive conservan el
+   token original, que sí contrasta con texto blanco.
+   Regla fuera de @layer para ganar a la utility .text-destructive. */
+.dark .text-destructive {
+  color: hsl(0 84% 72%);
 }

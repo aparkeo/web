@@ -2,6 +2,7 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import {
   cn,
   colorForStatus,
+  statusTextClass,
   distanceMeters,
   formatDistance,
   formatRelativeTime,
@@ -103,7 +104,15 @@ describe('labelForStatus / colorForStatus', () => {
   it('asigna verde/rojo/gris a cada estado', () => {
     expect(colorForStatus('FREE')).toBe('#16A34A');
     expect(colorForStatus('OCCUPIED')).toBe('#DC2626');
-    expect(colorForStatus('UNKNOWN')).toBe('#94A3B8');
+    expect(colorForStatus('UNKNOWN')).toBe('#64748B');
+  });
+
+  it('devuelve clases de texto conscientes del tema para cada estado', () => {
+    for (const status of ['FREE', 'OCCUPIED', 'UNKNOWN'] as const) {
+      const classes = statusTextClass(status);
+      expect(classes).toContain('text-[');
+      expect(classes).toContain('dark:text-[');
+    }
   });
 });
 

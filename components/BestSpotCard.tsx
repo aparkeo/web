@@ -50,6 +50,9 @@ export function BestSpotCard() {
         </p>
       ) : null}
 
+      {/* aria-live: la recomendación llega de forma asíncrona tras elegir
+          destino; sin región live un lector de pantalla no se enteraría */}
+      <div aria-live="polite">
       {!destination ? (
         <p className="mx-auto max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
           Dinos a dónde vas (o usa tu ubicación actual) y te recomendamos la mejor plaza PMR para llegar allí.
@@ -122,6 +125,7 @@ export function BestSpotCard() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

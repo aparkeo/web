@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { MapPin, Menu, LayoutDashboard, BarChart3, LineChart, User, LogOut, ShieldCheck, Flag, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -30,6 +30,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const { canInstall, openInstall } = useInstallMenu();
 
   return (
@@ -115,6 +116,7 @@ export function Navbar() {
           <ThemeToggle />
           {session?.user ? <NotificationBell /> : null}
           <Button
+            ref={toggleRef}
             variant="ghost"
             size="icon"
             className="min-h-11 min-w-11"
@@ -123,13 +125,23 @@ export function Navbar() {
             aria-expanded={open}
             aria-controls="mobile-nav"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
       </div>
 
       {open ? (
-        <div id="mobile-nav" className="border-t border-border md:hidden">
+        <div
+          id="mobile-nav"
+          className="border-t border-border md:hidden"
+          onKeyDown={(e) => {
+            // Escape cierra el menú y devuelve el foco al botón que lo abrió
+            if (e.key === 'Escape') {
+              setOpen(false);
+              toggleRef.current?.focus();
+            }
+          }}
+        >
           <nav className="container flex flex-col gap-1 py-3" aria-label="Navegación móvil">
             {NAV_LINKS.map((link) => (
               <Link

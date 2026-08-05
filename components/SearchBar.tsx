@@ -11,7 +11,7 @@ export function SearchBar() {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+      <Search className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
       <Input
         value={search}
         onChange={(e) => setSearch(e.target.value)}

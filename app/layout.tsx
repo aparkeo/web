@@ -66,7 +66,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <Providers>
           <Navbar />
-          <main id="main-content">{children}</main>
+          {/* tabIndex=-1 permite que el enlace «Saltar al contenido principal»
+              mueva el foco al <main> (un <main> no es focuseable por defecto) */}
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

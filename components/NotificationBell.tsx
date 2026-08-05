@@ -151,7 +151,7 @@ export function NotificationBell() {
                   <span className="whitespace-normal text-xs text-muted-foreground">
                     {notification.body}
                   </span>
-                  <span className="text-[11px] text-muted-foreground/80">
+                  <span className="text-[11px] text-muted-foreground">
                     {formatDistanceToNow(new Date(notification.createdAt), {
                       addSuffix: true,
                       locale: es,
