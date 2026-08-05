@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { MapPin, Menu, LayoutDashboard, BarChart3, User, LogOut, ShieldCheck, Flag } from 'lucide-react';
+import { MapPin, Menu, LayoutDashboard, BarChart3, LineChart, User, LogOut, ShieldCheck, Flag } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -21,6 +21,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 const NAV_LINKS = [
   { href: '/map', label: 'Mapa', icon: MapPin },
   { href: '/stats', label: 'Estadísticas', icon: BarChart3 },
+  { href: '/analytics', label: 'Analítica', icon: LineChart },
   { href: '/report', label: 'Reportar', icon: Flag },
 ];
 
