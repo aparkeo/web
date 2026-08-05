@@ -69,6 +69,10 @@
 /* leaflet.css se importa en MapView.tsx (vía JS) para no cargarlo en páginas sin mapa */
 
 .leaflet-container {
+  position: relative;
+  /* Stacking context propio: atrapa los z-index internos de Leaflet (panes 200-1000)
+     para que los dropdowns del navbar (z-50) no queden tapados por el mapa */
+  z-index: 0;
   width: 100%;
   height: 100%;
   font-family: inherit;
