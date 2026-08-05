@@ -1,4 +1,4 @@
-# Tests — MinusVigo Web
+# Tests — Aparkeo Web
 
 Infraestructura de tests del proyecto: **Vitest** para unitarios y **Playwright**
 para E2E. No hay tests en CI más allá de los unitarios (ver

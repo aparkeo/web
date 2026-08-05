@@ -1,6 +1,6 @@
-# MinusVigo Web
+# Aparkeo Web
 
-Versión web de MinusVigo — encuentra plazas PMR libres en Vigo, con predicción
+Versión web de Aparkeo Vigo — encuentra plazas PMR libres en Vigo, con predicción
 inteligente, reportes de la comunidad, panel de administración y estadísticas.
 
 **Proyecto totalmente independiente de la app móvil** (carpeta `minusvigo`).

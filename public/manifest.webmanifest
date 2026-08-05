@@ -1,7 +1,7 @@
 {
-  "name": "MinusVigo — Plazas PMR en Vigo",
-  "short_name": "MinusVigo",
-  "description": "Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.",
+  "name": "Aparkeo Vigo — Plazas PMR en vivo",
+  "short_name": "Aparkeo",
+  "description": "Aparkeo Vigo: encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.",
   "lang": "es",
   "id": "/",
   "start_url": "/map",

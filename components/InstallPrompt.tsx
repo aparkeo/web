@@ -236,7 +236,7 @@ function InstallPromptBanner({ variant, onInstall, onDismiss, onClose }: BannerP
   return (
     <div
       role="region"
-      aria-label="Instalar la aplicación MinusVigo"
+      aria-label="Instalar la aplicación Aparkeo"
       className="home-fade-up fixed inset-x-4 bottom-4 z-50 sm:inset-x-auto sm:right-6 sm:w-[22rem]"
     >
       <div className="relative rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-elevated">
@@ -259,7 +259,7 @@ function InstallPromptBanner({ variant, onInstall, onDismiss, onClose }: BannerP
             className="h-12 w-12 shrink-0 rounded-xl shadow-sm"
           />
           <div className="min-w-0 pr-8">
-            <p className="text-sm font-bold leading-tight">Instala MinusVigo</p>
+            <p className="text-sm font-bold leading-tight">Instala Aparkeo</p>
             {variant === 'native' ? (
               <p className="mt-1 text-sm text-muted-foreground">
                 Añádela a tu pantalla de inicio y encuentra plazas PMR con un toque, incluso sin

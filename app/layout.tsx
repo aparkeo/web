@@ -15,8 +15,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `MinusVigo — ${SITE_TAGLINE.split(',')[0]}`,
-    template: '%s · MinusVigo',
+    default: `Aparkeo Vigo — ${SITE_TAGLINE.split(',')[0]}`,
+    template: '%s · Aparkeo',
   },
   description: SITE_DESCRIPTION,
   keywords: [
@@ -28,29 +28,29 @@ export const metadata: Metadata = {
     'movilidad reducida',
     'discapacidad Vigo',
   ],
-  authors: [{ name: 'MinusVigo' }],
+  authors: [{ name: 'Aparkeo' }],
   robots: { index: true, follow: true },
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'es_ES',
     url: SITE_URL,
-    siteName: 'MinusVigo',
-    title: `MinusVigo — ${SITE_TAGLINE}`,
+    siteName: 'Aparkeo Vigo',
+    title: `Aparkeo Vigo — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     // Las imágenes (PNG 1200×630) las generan app/opengraph-image.tsx y
     // app/twitter-image.tsx por convención de archivos de Next.
   },
   twitter: {
     card: 'summary_large_image',
-    title: `MinusVigo — ${SITE_TAGLINE}`,
+    title: `Aparkeo Vigo — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MinusVigo',
+    title: 'Aparkeo',
   },
   icons: {
     icon: { url: '/icon.svg', type: 'image/svg+xml' },

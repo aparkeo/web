@@ -1,4 +1,4 @@
-# QA con lector de pantalla (NVDA) — MinusVigo
+# QA con lector de pantalla (NVDA) — Aparkeo
 
 Checklist manual para validar la accesibilidad real de los flujos principales tras la
 auditoría a11y (roadmap nº20). Duración estimada: **30–45 minutos**.
@@ -54,7 +54,7 @@ que no se anuncie, y cualquier foco perdido o atrapado.
 
 | # | Paso | Resultado esperado | ✅/❌ |
 |---|---|---|---|
-| 2.1 | Entra a `/map` | NVDA anuncia el título «Mapa de plazas PMR · MinusVigo» | |
+| 2.1 | Entra a `/map` | NVDA anuncia el título «Mapa de plazas PMR · Aparkeo» | |
 | 2.2 | Espera a que carguen las plazas | Una región `aria-live` anuncia el número de plazas cargadas | |
 | 2.3 | `Tab` hasta el mapa | El contenedor es enfocable (tecla `keyboard` de Leaflet activa) | |
 | 2.4 | Sigue con `Tab` sobre los marcadores | Cada marcador se anuncia: «Plaza PMR en {calle} — {estado}, botón» | |
@@ -81,7 +81,7 @@ que no se anuncie, y cualquier foco perdido o atrapado.
 
 | # | Paso | Resultado esperado | ✅/❌ |
 |---|---|---|---|
-| 4.1 | Abre una plaza desde el mapa | Título anunciado: «Plaza PMR en {calle} · MinusVigo» | |
+| 4.1 | Abre una plaza desde el mapa | Título anunciado: «Plaza PMR en {calle} · Aparkeo» | |
 | 4.2 | Botón de favorito | Nombre + estado («marcar/quitar favorito») | |
 | 4.3 | Botón compartir | Se anuncia con nombre; al activarlo en desktop, toast «Enlace copiado» anunciado | |
 | 4.4 | Galería de fotos | Cada foto tiene `alt` con la calle; el lightbox atrapa foco y `Escape` lo cierra | |

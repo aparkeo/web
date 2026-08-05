@@ -6,7 +6,7 @@ import { SITE_GITHUB_URL } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Privacidad',
   description:
-    'Política de privacidad de MinusVigo: qué datos recogemos, para qué, qué base jurídica nos ampara y cómo ejercer tus derechos RGPD (acceso, rectificación, supresión, portabilidad y oposición).',
+    'Política de privacidad de Aparkeo: qué datos recogemos, para qué, qué base jurídica nos ampara y cómo ejercer tus derechos RGPD (acceso, rectificación, supresión, portabilidad y oposición).',
   alternates: { canonical: '/privacy' },
 };
 
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
       <header className="home-fade-up space-y-3">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Privacidad</h1>
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          MinusVigo es un proyecto comunitario y sin ánimo de lucro. Esta página explica, en llano, qué
+          Aparkeo es un proyecto comunitario y sin ánimo de lucro. Esta página explica, en llano, qué
           datos recoge la aplicación, para qué los usa y cómo puedes ejercer tus derechos. Última
           actualización: {LAST_UPDATED}.
         </p>
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
       <Section kicker="Responsable" title="Quién está detrás">
         <p>
           El responsable del tratamiento es <strong className="text-foreground">el mantenedor del proyecto
-          MinusVigo</strong>, un proyecto comunitario independiente (no hay empresa ni entidad legal detrás).
+          Aparkeo</strong>, un proyecto comunitario independiente (no hay empresa ni entidad legal detrás).
         </p>
         <p>
           Para cualquier cuestión de privacidad puedes contactar a través del repositorio público del
@@ -187,7 +187,7 @@ export default function PrivacyPage() {
 
       <Section kicker="Cookies" title="Almacenamiento técnico y cookies">
         <p>
-          MinusVigo <strong className="text-foreground">no usa cookies de terceros ni de publicidad</strong>.
+          Aparkeo <strong className="text-foreground">no usa cookies de terceros ni de publicidad</strong>.
           Solo utiliza almacenamiento técnico estrictamente necesario:
         </p>
         <ul className="list-disc space-y-2 pl-5">

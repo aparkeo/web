@@ -4,7 +4,7 @@ import { isFreeTransition } from '@/lib/notifications';
 import type { ParkingSpot, Prediction, Confidence, SpotStatus } from '@prisma/client';
 
 /**
- * Módulo de predicción de MinusVigo Web.
+ * Módulo de predicción de Aparkeo Web.
  *
  * Dos señales se combinan:
  *  1. "Live" — consenso en tiempo real de los últimos 15 min de Report

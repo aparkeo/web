@@ -10,7 +10,7 @@ const secondaryLinkClass =
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'MinusVigo',
+  name: 'Aparkeo Vigo',
   url: SITE_URL,
   description: SITE_DESCRIPTION,
   applicationCategory: 'UtilitiesApplication',
@@ -40,7 +40,7 @@ export default function HomePage() {
           <BestSpotCard />
         </div>
 
-        <nav aria-label="Explorar MinusVigo" className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <nav aria-label="Explorar Aparkeo Vigo" className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link href="/map" className={secondaryLinkClass}>
             <Map className="h-4 w-4 text-primary" />
             Ver mapa completo

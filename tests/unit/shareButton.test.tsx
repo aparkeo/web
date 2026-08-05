@@ -24,13 +24,13 @@ describe('ShareButton', () => {
     const share = vi.fn().mockResolvedValue(undefined);
     setNavigatorProp('share', share);
 
-    render(<ShareButton title="Plaza PMR en Gran Vía | MinusVigo" text="Plaza PMR en Gran Vía — mira si está libre en MinusVigo" url="https://minusvigo-web.vercel.app/spots/7" />);
+    render(<ShareButton title="Plaza PMR en Gran Vía | Aparkeo Vigo" text="Plaza PMR en Gran Vía — mira si está libre en Aparkeo Vigo" url="https://minusvigo-web.vercel.app/spots/7" />);
     fireEvent.click(screen.getByRole('button', { name: 'Compartir' }));
 
     await waitFor(() => {
       expect(share).toHaveBeenCalledWith({
-        title: 'Plaza PMR en Gran Vía | MinusVigo',
-        text: 'Plaza PMR en Gran Vía — mira si está libre en MinusVigo',
+        title: 'Plaza PMR en Gran Vía | Aparkeo Vigo',
+        text: 'Plaza PMR en Gran Vía — mira si está libre en Aparkeo Vigo',
         url: 'https://minusvigo-web.vercel.app/spots/7',
       });
     });

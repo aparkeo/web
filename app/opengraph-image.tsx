@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 // Tarjeta OG de marca (1200×630): la primera impresión al pegar el enlace en
 // WhatsApp, X o Telegram. SVG no vale: esas plataformas exigen PNG/JPG.
 export const runtime = 'edge';
-export const alt = 'MinusVigo — Plazas PMR libres en Vigo, en tiempo real';
+export const alt = 'Aparkeo Vigo — Plazas PMR en vivo';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -37,14 +37,14 @@ export default function OpenGraphImage() {
               color: '#0D776B',
             }}
           >
-            M
+            A
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 100, fontWeight: 800, color: '#FFFFFF', letterSpacing: -3, lineHeight: 1 }}>
-              MinusVigo
+              Aparkeo
             </div>
             <div style={{ fontSize: 42, fontWeight: 600, color: '#CFF2EA', marginTop: 16 }}>
-              Plazas PMR libres en Vigo, en tiempo real
+              Plazas PMR en vivo · Vigo
             </div>
           </div>
         </div>

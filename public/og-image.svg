@@ -2,8 +2,8 @@
   <rect width="1200" height="630" fill="#F2FBF8"/>
   <rect x="80" y="240" width="150" height="150" rx="32" fill="#0D776B"/>
   <path d="M155 262c-19.4 0-35 15.4-35 34.4 0 26.8 35 59.1 35 59.1s35-32.3 35-59.1c0-19-15.6-34.4-35-34.4z" fill="#F2FBF8"/>
-  <text x="155" y="322" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="52" font-weight="800" fill="#0D776B" text-anchor="middle">M</text>
-  <text x="270" y="330" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="88" font-weight="800" fill="#0D3530">MinusVigo</text>
-  <text x="270" y="395" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="600" fill="#475569">Plazas PMR libres en Vigo, en tiempo real</text>
+  <text x="155" y="322" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="52" font-weight="800" fill="#0D776B" text-anchor="middle">A</text>
+  <text x="270" y="330" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="88" font-weight="800" fill="#0D3530">Aparkeo</text>
+  <text x="270" y="395" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="600" fill="#475569">Plazas PMR en vivo · Vigo</text>
   <text x="270" y="450" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="28" fill="#475569">Mapa · Predicciones · Reportes de la comunidad</text>
 </svg>

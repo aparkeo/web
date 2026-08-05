@@ -7,7 +7,7 @@ import { SPONSORS, SUPPORT_KOFI_URL, SUPPORT_PAYPAL_URL } from '@/lib/support';
 export const metadata: Metadata = {
   title: 'Apoya el proyecto',
   description:
-    'MinusVigo es un proyecto comunitario y gratuito. Las donaciones y el patrocinio local cubren el servidor, la base de datos, el dominio y el tiempo de desarrollo. El mapa y los reportes serán siempre gratuitos.',
+    'Aparkeo es un proyecto comunitario y gratuito. Las donaciones y el patrocinio local cubren el servidor, la base de datos, el dominio y el tiempo de desarrollo. El mapa y los reportes serán siempre gratuitos.',
   alternates: { canonical: '/apoyo' },
 };
 
@@ -22,10 +22,10 @@ export default function ApoyoPage() {
           Proyecto comunitario
         </p>
         <h1 className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Apoya MinusVigo
+          Apoya Aparkeo
         </h1>
         <p className="mx-auto max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-          MinusVigo nació para responder a una pregunta sencilla: ¿dónde hay una plaza PMR libre en
+          Aparkeo nació para responder a una pregunta sencilla: ¿dónde hay una plaza PMR libre en
           Vigo, ahora mismo? Lo mantiene una sola persona con la ayuda de la comunidad que reporta,
           sin ánimo de lucro en el núcleo del proyecto.
         </p>
@@ -117,7 +117,7 @@ export default function ApoyoPage() {
         <Heart className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
         <span>
           El mapa y los reportes serán siempre gratuitos. Apoyar es voluntario y no desbloquea ni
-          bloquea ninguna función: es solo una forma de ayudar a que MinusVigo siga existiendo.
+          bloquea ninguna función: es solo una forma de ayudar a que Aparkeo siga existiendo.
         </span>
       </p>
     </div>

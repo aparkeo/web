@@ -11,7 +11,7 @@ export default function AdminExportPage() {
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Administración</p>
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Exportar datos</h1>
         <p className="mt-3 max-w-lg text-pretty leading-relaxed text-muted-foreground">
-          Descarga los datos de MinusVigo en formato CSV para análisis externos.
+          Descarga los datos de Aparkeo en formato CSV para análisis externos.
         </p>
       </header>
       <div className="grid gap-4 sm:grid-cols-2">

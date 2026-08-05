@@ -3,7 +3,7 @@
 > **Estado: DESPLEGADO** — https://minusvigo-web.vercel.app
 > Verificado en producción: home, /map, /login y /api/spots (843 plazas desde Supabase).
 
-Guía para publicar MinusVigo Web en producción. Todo está preparado;
+Guía para publicar Aparkeo Web en producción. Todo está preparado;
 solo falta la autenticación (interactiva, la hace el propietario).
 
 ## Prerrequisitos ya resueltos

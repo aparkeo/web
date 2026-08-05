@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     alternates: { canonical: `/spots/${spot.id}` },
     openGraph: {
-      title: `${title} | MinusVigo`,
+      title: `${title} | Aparkeo Vigo`,
       description,
     },
   };

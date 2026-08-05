@@ -1,6 +1,6 @@
 /**
  * Configuración de apoyo al proyecto (Fase 1 de monetización: donaciones +
- * patrocinio local). El núcleo de MinusVigo —mapa y reportes— sigue siendo
+ * patrocinio local). El núcleo de Aparkeo —mapa y reportes— sigue siendo
  * comunitario y gratuito; esta fase solo financia costes (servidor, base de
  * datos, dominio, tiempo de desarrollo).
  *

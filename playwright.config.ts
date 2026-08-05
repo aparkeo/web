@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
 /**
- * Configuración E2E de MinusVigo Web.
+ * Configuración E2E de Aparkeo Web.
  *
  * Variables de entorno:
  *  - E2E_BASE_URL   URL contra la que correr (default http://localhost:3000).

@@ -2,7 +2,7 @@
   "name": "minusvigo-web",
   "version": "0.1.0",
   "private": true,
-  "description": "MinusVigo Web — plataforma web para encontrar plazas PMR en Vigo. Proyecto independiente de la app móvil.",
+  "description": "Aparkeo Web — plataforma web para encontrar plazas PMR en Vigo. Proyecto independiente de la app móvil.",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

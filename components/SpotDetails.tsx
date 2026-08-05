@@ -54,8 +54,8 @@ export function SpotDetails({ spotId }: { spotId: number }) {
             <CardTitle className="text-2xl font-extrabold tracking-tight">{spot.street}</CardTitle>
             <div className="flex items-center">
               <ShareButton
-                title={`Plaza PMR en ${spot.street} | MinusVigo`}
-                text={`Plaza PMR en ${spot.street} — mira si está libre en MinusVigo`}
+                title={`Plaza PMR en ${spot.street} | Aparkeo Vigo`}
+                text={`Plaza PMR en ${spot.street} — mira si está libre en Aparkeo Vigo`}
               />
               <Button
                 variant="ghost"

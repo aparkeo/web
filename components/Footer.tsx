@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border">
       <div className="container flex flex-col items-center justify-between gap-3 py-6 text-sm text-muted-foreground sm:flex-row">
-        <p>MinusVigo · Proyecto comunitario</p>
+        <p>Aparkeo · Proyecto comunitario</p>
         <nav className="flex items-center gap-5" aria-label="Enlaces de pie de página">
           <Link href="/privacy" className="transition-colors hover:text-foreground">
             Privacidad

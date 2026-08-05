@@ -39,9 +39,9 @@ export default function LoginPage() {
       <div className="container flex min-h-[80vh] max-w-md items-center py-8">
         <Card className="home-fade-up w-full rounded-2xl shadow-elevated">
           <CardHeader className="gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">MinusVigo</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Aparkeo</p>
             <CardTitle className="text-2xl font-extrabold tracking-tight">Entrar</CardTitle>
-            <CardDescription>Accede a tu cuenta de MinusVigo</CardDescription>
+            <CardDescription>Accede a tu cuenta de Aparkeo</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

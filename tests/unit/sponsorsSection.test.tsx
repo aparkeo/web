@@ -11,7 +11,7 @@ describe('SponsorsSection', () => {
 
     const cta = screen.getByRole('link', { name: /quiero patrocinar/i });
     expect(cta).toHaveAttribute('href', expect.stringMatching(/^mailto:/));
-    expect(cta.getAttribute('href')).toContain(encodeURIComponent('Patrocinio de MinusVigo'));
+    expect(cta.getAttribute('href')).toContain(encodeURIComponent('Patrocinio de Aparkeo'));
   });
 
   it('con patrocinadores los muestra en grid con enlaces seguros', () => {

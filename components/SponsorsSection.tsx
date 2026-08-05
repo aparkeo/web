@@ -2,7 +2,7 @@ import { Store, Mail } from 'lucide-react';
 import { SUPPORT_CONTACT_EMAIL, type Sponsor } from '@/lib/support';
 
 const sponsorMailto = `mailto:${SUPPORT_CONTACT_EMAIL}?subject=${encodeURIComponent(
-  'Patrocinio de MinusVigo',
+  'Patrocinio de Aparkeo',
 )}`;
 
 /**

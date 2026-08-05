@@ -38,9 +38,9 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-            M
+            A
           </span>
-          MinusVigo
+          Aparkeo
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

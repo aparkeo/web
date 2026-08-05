@@ -24,7 +24,7 @@ async function main() {
     update: {},
     create: {
       email: 'admin@minusvigo.dev',
-      name: 'Admin MinusVigo',
+      name: 'Admin Aparkeo',
       role: 'ADMIN',
       password: hashedPassword,
     },

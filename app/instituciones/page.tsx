@@ -14,14 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SUPPORT_CONTACT_EMAIL } from '@/lib/support';
 
 export const metadata: Metadata = {
-  title: 'MinusVigo para instituciones',
+  title: 'Aparkeo Vigo para instituciones',
   description:
     'Datos de movilidad PMR en tiempo real, generados por la ciudadanía, al servicio de ayuntamientos, diputaciones y entidades del tercer sector. Piloto gratuito con el Concello de Vigo: la plataforma ya está construida y operativa.',
   alternates: { canonical: '/instituciones' },
 };
 
 const contactMailto = `mailto:${SUPPORT_CONTACT_EMAIL}?subject=${encodeURIComponent(
-  'Colaboración institucional — MinusVigo',
+  'Colaboración institucional — Aparkeo Vigo',
 )}`;
 
 const ctaButtonClass =
@@ -89,7 +89,7 @@ export default function InstitucionesPage() {
           Datos de movilidad PMR en tiempo real, al servicio de las administraciones
         </h1>
         <p className="mx-auto max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-          MinusVigo convierte la participación ciudadana en información operativa sobre las plazas de
+          Aparkeo Vigo convierte la participación ciudadana en información operativa sobre las plazas de
           aparcamiento para personas con movilidad reducida. Una plataforma ya construida y operativa,
           lista para pilotar con ayuntamientos, diputaciones y entidades del tercer sector.
         </p>
@@ -139,7 +139,7 @@ export default function InstitucionesPage() {
             real, participación ciudadana y datos para decidir mejor.
           </p>
           <p>
-            La diferencia de MinusVigo es que{' '}
+            La diferencia de Aparkeo Vigo es que{' '}
             <strong className="text-foreground">la plataforma ya está construida y operativa</strong>
             . No hay que presupuestar un desarrollo ni esperar meses de ejecución: el riesgo técnico
             del piloto es cero, y cada euro de una eventual colaboración va a operación y mejora, no

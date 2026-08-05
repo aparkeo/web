@@ -65,7 +65,7 @@ export async function GET() {
 
   const payload = {
     exportedAt: new Date().toISOString(),
-    servicio: 'MinusVigo (minusvigo-web)',
+    servicio: 'Aparkeo (minusvigo-web)',
     perfil: {
       id: user.id,
       nombre: user.name,

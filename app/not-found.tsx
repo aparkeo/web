@@ -15,7 +15,7 @@ export default function NotFound() {
             Página no encontrada
           </h1>
           <p className="mt-3 max-w-md text-pretty leading-relaxed text-muted-foreground">
-            La plaza o página que buscas no existe en MinusVigo. Puede que el enlace esté roto o que la plaza se
+            La plaza o página que buscas no existe en Aparkeo. Puede que el enlace esté roto o que la plaza se
             haya dado de baja.
           </p>
           <Button asChild size="lg" className="btn-cta mt-8 rounded-full px-6">

@@ -20,8 +20,8 @@ export default function AnalyticsPage() {
           </div>
           <ShareButton
             label="Compartir"
-            title="Analítica PMR de Vigo | MinusVigo"
-            text="Mira cómo respira el aparcamiento PMR en Vigo: horas punta, zonas y tendencias en MinusVigo"
+            title="Analítica PMR de Vigo | Aparkeo Vigo"
+            text="Mira cómo respira el aparcamiento PMR en Vigo: horas punta, zonas y tendencias en Aparkeo Vigo"
           />
         </div>
         <p className="mt-3 max-w-lg text-pretty leading-relaxed text-muted-foreground">

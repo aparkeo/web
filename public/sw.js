@@ -1,5 +1,5 @@
 /* ==========================================================================
- * MinusVigo — Service Worker (sin librerías)
+ * Aparkeo — Service Worker (sin librerías)
  *
  * Objetivo: que la app siga siendo útil SIN COBERTURA en la calle:
  *   - El app shell y las páginas visitadas cargan offline.
@@ -195,7 +195,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     (async () => {
       // Fallback defensivo por si el payload no es JSON válido.
-      let data = { title: 'MinusVigo', body: '', url: '/', tag: undefined };
+      let data = { title: 'Aparkeo', body: '', url: '/', tag: undefined };
       try {
         if (event.data) {
           const parsed = event.data.json();
