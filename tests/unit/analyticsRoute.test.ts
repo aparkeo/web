@@ -41,7 +41,11 @@ describe('GET /api/analytics', () => {
       .mockResolvedValueOnce([{ hour: 10, free: 3, occupied: 5 }]) // hourly
       .mockResolvedValueOnce([{ dow: 3, free: 3, occupied: 5 }]) // weekday
       .mockResolvedValueOnce([{ day: '2026-08-04', free: 3, occupied: 5 }]) // daily
-      .mockResolvedValueOnce([{ id: 1, street: 'Gran Vía', reports: 8, free: 3, occupied: 5 }]); // top
+      .mockResolvedValueOnce([{ id: 1, street: 'Gran Vía', reports: 8, free: 3, occupied: 5 }]) // top
+      .mockResolvedValueOnce([
+        { source: 'cartel', visits: 12 },
+        { source: 'instagram', visits: 7 },
+      ]); // canales UTM
 
     const res = await GET(req());
     expect(res.status).toBe(200);
@@ -62,6 +66,11 @@ describe('GET /api/analytics', () => {
     expect(body.daily).toHaveLength(30);
     expect(body.streets[0]).toMatchObject({ street: 'Gran Vía', reports: 8, occupiedPct: 63 });
     expect(body.topSpots[0]).toMatchObject({ id: 1, occupiedPct: 63 });
+    expect(body.channels).toEqual([
+      { source: 'cartel', visits: 12 },
+      { source: 'instagram', visits: 7 },
+    ]);
+    expect(body.trackedVisits).toBe(19);
     expect(body.hasData).toBe(true);
 
     // La respuesta no debe contener ningún userId
@@ -83,6 +92,8 @@ describe('GET /api/analytics', () => {
     expect(body.daily.every((d: { total: number }) => d.total === 0)).toBe(true);
     expect(body.streets).toEqual([]);
     expect(body.topSpots).toEqual([]);
+    expect(body.channels).toEqual([]);
+    expect(body.trackedVisits).toBe(0);
   });
 
   it('valida el parámetro days (zod): 400 si no es un entero en rango', async () => {
@@ -103,9 +114,20 @@ describe('GET /api/analytics', () => {
 
   it('la agregación pesada va a la DB con $queryRaw (no carga reports a memoria)', async () => {
     await GET(req());
-    // 5 consultas agregadas: streets, hourly, weekday, daily, top spots
-    expect(queryRaw).toHaveBeenCalledTimes(5);
+    // 6 consultas agregadas: streets, hourly, weekday, daily, top spots, canales UTM
+    expect(queryRaw).toHaveBeenCalledTimes(6);
     const sql = String(queryRaw.mock.calls[0][0].values !== undefined ? queryRaw.mock.calls[0][0] : '');
+    expect(sql).toContain('GROUP BY');
+  });
+
+  it('la agregación de canales agrupa por metadata->>\'source\' sobre events en la ventana', async () => {
+    await GET(req());
+    const channelCall = queryRaw.mock.calls[5][0];
+    const sql = Array.isArray(channelCall?.strings)
+      ? channelCall.strings.join('?')
+      : String(channelCall);
+    expect(sql).toContain("metadata->>'source'");
+    expect(sql).toContain('utm_visit');
     expect(sql).toContain('GROUP BY');
   });
 });

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, BarChart3, Clock3, MapPin, TrendingUp, Users } from 'lucide-react';
+import { Activity, BarChart3, Clock3, MapPin, QrCode, TrendingUp, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CityAnalytics } from '@/lib/analytics';
@@ -92,6 +92,7 @@ export function AnalyticsDashboard() {
     { label: `Reportes (${data.windowDays} días)`, value: data.daily.reduce((a, d) => a + d.total, 0), icon: BarChart3 },
     { label: 'Reportes (7 días)', value: kpis.reportsLast7d, icon: Clock3 },
     { label: 'Personas que han reportado', value: kpis.reporters, icon: Users },
+    { label: `Visitas con QR/enlace (${data.windowDays} días)`, value: data.trackedVisits, icon: QrCode },
   ];
 
   return (
@@ -246,6 +247,54 @@ export function AnalyticsDashboard() {
           </Card>
         </>
       )}
+
+      {/* Visitas por canal (UTM) — independiente de los reportes: se muestra
+          aunque aún no haya datos de actividad, porque mide la difusión. */}
+      <Card className="rounded-2xl shadow-elevated">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 tracking-tight">
+            <QrCode className="h-5 w-5 text-primary" aria-hidden /> Visitas por canal
+          </CardTitle>
+          <CardDescription>
+            Visitas llegadas por QR o enlace con UTM en los últimos {data.windowDays} días.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {data.channels.length === 0 ? (
+            <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border p-6 text-center">
+              <QrCode className="h-6 w-6 text-muted-foreground" aria-hidden />
+              <p className="text-sm font-medium">Aún no hay visitas medidas por canal</p>
+              <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">
+                En cuanto circulen los QRs y enlaces de difusión, verás aquí qué canales traen visitas.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-4">
+              {data.channels.map((c) => {
+                const max = data.channels[0].visits;
+                const pct = max > 0 ? Math.max(2, Math.round((c.visits / max) * 100)) : 0;
+                return (
+                  <li key={c.source}>
+                    <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
+                      <span className="truncate font-semibold">{c.source}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {c.visits} {c.visits === 1 ? 'visita' : 'visitas'}
+                      </span>
+                    </div>
+                    <div
+                      className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
+                      role="img"
+                      aria-label={`${c.source}: ${c.visits} ${c.visits === 1 ? 'visita' : 'visitas'} en los últimos ${data.windowDays} días`}
+                    >
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
         Datos agregados y anónimos de los últimos {data.windowDays} días (los KPIs de «ahora» reflejan el estado

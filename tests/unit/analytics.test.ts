@@ -5,6 +5,7 @@ import {
   ANALYTICS_MIN_DAYS,
   UNASSIGNED_KEY,
   UNASSIGNED_LABEL,
+  buildChannelAggregates,
   buildDailyTrend,
   buildHourlyBuckets,
   buildStreetAggregates,
@@ -134,5 +135,33 @@ describe('buildTopSpots', () => {
     ]);
     expect(top[0]).toEqual({ id: 7, street: 'Gran Vía', reports: 9, occupiedPct: 33 });
     expect(top[1]).toEqual({ id: 8, street: UNASSIGNED_LABEL, reports: 5, occupiedPct: 100 });
+  });
+});
+
+describe('buildChannelAggregates', () => {
+  it('ordena por visitas desc con desempate alfabético y recorta la fuente', () => {
+    const channels = buildChannelAggregates([
+      { source: 'instagram', visits: 7 },
+      { source: 'cartel', visits: 12 },
+      { source: 'whatsapp', visits: 7 },
+    ]);
+    expect(channels).toEqual([
+      { source: 'cartel', visits: 12 },
+      { source: 'instagram', visits: 7 },
+      { source: 'whatsapp', visits: 7 },
+    ]);
+  });
+
+  it('descarta fuentes nulas o vacías (metadata malformada)', () => {
+    const channels = buildChannelAggregates([
+      { source: null, visits: 5 },
+      { source: '  ', visits: 3 },
+      { source: 'telegram', visits: 2 },
+    ]);
+    expect(channels).toEqual([{ source: 'telegram', visits: 2 }]);
+  });
+
+  it('estado vacío: sin filas devuelve lista vacía', () => {
+    expect(buildChannelAggregates([])).toEqual([]);
   });
 });

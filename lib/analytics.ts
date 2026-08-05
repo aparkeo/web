@@ -81,6 +81,12 @@ export interface TopSpot {
   occupiedPct: number;
 }
 
+/** Visitas con UTM de un canal (utm_source) en la ventana temporal. */
+export interface ChannelAggregate {
+  source: string;
+  visits: number;
+}
+
 export interface CityAnalytics {
   windowDays: number;
   generatedAt: string;
@@ -90,6 +96,10 @@ export interface CityAnalytics {
   daily: DailyBucket[];
   streets: StreetAggregate[];
   topSpots: TopSpot[];
+  /** Visitas medidas por canal UTM (difusión con QRs/enlaces), ventana actual. */
+  channels: ChannelAggregate[];
+  /** Total de visitas con UTM en la ventana (suma de channels). */
+  trackedVisits: number;
   /** Reportes en la ventana temporal; false → la UI muestra estados vacíos. */
   hasData: boolean;
 }
@@ -194,6 +204,18 @@ export function buildTopSpots(rows: { id: number; street: string; reports: numbe
   }));
 }
 
+/**
+ * Normaliza las filas de visitas por canal: descarta fuentes vacías/nulas
+ * (metadata malformada) y ordena por visitas desc, con desempate alfabético
+ * estable para que el panel no "baile" entre cargas.
+ */
+export function buildChannelAggregates(rows: { source: string | null; visits: number }[]): ChannelAggregate[] {
+  return rows
+    .filter((r): r is { source: string; visits: number } => typeof r.source === 'string' && r.source.trim() !== '')
+    .map((r) => ({ source: r.source.trim(), visits: r.visits }))
+    .sort((a, b) => b.visits - a.visits || a.source.localeCompare(b.source));
+}
+
 // ---------------------------------------------------------------------------
 // Consultas (todo el GROUP BY ocurre en Postgres)
 // ---------------------------------------------------------------------------
@@ -231,6 +253,11 @@ interface TopSpotRow {
   occupied: number;
 }
 
+interface ChannelRow {
+  source: string | null;
+  visits: number;
+}
+
 /**
  * Agregados de ciudad para el panel público. Solo devuelve números ya
  * agregados: nunca userIds ni trazas individuales (privacidad por diseño).
@@ -253,6 +280,7 @@ export async function getCityAnalytics(days: number = ANALYTICS_DEFAULT_DAYS): P
     dowRows,
     dayRows,
     topSpotRows,
+    channelRows,
   ] = await Promise.all([
     prisma.parkingSpot.count(),
     prisma.parkingSpot.count({ where: { status: 'FREE' } }),
@@ -325,10 +353,25 @@ export async function getCityAnalytics(days: number = ANALYTICS_DEFAULT_DAYS): P
       ORDER BY reports DESC
       LIMIT 10
     `,
+    // Visitas por canal UTM (difusión con QRs/enlaces): GROUP BY sobre el
+    // JSONB directamente en Postgres, sin cargar eventos a memoria. Solo el
+    // utm_source (el canal); el source es siempre válido por la validación
+    // de /api/track, pero se defiende el NOT NULL por si hubiera filas
+    // manuales. Sin userIds ni trazas individuales: solo el contador.
+    prisma.$queryRaw<ChannelRow[]>`
+      SELECT
+        metadata->>'source' AS source,
+        COUNT(*)::int AS visits
+      FROM events
+      WHERE type = 'utm_visit' AND "createdAt" >= ${since}
+      GROUP BY 1
+      ORDER BY visits DESC
+    `,
   ]);
 
   const daily = buildDailyTrend(dayRows, windowDays, now);
   const windowReports = daily.reduce((acc, d) => acc + d.total, 0);
+  const channels = buildChannelAggregates(channelRows);
 
   return {
     windowDays,
@@ -347,6 +390,8 @@ export async function getCityAnalytics(days: number = ANALYTICS_DEFAULT_DAYS): P
     daily,
     streets: buildStreetAggregates(streetRows),
     topSpots: buildTopSpots(topSpotRows),
+    channels,
+    trackedVisits: channels.reduce((acc, c) => acc + c.visits, 0),
     hasData: windowReports > 0,
   };
 }
