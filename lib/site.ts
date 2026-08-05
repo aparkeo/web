@@ -5,3 +5,6 @@ export const SITE_NAME = 'MinusVigo';
 export const SITE_TAGLINE = 'Plazas PMR libres en Vigo, en tiempo real';
 export const SITE_DESCRIPTION =
   'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.';
+// Repositorio público del proyecto: vía de contacto con el mantenedor y
+// canal para ejercer derechos RGPD (no hay entidad legal detrás).
+export const SITE_GITHUB_URL = 'https://github.com/adrianalvarezfreire11/minusvigo-web';

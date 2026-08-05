@@ -1,10 +1,14 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { Download } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { SpotCard } from '@/components/SpotCard';
+import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import type { SpotDTO } from '@/types';
 
 export default async function ProfilePage() {
@@ -70,6 +74,42 @@ export default async function ProfilePage() {
           ) : (
             favoriteSpots.map((spot) => <SpotCard key={spot.id} spot={spot} />)
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="home-fade-up home-fade-up-delay rounded-2xl shadow-elevated">
+        <CardHeader>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Privacidad</p>
+          <CardTitle className="tracking-tight">Tus datos</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Puedes descargar una copia de todos tus datos (perfil, reportes, favoritos, comentarios, fotos,
+            notificaciones y avisos) en formato JSON. Más detalles en la{' '}
+            <Link href="/privacy" className="font-semibold text-primary underline-offset-4 hover:underline">
+              política de privacidad
+            </Link>
+            .
+          </p>
+          <Button asChild variant="outline">
+            <a href="/api/user/export">
+              <Download className="mr-2 h-4 w-4" aria-hidden="true" /> Descargar mis datos
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="home-fade-up home-fade-up-delay rounded-2xl border-destructive/40 shadow-elevated">
+        <CardHeader>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-destructive">Zona de peligro</p>
+          <CardTitle className="tracking-tight">Eliminar cuenta</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Eliminar tu cuenta borra de forma irreversible todos tus datos: reportes, favoritos, comentarios,
+            fotos, notificaciones y suscripciones de avisos.
+          </p>
+          <DeleteAccountButton />
         </CardContent>
       </Card>
     </div>

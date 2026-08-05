@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import { SITE_URL, SITE_TAGLINE, SITE_DESCRIPTION } from '@/lib/site';
 import { Providers } from './providers';
 import './globals.css';
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main id="main-content" tabIndex={-1}>
             {children}
           </main>
+          <Footer />
         </Providers>
       </body>
     </html>
