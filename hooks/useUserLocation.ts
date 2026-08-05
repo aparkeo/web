@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useMapStore } from '@/store/useMapStore';
+import { useT } from '@/components/i18n/I18nProvider';
+import type { Dictionary } from '@/lib/i18n';
 
 const HIGH_ACCURACY: PositionOptions = {
   enableHighAccuracy: true,
@@ -16,18 +18,19 @@ const LOW_ACCURACY: PositionOptions = {
   maximumAge: 60_000,
 };
 
-function errorMessage(err: GeolocationPositionError): string {
-  if (err.code === err.PERMISSION_DENIED) return 'Permiso de ubicación denegado.';
-  return 'No se pudo obtener la ubicación.';
+function errorMessage(err: GeolocationPositionError, t: Dictionary): string {
+  if (err.code === err.PERMISSION_DENIED) return t.destination.permissionDenied;
+  return t.destination.locationError;
 }
 
 export function useUserLocation() {
   const setUserLocation = useMapStore((s) => s.setUserLocation);
   const [loading, setLoading] = useState(false);
+  const t = useT();
 
   const locate = useCallback(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      toast.error('Geolocalización no disponible en este dispositivo.');
+      toast.error(t.destination.geolocationUnavailable);
       return;
     }
 
@@ -44,19 +47,19 @@ export function useUserLocation() {
         navigator.geolocation.getCurrentPosition(
           onSuccess,
           (fallbackErr) => {
-            toast.error(errorMessage(fallbackErr));
+            toast.error(errorMessage(fallbackErr, t));
             setLoading(false);
           },
           LOW_ACCURACY,
         );
         return;
       }
-      toast.error(errorMessage(err));
+      toast.error(errorMessage(err, t));
       setLoading(false);
     };
 
     navigator.geolocation.getCurrentPosition(onSuccess, onHighAccuracyError, HIGH_ACCURACY);
-  }, [setUserLocation]);
+  }, [setUserLocation, t]);
 
   return { locate, loading };
 }

@@ -15,6 +15,7 @@ import { useMapStore } from '@/store/useMapStore';
 import { useBaseLayerStore } from '@/store/useBaseLayerStore';
 import { colorForStatus } from '@/lib/utils';
 import { SpotMarker } from '@/components/SpotMarker';
+import { useT } from '@/components/i18n/I18nProvider';
 import type { SpotStatus } from '@/types';
 
 // Icono de cluster: círculo con el color del estado dominante entre sus hijos.
@@ -139,13 +140,14 @@ function InvalidateSizeOnVisible({ visible }: { visible: boolean }) {
 
 function LocateButton() {
   const { locate, loading } = useUserLocation();
+  const t = useT();
 
   return (
     <button
       type="button"
       onClick={locate}
       disabled={loading}
-      aria-label="Mi ubicación"
+      aria-label={t.map.myLocation}
       className="absolute bottom-28 right-3 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background shadow-lg transition-colors hover:bg-secondary disabled:opacity-60"
     >
       {loading ? (
@@ -164,16 +166,17 @@ function LocateButton() {
 function BaseLayerControl() {
   const baseLayer = useBaseLayerStore((s) => s.baseLayer);
   const setBaseLayer = useBaseLayerStore((s) => s.setBaseLayer);
+  const t = useT();
 
   const options = [
-    { value: 'map' as const, label: 'Mapa', ariaLabel: 'Vista de mapa', Icon: MapIcon },
-    { value: 'satellite' as const, label: 'Satélite', ariaLabel: 'Vista satélite', Icon: Satellite },
+    { value: 'map' as const, label: t.map.baseLayerMap, ariaLabel: t.map.baseLayerMapAria, Icon: MapIcon },
+    { value: 'satellite' as const, label: t.map.baseLayerSatellite, ariaLabel: t.map.baseLayerSatelliteAria, Icon: Satellite },
   ];
 
   return (
     <div
       role="group"
-      aria-label="Capa del mapa"
+      aria-label={t.map.baseLayerGroup}
       className="absolute right-3 top-3 z-[1000] flex overflow-hidden rounded-full border border-border bg-background shadow-lg"
     >
       {options.map(({ value, label, ariaLabel, Icon }) => {
@@ -207,6 +210,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
   const selectedSpotId = useMapStore((s) => s.selectedSpotId);
   const setSelectedSpot = useMapStore((s) => s.setSelectedSpot);
   const userLocation = useMapStore((s) => s.userLocation);
+  const t = useT();
 
   const userIcon = useMemo(
     () =>
@@ -229,7 +233,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
         className="h-full w-full"
         zoomControl={false}
         keyboard
-        aria-label="Mapa interactivo de plazas de movilidad reducida en Vigo"
+        aria-label={t.map.fullAria}
       >
         <BaseLayers />
         <ZoomControl position="bottomright" />

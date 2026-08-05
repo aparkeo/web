@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useReportSpot } from '@/hooks/useReportSpot';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 
 interface ReportModalProps {
   spotId: number;
@@ -24,6 +26,7 @@ interface ReportModalProps {
 export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalProps) {
   const { status: sessionStatus } = useSession();
   const reportSpot = useReportSpot();
+  const t = useT();
   const [choice, setChoice] = useState<'FREE' | 'OCCUPIED' | null>(null);
   const [locating, setLocating] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lon: number; accuracyM: number } | null>(null);
@@ -31,7 +34,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
 
   const captureLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setLocError('Geolocalización no disponible en este dispositivo.');
+      setLocError(t.destination.geolocationUnavailable);
       return;
     }
     setLocating(true);
@@ -46,12 +49,12 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
         setLocating(false);
       },
       (err) => {
-        setLocError(err.code === 1 ? 'Permiso de ubicación denegado.' : 'No se pudo obtener la ubicación.');
+        setLocError(err.code === 1 ? t.destination.permissionDenied : t.destination.locationError);
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 },
     );
-  }, []);
+  }, [t]);
 
   const handleSubmit = async () => {
     if (!choice) return;
@@ -79,17 +82,15 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reportar estado de la plaza</DialogTitle>
+          <DialogTitle>{t.reportModal.title}</DialogTitle>
           <DialogDescription>{street}</DialogDescription>
         </DialogHeader>
 
         {sessionStatus !== 'authenticated' ? (
-          <p className="text-sm text-muted-foreground">
-            Necesitas iniciar sesión para reportar el estado de una plaza.
-          </p>
+          <p className="text-sm text-muted-foreground">{t.reportModal.loginRequired}</p>
         ) : (
           <div className="space-y-3 py-2">
-            <div className="grid grid-cols-2 gap-3" role="group" aria-label="Estado actual de la plaza">
+            <div className="grid grid-cols-2 gap-3" role="group" aria-label={t.reportModal.statusGroupAria}>
               <button
                 type="button"
                 onClick={() => setChoice('FREE')}
@@ -99,7 +100,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
                 }`}
               >
                 <CheckCircle2 className="h-7 w-7 text-free" />
-                <span className="font-semibold">Está libre</span>
+                <span className="font-semibold">{t.reportModal.isFree}</span>
               </button>
               <button
                 type="button"
@@ -110,7 +111,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
                 }`}
               >
                 <XCircle className="h-7 w-7 text-destructive" />
-                <span className="font-semibold">Está ocupada</span>
+                <span className="font-semibold">{t.reportModal.isOccupied}</span>
               </button>
             </div>
 
@@ -122,10 +123,10 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
             >
               <MapPin className="h-4 w-4 text-primary" />
               {locating
-                ? 'Obteniendo ubicación…'
+                ? t.reportModal.locating
                 : location
-                  ? `Ubicación capturada (±${Math.round(location.accuracyM)} m)`
-                  : 'Añadir mi ubicación (mejora la fiabilidad)'}
+                  ? fmt(t.reportModal.locationCaptured, { n: Math.round(location.accuracyM) })
+                  : t.reportModal.addLocation}
             </button>
 
             {locError ? <p role="alert" className="text-xs text-destructive">{locError}</p> : null}
@@ -134,7 +135,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
 
         <DialogFooter>
           <Button variant="ghost" type="button" onClick={() => handleClose(false)} className="rounded-xl">
-            Cancelar
+            {t.common.cancel}
           </Button>
           <Button
             type="button"
@@ -142,7 +143,7 @@ export function ReportModal({ spotId, street, open, onOpenChange }: ReportModalP
             disabled={!choice || sessionStatus !== 'authenticated' || reportSpot.isPending}
             className="btn-cta min-h-11 rounded-xl font-bold"
           >
-            {reportSpot.isPending ? 'Enviando…' : 'Enviar reporte'}
+            {reportSpot.isPending ? t.reportModal.sending : t.reportModal.submit}
           </Button>
         </DialogFooter>
       </DialogContent>

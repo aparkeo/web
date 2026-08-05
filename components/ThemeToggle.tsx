@@ -10,16 +10,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-
-const OPTIONS = [
-  { value: 'light', label: 'Claro', icon: Sun },
-  { value: 'dark', label: 'Oscuro', icon: Moon },
-  { value: 'system', label: 'Sistema', icon: Monitor },
-] as const;
+import { useT } from '@/components/i18n/I18nProvider';
 
 export function ThemeToggle() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const t = useT();
 
   useEffect(() => setMounted(true), []);
 
@@ -32,6 +28,12 @@ export function ThemeToggle() {
     );
   }
 
+  const OPTIONS = [
+    { value: 'light', label: t.theme.light, icon: Sun },
+    { value: 'dark', label: t.theme.dark, icon: Moon },
+    { value: 'system', label: t.theme.system, icon: Monitor },
+  ] as const;
+
   const isDark = resolvedTheme === 'dark';
   const CurrentIcon = isDark ? Moon : Sun;
 
@@ -42,7 +44,7 @@ export function ThemeToggle() {
           variant="ghost"
           size="icon"
           className="min-h-11 min-w-11"
-          aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          aria-label={isDark ? t.theme.toLight : t.theme.toDark}
         >
           <CurrentIcon className="h-5 w-5" />
         </Button>

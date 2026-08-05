@@ -7,12 +7,14 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
+import { useT } from '@/components/i18n/I18nProvider';
 import { formatDistance, formatWalkTime } from '@/lib/utils';
 import type { SpotDTO } from '@/types';
 
 export function SpotCard({ spot }: { spot: SpotDTO }) {
   const favoriteToggle = useFavoriteToggle();
-  const walk = spot.distanceM !== undefined ? formatWalkTime(spot.distanceM) : null;
+  const t = useT();
+  const walk = spot.distanceM !== undefined ? formatWalkTime(spot.distanceM, t.time) : null;
 
   return (
     <Card className="card-lift rounded-2xl">
@@ -26,7 +28,7 @@ export function SpotCard({ spot }: { spot: SpotDTO }) {
           </Link>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <StatusBadge status={spot.status} />
-            {spot.confidence === 'CONFIRMED' ? <Badge variant="outline">✓ Confirmada</Badge> : null}
+            {spot.confidence === 'CONFIRMED' ? <Badge variant="outline">{t.status.confirmed}</Badge> : null}
             {spot.distanceM !== undefined ? (
               <span className="text-xs text-muted-foreground">
                 {formatDistance(spot.distanceM)}
@@ -41,7 +43,7 @@ export function SpotCard({ spot }: { spot: SpotDTO }) {
           size="icon"
           type="button"
           onClick={() => favoriteToggle.mutate(spot.id)}
-          aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Añadir a favoritas'}
+          aria-label={spot.isFavorite ? t.map.removeFavorite : t.map.addFavorite}
           className="h-11 w-11 shrink-0 rounded-full transition-colors duration-150"
         >
           {/* amber-600 (3.5:1) en claro / amber-400 en oscuro: yellow-400 no
@@ -55,7 +57,7 @@ export function SpotCard({ spot }: { spot: SpotDTO }) {
           />
         </Button>
 
-        <Button asChild size="icon" aria-label="Cómo llegar" className="h-11 w-11 shrink-0 rounded-full">
+        <Button asChild size="icon" aria-label={t.map.howToGet} className="h-11 w-11 shrink-0 rounded-full">
           <a
             href={`https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=;${spot.lat}%2C${spot.lon}`}
             target="_blank"

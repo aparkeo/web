@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/components/i18n/I18nProvider';
 
 interface MapErrorBoundaryProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface MapErrorBoundaryProps {
 
 export function MapErrorBoundary({ children }: MapErrorBoundaryProps) {
   const [hasError, setHasError] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     const handler = (event: ErrorEvent) => {
@@ -26,9 +28,9 @@ export function MapErrorBoundary({ children }: MapErrorBoundaryProps) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
         <AlertTriangle className="h-10 w-10 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">No se pudo cargar el mapa interactivo.</p>
+        <p className="text-sm text-muted-foreground">{t.map.loadError}</p>
         <Button variant="outline" size="sm" onClick={() => setHasError(false)}>
-          Reintentar
+          {t.common.retry}
         </Button>
       </div>
     );

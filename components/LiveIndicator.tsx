@@ -6,19 +6,22 @@
  * contrario no ocupa espacio ni muestra estados de error (la app sigue
  * funcionando con polling).
  */
+import { useT } from '@/components/i18n/I18nProvider';
+
 export function LiveIndicator({ live }: { live: boolean }) {
+  const t = useT();
   if (!live) return null;
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400"
       role="status"
-      aria-label="Actualización en directo activada"
+      aria-label={t.map.liveAria}
     >
       <span className="relative flex h-2 w-2" aria-hidden="true">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
       </span>
-      En directo
+      {t.map.live}
     </span>
   );
 }

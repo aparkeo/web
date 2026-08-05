@@ -10,6 +10,8 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 import { UtmTracker } from '@/components/UtmTracker';
 import { InstallPromptProvider } from '@/components/InstallPrompt';
 import { OnboardingTourProvider } from '@/components/OnboardingTour';
+import { I18nProvider } from '@/components/i18n/I18nProvider';
+import type { Dictionary, Locale } from '@/lib/i18n';
 
 // Sonner no detecta solo la clase .dark de next-themes: hay que pasarle el tema resuelto.
 function ThemedToaster() {
@@ -17,7 +19,15 @@ function ThemedToaster() {
   return <Toaster position="top-center" richColors theme={resolvedTheme === 'dark' ? 'dark' : 'light'} />;
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  locale,
+  dict,
+  children,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  children: React.ReactNode;
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -26,18 +36,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <InstallPromptProvider>
-            <OnboardingTourProvider>{children}</OnboardingTourProvider>
-          </InstallPromptProvider>
-          <OfflineIndicator />
-          <ServiceWorkerRegistration />
-          <UtmTracker />
-          <ThemedToaster />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <I18nProvider locale={locale} dict={dict}>
+      <SessionProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <InstallPromptProvider>
+              <OnboardingTourProvider>{children}</OnboardingTourProvider>
+            </InstallPromptProvider>
+            <OfflineIndicator />
+            <ServiceWorkerRegistration />
+            <UtmTracker />
+            <ThemedToaster />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </SessionProvider>
+    </I18nProvider>
   );
 }

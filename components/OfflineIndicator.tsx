@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { WifiOff } from 'lucide-react';
+import { useT } from '@/components/i18n/I18nProvider';
 
 /**
  * Banner fijo bajo el navbar (h-16) que avisa cuando el usuario se queda
@@ -10,6 +11,7 @@ import { WifiOff } from 'lucide-react';
  */
 export function OfflineIndicator() {
   const [isOffline, setIsOffline] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
@@ -35,7 +37,7 @@ export function OfflineIndicator() {
     >
       <p className="flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 shadow-sm dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Sin conexión — mostrando los últimos datos guardados
+        {t.map.offline}
       </p>
     </div>
   );

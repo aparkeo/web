@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Activity, BarChart3, Clock3, MapPin, QrCode, TrendingUp, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import type { CityAnalytics } from '@/lib/analytics';
 import { ANALYTICS_COLORS } from '@/components/analyticsColors';
 
@@ -34,12 +36,13 @@ async function fetchAnalytics(): Promise<CityAnalytics> {
 }
 
 function EmptyPanel({ label }: { label: string }) {
+  const t = useT();
   return (
     <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border p-6 text-center">
       <BarChart3 className="h-6 w-6 text-muted-foreground" aria-hidden />
       <p className="text-sm font-medium">{label}</p>
       <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">
-        En cuanto la comunidad empiece a reportar, este panel cobrará vida.
+        {t.analytics.panelComesAlive}
       </p>
     </div>
   );
@@ -52,20 +55,21 @@ export function AnalyticsDashboard() {
     // La API cachea 5 min en CDN; no tiene sentido refetchear más rápido.
     staleTime: 5 * 60_000,
   });
+  const t = useT();
 
   if (isLoading || !data) {
     if (isError) {
       return (
         <Card className="rounded-2xl shadow-elevated">
           <CardContent className="flex min-h-40 flex-col items-center justify-center gap-3 p-8 text-center">
-            <p className="text-sm font-medium">No se pudo cargar la analítica de la ciudad.</p>
+            <p className="text-sm font-medium">{t.analytics.loadError}</p>
             <button
               type="button"
               onClick={() => refetch()}
               disabled={isRefetching}
               className="btn-cta min-h-11 rounded-full px-5 text-sm font-semibold"
             >
-              Reintentar
+              {t.common.retry}
             </button>
           </CardContent>
         </Card>
@@ -86,13 +90,13 @@ export function AnalyticsDashboard() {
 
   const { kpis } = data;
   const kpiCards = [
-    { label: 'Plazas registradas', value: kpis.totalSpots, icon: MapPin },
-    { label: 'Libres ahora', value: kpis.free, icon: Activity },
-    { label: 'Ocupadas ahora', value: kpis.occupied, icon: Activity },
-    { label: `Reportes (${data.windowDays} días)`, value: data.daily.reduce((a, d) => a + d.total, 0), icon: BarChart3 },
-    { label: 'Reportes (7 días)', value: kpis.reportsLast7d, icon: Clock3 },
-    { label: 'Personas que han reportado', value: kpis.reporters, icon: Users },
-    { label: `Visitas con QR/enlace (${data.windowDays} días)`, value: data.trackedVisits, icon: QrCode },
+    { label: t.analytics.kpiSpots, value: kpis.totalSpots, icon: MapPin },
+    { label: t.analytics.kpiFreeNow, value: kpis.free, icon: Activity },
+    { label: t.analytics.kpiOccupiedNow, value: kpis.occupied, icon: Activity },
+    { label: fmt(t.analytics.kpiReportsWindow, { n: data.windowDays }), value: data.daily.reduce((a, d) => a + d.total, 0), icon: BarChart3 },
+    { label: t.analytics.kpiReports7d, value: kpis.reportsLast7d, icon: Clock3 },
+    { label: t.analytics.kpiReporters, value: kpis.reporters, icon: Users },
+    { label: fmt(t.analytics.kpiTrackedVisits, { n: data.windowDays }), value: data.trackedVisits, icon: QrCode },
   ];
 
   return (
@@ -115,8 +119,8 @@ export function AnalyticsDashboard() {
       {/* Estado actual */}
       <Card className="rounded-2xl shadow-elevated">
         <CardHeader>
-          <CardTitle className="tracking-tight">Estado actual de las plazas</CardTitle>
-          <CardDescription>Último consenso conocido de cada plaza, ahora mismo.</CardDescription>
+          <CardTitle className="tracking-tight">{t.analytics.currentStatus}</CardTitle>
+          <CardDescription>{t.analytics.currentStatusDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <CurrentStatusBar free={kpis.free} occupied={kpis.occupied} unknown={kpis.unknown} />
@@ -126,7 +130,7 @@ export function AnalyticsDashboard() {
       {!data.hasData ? (
         <Card className="rounded-2xl shadow-elevated">
           <CardContent className="p-6">
-            <EmptyPanel label={`Aún no hay suficientes datos en los últimos ${data.windowDays} días`} />
+            <EmptyPanel label={fmt(t.analytics.notEnoughData, { n: data.windowDays })} />
           </CardContent>
         </Card>
       ) : (
@@ -135,8 +139,8 @@ export function AnalyticsDashboard() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="rounded-2xl shadow-elevated">
               <CardHeader>
-                <CardTitle className="tracking-tight">Horas punta</CardTitle>
-                <CardDescription>Reportes por hora del día, últimos {data.windowDays} días.</CardDescription>
+                <CardTitle className="tracking-tight">{t.analytics.rushHours}</CardTitle>
+                <CardDescription>{fmt(t.analytics.rushHoursDesc, { n: data.windowDays })}</CardDescription>
               </CardHeader>
               <CardContent className="h-64">
                 <HourlyChart data={data.hourly} />
@@ -144,8 +148,8 @@ export function AnalyticsDashboard() {
             </Card>
             <Card className="rounded-2xl shadow-elevated">
               <CardHeader>
-                <CardTitle className="tracking-tight">Ritmo semanal</CardTitle>
-                <CardDescription>Reportes por día de la semana.</CardDescription>
+                <CardTitle className="tracking-tight">{t.analytics.weeklyRhythm}</CardTitle>
+                <CardDescription>{t.analytics.weeklyRhythmDesc}</CardDescription>
               </CardHeader>
               <CardContent className="h-64">
                 <WeekdayChart data={data.weekdays} />
@@ -157,9 +161,9 @@ export function AnalyticsDashboard() {
           <Card className="rounded-2xl shadow-elevated">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 tracking-tight">
-                <TrendingUp className="h-5 w-5 text-primary" aria-hidden /> Tendencia de actividad
+                <TrendingUp className="h-5 w-5 text-primary" aria-hidden /> {t.analytics.trend}
               </CardTitle>
-              <CardDescription>Reportes por día en los últimos {data.windowDays} días.</CardDescription>
+              <CardDescription>{fmt(t.analytics.trendDesc, { n: data.windowDays })}</CardDescription>
             </CardHeader>
             <CardContent className="h-72">
               <TrendChart data={data.daily} />
@@ -169,15 +173,12 @@ export function AnalyticsDashboard() {
           {/* Ocupación por zonas */}
           <Card className="rounded-2xl shadow-elevated">
             <CardHeader>
-              <CardTitle className="tracking-tight">Ocupación por zonas</CardTitle>
-              <CardDescription>
-                Calles con más actividad en los últimos {data.windowDays} días. El porcentaje indica cuántos
-                reportes fueron de «ocupada».
-              </CardDescription>
+              <CardTitle className="tracking-tight">{t.analytics.byZone}</CardTitle>
+              <CardDescription>{fmt(t.analytics.byZoneDesc, { n: data.windowDays })}</CardDescription>
             </CardHeader>
             <CardContent>
               {data.streets.length === 0 ? (
-                <EmptyPanel label="Aún no hay suficientes datos por zonas" />
+                <EmptyPanel label={t.analytics.notEnoughZones} />
               ) : (
                 <ul className="space-y-4">
                   {data.streets.map((s) => (
@@ -187,18 +188,18 @@ export function AnalyticsDashboard() {
                           {s.street}
                           {s.unassigned ? (
                             <span className="ml-2 align-middle text-xs font-normal text-muted-foreground">
-                              (agrupadas)
+                              {t.analytics.grouped}
                             </span>
                           ) : null}
                         </span>
                         <span className="shrink-0 text-xs text-muted-foreground">
-                          {s.reports} reportes · {s.occupiedPct}% ocupada
+                          {fmt(t.analytics.zoneValue, { reports: s.reports, pct: s.occupiedPct })}
                         </span>
                       </div>
                       <div
                         className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted"
                         role="img"
-                        aria-label={`${s.street}: ${s.occupiedPct}% de reportes de ocupada`}
+                        aria-label={fmt(t.analytics.zoneAria, { street: s.street, pct: s.occupiedPct })}
                       >
                         <div style={{ width: `${100 - s.occupiedPct}%`, backgroundColor: ANALYTICS_COLORS.free }} />
                         <div style={{ width: `${s.occupiedPct}%`, backgroundColor: ANALYTICS_COLORS.occupied }} />
@@ -209,8 +210,7 @@ export function AnalyticsDashboard() {
               )}
               {data.streets.some((s) => s.unassigned) ? (
                 <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                  Las plazas del dataset oficial sin calle asignada se agrupan en un único bloque para no distorsionar
-                  el ranking por calles.
+                  {t.analytics.unassignedNote}
                 </p>
               ) : null}
             </CardContent>
@@ -219,12 +219,12 @@ export function AnalyticsDashboard() {
           {/* Plazas más reportadas */}
           <Card className="rounded-2xl shadow-elevated">
             <CardHeader>
-              <CardTitle className="tracking-tight">Plazas más reportadas</CardTitle>
-              <CardDescription>Top {data.topSpots.length} por actividad de la comunidad.</CardDescription>
+              <CardTitle className="tracking-tight">{t.analytics.topSpots}</CardTitle>
+              <CardDescription>{fmt(t.analytics.topSpotsDesc, { n: data.topSpots.length })}</CardDescription>
             </CardHeader>
             <CardContent>
               {data.topSpots.length === 0 ? (
-                <EmptyPanel label="Aún no hay plazas con reportes suficientes" />
+                <EmptyPanel label={t.analytics.notEnoughTopSpots} />
               ) : (
                 <ol className="divide-y divide-border">
                   {data.topSpots.map((spot, i) => (
@@ -236,7 +236,7 @@ export function AnalyticsDashboard() {
                         <span className="w-6 shrink-0 text-sm font-extrabold text-muted-foreground">{i + 1}</span>
                         <span className="min-w-0 flex-1 truncate text-sm font-semibold">{spot.street}</span>
                         <span className="shrink-0 text-xs text-muted-foreground">
-                          {spot.reports} reportes · {spot.occupiedPct}% ocupada
+                          {fmt(t.analytics.zoneValue, { reports: spot.reports, pct: spot.occupiedPct })}
                         </span>
                       </Link>
                     </li>
@@ -253,19 +253,19 @@ export function AnalyticsDashboard() {
       <Card className="rounded-2xl shadow-elevated">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 tracking-tight">
-            <QrCode className="h-5 w-5 text-primary" aria-hidden /> Visitas por canal
+            <QrCode className="h-5 w-5 text-primary" aria-hidden /> {t.analytics.byChannel}
           </CardTitle>
           <CardDescription>
-            Visitas llegadas por QR o enlace con UTM en los últimos {data.windowDays} días.
+            {fmt(t.analytics.byChannelDesc, { n: data.windowDays })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {data.channels.length === 0 ? (
             <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border p-6 text-center">
               <QrCode className="h-6 w-6 text-muted-foreground" aria-hidden />
-              <p className="text-sm font-medium">Aún no hay visitas medidas por canal</p>
+              <p className="text-sm font-medium">{t.analytics.noChannelVisits}</p>
               <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">
-                En cuanto circulen los QRs y enlaces de difusión, verás aquí qué canales traen visitas.
+                {t.analytics.noChannelVisitsHint}
               </p>
             </div>
           ) : (
@@ -273,18 +273,19 @@ export function AnalyticsDashboard() {
               {data.channels.map((c) => {
                 const max = data.channels[0].visits;
                 const pct = max > 0 ? Math.max(2, Math.round((c.visits / max) * 100)) : 0;
+                const unit = c.visits === 1 ? t.analytics.visitOne : t.analytics.visitMany;
                 return (
                   <li key={c.source}>
                     <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
                       <span className="truncate font-semibold">{c.source}</span>
                       <span className="shrink-0 text-xs text-muted-foreground">
-                        {c.visits} {c.visits === 1 ? 'visita' : 'visitas'}
+                        {c.visits} {unit}
                       </span>
                     </div>
                     <div
                       className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
                       role="img"
-                      aria-label={`${c.source}: ${c.visits} ${c.visits === 1 ? 'visita' : 'visitas'} en los últimos ${data.windowDays} días`}
+                      aria-label={fmt(t.analytics.channelAria, { source: c.source, n: c.visits, unit, days: data.windowDays })}
                     >
                       <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                     </div>
@@ -297,8 +298,7 @@ export function AnalyticsDashboard() {
       </Card>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Datos agregados y anónimos de los últimos {data.windowDays} días (los KPIs de «ahora» reflejan el estado
-        actual). Nunca se publican datos personales ni trazas individuales.
+        {fmt(t.analytics.footerNote, { n: data.windowDays })}
       </p>
     </div>
   );

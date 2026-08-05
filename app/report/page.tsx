@@ -6,21 +6,24 @@ import { SearchBar } from '@/components/SearchBar';
 import { ReportModal } from '@/components/ReportModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSpots } from '@/hooks/useSpots';
-import { labelForStatus, statusTextClass } from '@/lib/utils';
+import { statusTextClass } from '@/lib/utils';
 import { spotsCountAnnouncement } from '@/lib/a11y';
+import { useT } from '@/components/i18n/I18nProvider';
 
 export default function ReportPage() {
   const { data: spots = [], isLoading } = useSpots();
   const [target, setTarget] = useState<{ id: number; street: string } | null>(null);
+  const t = useT();
+
+  const labelFor = (status: 'FREE' | 'OCCUPIED' | 'UNKNOWN') =>
+    status === 'FREE' ? t.status.free : status === 'OCCUPIED' ? t.status.occupied : t.status.unknown;
 
   return (
     <div className="container max-w-xl pb-16 pt-10 sm:pt-14">
       <header className="home-fade-up mb-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Comunidad PMR</p>
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Reportar estado de una plaza</h1>
-        <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
-          Busca la plaza que has visto y dinos si está libre u ocupada. Cada reporte ayuda a toda la comunidad PMR.
-        </p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.reportPage.kicker}</p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t.reportPage.title}</h1>
+        <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">{t.reportPage.subtitle}</p>
       </header>
 
       <div className="home-fade-up home-fade-up-delay">
@@ -29,7 +32,7 @@ export default function ReportPage() {
         <div className="mt-4 space-y-2.5">
           {/* Región live: anuncia cuántas plazas coinciden con la búsqueda */}
           <p className="sr-only" role="status">
-            {isLoading ? '' : spotsCountAnnouncement(spots.length)}
+            {isLoading ? '' : spotsCountAnnouncement(spots.length, t.a11y)}
           </p>
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)
@@ -46,7 +49,7 @@ export default function ReportPage() {
                   <span>
                     <span className="block font-semibold tracking-tight">{spot.street}</span>
                     <span className={`block text-xs ${statusTextClass(spot.status)}`}>
-                      {labelForStatus(spot.status)}
+                      {labelFor(spot.status)}
                     </span>
                   </span>
                   <Flag className="h-4 w-4 text-muted-foreground" aria-hidden="true" />

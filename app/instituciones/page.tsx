@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SUPPORT_CONTACT_EMAIL } from '@/lib/support';
+import { getServerDictionary } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Aparkeo Vigo para instituciones',
@@ -33,77 +34,52 @@ interface Offering {
   body: string;
 }
 
-const OFFERINGS: Offering[] = [
-  {
-    Icon: MapPinned,
-    title: 'Mapa en tiempo real de plazas PMR',
-    body: 'Cada plaza de movilidad reducida del municipio con su estado (libre u ocupada) alimentado por reportes ciudadanos verificados con GPS. Información operativa que hoy ninguna administración tiene sin instalar sensores.',
-  },
-  {
-    Icon: BarChart3,
-    title: 'Datos agregados de ocupación y demanda',
-    body: 'Histórico de reportes convertible en evidencia para la planificación urbana: qué zonas necesitan más plazas PMR, en qué franjas se concentra la presión y dónde conviene actuar primero.',
-  },
-  {
-    Icon: MessagesSquare,
-    title: 'Canal ciudadano verificado',
-    body: 'Reportes con fotos, comentarios y notificaciones push. Participación ciudadana real sobre accesibilidad sin coste de desarrollo, contratación ni mantenimiento para la administración.',
-  },
-  {
-    Icon: ShieldCheck,
-    title: 'Tecnología transparente y auditable',
-    body: 'Código disponible para auditoría institucional, cumplimiento del RGPD por diseño (exportación y borrado de datos en self-service) y despliegue en infraestructura europea. Sin caja negra ni dependencia de proveedor.',
-  },
-];
-
-const STEPS: { title: string; body: string }[] = [
-  {
-    title: 'Piloto gratuito de 6 meses',
-    body: 'Con el Concello de Vigo, sin coste ni compromiso. La plataforma ya funciona hoy: el piloto empieza cuando la institución lo decida, no cuando termine un desarrollo.',
-  },
-  {
-    title: 'Evaluación con datos reales',
-    body: 'Al cierre del piloto, informe de impacto construido sobre los datos agregados de uso y demanda: qué aportó el canal ciudadano y qué zonas concentran la necesidad.',
-  },
-  {
-    title: 'Acuerdo de mantenimiento y extensión',
-    body: 'Si la evaluación es positiva, acuerdo de mantenimiento a coste ajustado y posibilidad de extender la plataforma a otros municipios de la provincia o la comunidad autónoma.',
-  },
-];
-
 /**
  * Landing institucional (B2G/B2B): la página que se enseña a ayuntamientos,
  * diputaciones y entidades del tercer sector para vender la plataforma.
- * Server component estático, sin cifras de tracción inventadas: se habla de
+ * Server component, sin cifras de tracción inventadas: se habla de
  * capacidades de la plataforma, no de estadísticas de uso.
  */
-export default function InstitucionesPage() {
+export default async function InstitucionesPage() {
+  const t = await getServerDictionary();
+
+  const OFFERINGS: Offering[] = [
+    { Icon: MapPinned, title: t.instituciones.offering1Title, body: t.instituciones.offering1Body },
+    { Icon: BarChart3, title: t.instituciones.offering2Title, body: t.instituciones.offering2Body },
+    { Icon: MessagesSquare, title: t.instituciones.offering3Title, body: t.instituciones.offering3Body },
+    { Icon: ShieldCheck, title: t.instituciones.offering4Title, body: t.instituciones.offering4Body },
+  ];
+
+  const STEPS: { title: string; body: string }[] = [
+    { title: t.instituciones.step1Title, body: t.instituciones.step1Body },
+    { title: t.instituciones.step2Title, body: t.instituciones.step2Body },
+    { title: t.instituciones.step3Title, body: t.instituciones.step3Body },
+  ];
+
   return (
     <div className="container max-w-3xl space-y-6 pb-16 pt-10 sm:pt-14">
       <header className="home-fade-up space-y-4 text-center">
         <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary shadow-elevated backdrop-blur-xl">
           <Landmark className="h-3.5 w-3.5" aria-hidden="true" />
-          Para instituciones
+          {t.instituciones.badge}
         </p>
         <h1 className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Datos de movilidad PMR en tiempo real, al servicio de las administraciones
+          {t.instituciones.title}
         </h1>
         <p className="mx-auto max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Aparkeo Vigo convierte la participación ciudadana en información operativa sobre las plazas de
-          aparcamiento para personas con movilidad reducida. Una plataforma ya construida y operativa,
-          lista para pilotar con ayuntamientos, diputaciones y entidades del tercer sector.
+          {t.instituciones.intro}
         </p>
         <p className="pt-1">
           <a href={contactMailto} className={ctaButtonClass}>
             <Mail className="h-4 w-4" aria-hidden="true" />
-            Contactar para colaborar
+            {t.instituciones.contactCta}
           </a>
         </p>
       </header>
 
       <section aria-labelledby="ofrece-heading" className="home-fade-up home-fade-up-delay space-y-4">
         <h2 id="ofrece-heading" className="text-center text-xl font-bold tracking-tight sm:text-2xl">
-          Qué ofrece la plataforma
+          {t.instituciones.offeringsTitle}
         </h2>
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {OFFERINGS.map(({ Icon, title, body }) => (
@@ -126,31 +102,22 @@ export default function InstitucionesPage() {
 
       <Card className="home-fade-up home-fade-up-delay rounded-2xl shadow-elevated">
         <CardHeader>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Contexto</p>
-          <CardTitle className="tracking-tight">Por qué ahora</CardTitle>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.instituciones.contextKicker}</p>
+          <CardTitle className="tracking-tight">{t.instituciones.contextTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+          <p>{t.instituciones.contextBody1}</p>
           <p>
-            La <strong className="text-foreground">Agenda Urbana Española</strong>, los fondos
-            europeos de inclusión y movilidad sostenible —como la{' '}
-            <strong className="text-foreground">European Urban Initiative</strong> y la{' '}
-            <strong className="text-foreground">Nueva Bauhaus Europea</strong>— y los planes de
-            accesibilidad autonómicos financian precisamente este tipo de proyectos: accesibilidad
-            real, participación ciudadana y datos para decidir mejor.
-          </p>
-          <p>
-            La diferencia de Aparkeo Vigo es que{' '}
-            <strong className="text-foreground">la plataforma ya está construida y operativa</strong>
-            . No hay que presupuestar un desarrollo ni esperar meses de ejecución: el riesgo técnico
-            del piloto es cero, y cada euro de una eventual colaboración va a operación y mejora, no
-            a construir lo que ya existe.
+            {t.instituciones.contextBody2a}
+            <strong className="text-foreground">{t.instituciones.contextBody2Strong}</strong>
+            {t.instituciones.contextBody2b}
           </p>
         </CardContent>
       </Card>
 
       <section aria-labelledby="modelo-heading" className="home-fade-up home-fade-up-delay-2 space-y-4">
         <h2 id="modelo-heading" className="text-center text-xl font-bold tracking-tight sm:text-2xl">
-          Modelo de colaboración
+          {t.instituciones.modelTitle}
         </h2>
         <ol className="space-y-4">
           {STEPS.map((step, index) => (
@@ -179,27 +146,26 @@ export default function InstitucionesPage() {
         className="home-fade-up home-fade-up-delay-2 rounded-2xl border border-border/60 bg-card/90 bg-gradient-to-b from-accent/15 via-transparent to-transparent px-6 py-8 text-center shadow-elevated backdrop-blur-xl"
       >
         <h2 id="contacto-heading" className="text-xl font-bold tracking-tight sm:text-2xl">
-          Hablemos de un piloto
+          {t.instituciones.pilotTitle}
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-          Si representas a un ayuntamiento, una diputación o una entidad del tercer sector y quieres
-          explorar una colaboración, escríbenos y preparamos una propuesta concreta.
+          {t.instituciones.pilotBody}
         </p>
         <p className="mt-5">
           <a href={contactMailto} className={ctaButtonClass}>
             <Mail className="h-4 w-4" aria-hidden="true" />
-            Contactar para colaborar
+            {t.instituciones.contactCta}
           </a>
         </p>
         <p className="mt-6 flex items-start justify-center gap-2 text-sm leading-relaxed text-muted-foreground">
           <Heart className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           <span>
-            ¿Eres un particular? También puedes{' '}
+            {t.instituciones.individualPrefix}
             <Link
               href="/apoyo"
               className="font-semibold text-primary underline-offset-4 hover:underline"
             >
-              apoyar el proyecto
+              {t.instituciones.individualLink}
             </Link>
             .
           </span>

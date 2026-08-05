@@ -3,6 +3,7 @@
 import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/components/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 
 interface ShareButtonProps {
@@ -22,6 +23,8 @@ function isAbortError(error: unknown): boolean {
 }
 
 export function ShareButton({ title, text, url, label, className }: ShareButtonProps) {
+  const t = useT();
+
   async function handleShare() {
     const shareUrl = url ?? window.location.href;
 
@@ -32,7 +35,7 @@ export function ShareButton({ title, text, url, label, className }: ShareButtonP
       } catch (error) {
         // AbortError = el usuario cerró la hoja de compartir: no es un fallo.
         if (!isAbortError(error)) {
-          toast.error('No se pudo compartir el enlace');
+          toast.error(t.share.shareError);
         }
       }
       return;
@@ -41,9 +44,9 @@ export function ShareButton({ title, text, url, label, className }: ShareButtonP
     // Escritorio (sin Web Share API): copiar al portapapeles.
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success('Enlace copiado');
+      toast.success(t.share.copied);
     } catch {
-      toast.error('No se pudo copiar el enlace');
+      toast.error(t.share.copyError);
     }
   }
 
@@ -68,7 +71,7 @@ export function ShareButton({ title, text, url, label, className }: ShareButtonP
       size="icon"
       onClick={handleShare}
       className={cn('min-h-11 min-w-11', className)}
-      aria-label="Compartir"
+      aria-label={t.share.aria}
     >
       <Share2 className="h-5 w-5" aria-hidden="true" />
     </Button>

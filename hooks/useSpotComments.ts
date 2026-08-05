@@ -6,6 +6,7 @@ import {
   postSpotComment,
   setSpotCommentHidden,
 } from '@/services/spotContent';
+import { useT } from '@/components/i18n/I18nProvider';
 
 export function useSpotComments(spotId: number) {
   return useQuery({
@@ -16,10 +17,11 @@ export function useSpotComments(spotId: number) {
 
 export function usePostSpotComment(spotId: number) {
   const queryClient = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (body: string) => postSpotComment(spotId, body),
     onSuccess: () => {
-      toast.success('Comentario publicado');
+      toast.success(t.toasts.commentPublished);
       queryClient.invalidateQueries({ queryKey: ['spotComments', spotId] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -28,10 +30,11 @@ export function usePostSpotComment(spotId: number) {
 
 export function useDeleteSpotComment(spotId: number) {
   const queryClient = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (commentId: string) => deleteSpotComment(spotId, commentId),
     onSuccess: () => {
-      toast.success('Comentario eliminado');
+      toast.success(t.toasts.commentDeleted);
       queryClient.invalidateQueries({ queryKey: ['spotComments', spotId] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -40,10 +43,11 @@ export function useDeleteSpotComment(spotId: number) {
 
 export function useHideSpotComment(spotId: number) {
   const queryClient = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (commentId: string) => setSpotCommentHidden(spotId, commentId, true),
     onSuccess: () => {
-      toast.success('Comentario ocultado');
+      toast.success(t.toasts.commentHidden);
       queryClient.invalidateQueries({ queryKey: ['spotComments', spotId] });
     },
     onError: (error: Error) => toast.error(error.message),

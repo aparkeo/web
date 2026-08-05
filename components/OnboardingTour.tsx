@@ -21,6 +21,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import {
   TOUR_AUTO_START_DELAY_MS,
   TOUR_STEPS,
@@ -102,7 +104,12 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
   const tooltipRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
+  const t = useT();
+
   const step = TOUR_STEPS[stepIndex];
+  // El texto del paso viene del diccionario activo (TOUR_STEPS conserva los
+  // literales ES como datos estructurales: id y targetSelector).
+  const stepText = t.tour.steps[step.id];
   const isLastStep = stepIndex === TOUR_STEPS.length - 1;
 
   const finishTour = useCallback(() => {
@@ -302,12 +309,12 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
                 <StepIcon className="h-5 w-5" aria-hidden />
               </span>
               <h2 id="tour-step-title" className="pt-1.5 text-base font-extrabold tracking-tight">
-                {step.title}
+                {stepText.title}
               </h2>
               <button
                 type="button"
                 onClick={finishTour}
-                aria-label="Cerrar el tour"
+                aria-label={t.tour.close}
                 className="ml-auto -mr-1.5 -mt-1.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden />
@@ -315,7 +322,7 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
             </div>
 
             <p id="tour-step-body" className="px-5 text-sm leading-relaxed text-muted-foreground">
-              {step.body}
+              {stepText.body}
             </p>
 
             <div className="flex items-center justify-between gap-3 p-5 pt-4">
@@ -331,7 +338,7 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
                   ))}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Paso {stepIndex + 1} de {TOUR_STEPS.length}
+                  {fmt(t.tour.stepProgress, { n: stepIndex + 1, total: TOUR_STEPS.length })}
                 </span>
               </div>
               <Button
@@ -341,7 +348,7 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
                 onClick={finishTour}
                 className="rounded-full text-muted-foreground"
               >
-                Saltar
+                {t.tour.skip}
               </Button>
             </div>
 
@@ -354,7 +361,7 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
                   onClick={goPrev}
                   className="min-h-11 gap-1 rounded-full"
                 >
-                  <ChevronLeft className="h-4 w-4" aria-hidden /> Anterior
+                  <ChevronLeft className="h-4 w-4" aria-hidden /> {t.tour.previous}
                 </Button>
               ) : null}
               <Button
@@ -364,11 +371,11 @@ export function OnboardingTourProvider({ children }: { children: React.ReactNode
               >
                 {isLastStep ? (
                   <>
-                    Explorar el mapa <Sparkles className="h-4 w-4" aria-hidden />
+                    {t.tour.last} <Sparkles className="h-4 w-4" aria-hidden />
                   </>
                 ) : (
                   <>
-                    Siguiente <ChevronRight className="h-4 w-4" aria-hidden />
+                    {t.tour.next} <ChevronRight className="h-4 w-4" aria-hidden />
                   </>
                 )}
               </Button>

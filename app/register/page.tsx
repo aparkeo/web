@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/components/i18n/I18nProvider';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,14 +19,15 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string; form?: string }>({});
+  const t = useT();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validación cliente antes de llamar a la API
     const nextErrors: typeof errors = {};
-    if (password.length < 8) nextErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-    if (confirmPassword !== password) nextErrors.confirmPassword = 'Las contraseñas no coinciden';
+    if (password.length < 8) nextErrors.password = t.auth.passwordTooShort;
+    if (confirmPassword !== password) nextErrors.confirmPassword = t.auth.passwordsMismatch;
     setErrors(nextErrors);
     if (nextErrors.password || nextErrors.confirmPassword) return;
 
@@ -38,8 +40,8 @@ export default function RegisterPage() {
     });
 
     if (!res.ok) {
-      const body = await res.json().catch(() => ({ error: 'Error al crear la cuenta' }));
-      const message = body.error ?? 'Error al crear la cuenta';
+      const body = await res.json().catch(() => ({ error: t.auth.registerError }));
+      const message = body.error ?? t.auth.registerError;
       setErrors({ form: message });
       toast.error(message);
       setLoading(false);
@@ -48,7 +50,7 @@ export default function RegisterPage() {
 
     await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
-    toast.success('Cuenta creada');
+    toast.success(t.auth.accountCreated);
     router.push('/');
     router.refresh();
   };
@@ -58,14 +60,14 @@ export default function RegisterPage() {
       <div className="container flex min-h-[80vh] max-w-md items-center py-8">
         <Card className="home-fade-up w-full rounded-2xl shadow-elevated">
           <CardHeader className="gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Aparkeo</p>
-            <CardTitle className="text-2xl font-extrabold tracking-tight">Crear cuenta</CardTitle>
-            <CardDescription>Únete a la comunidad Aparkeo</CardDescription>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.auth.brand}</p>
+            <CardTitle className="text-2xl font-extrabold tracking-tight">{t.auth.registerTitle}</CardTitle>
+            <CardDescription>{t.auth.registerSubtitle}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="name">Nombre</Label>
+                <Label htmlFor="name">{t.auth.name}</Label>
                 <Input
                   id="name"
                   autoComplete="name"
@@ -76,7 +78,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.auth.email}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -88,7 +90,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">{t.auth.password}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -102,7 +104,7 @@ export default function RegisterPage() {
                   className="h-12 rounded-xl text-base shadow-sm transition-[box-shadow,border-color] duration-200 focus-visible:shadow-md"
                 />
                 <p id="password-hint" className="text-xs text-muted-foreground">
-                  Mínimo 8 caracteres
+                  {t.auth.passwordHint}
                 </p>
                 {errors.password ? (
                   <p id="password-error" role="alert" className="text-sm font-semibold text-destructive">
@@ -111,7 +113,7 @@ export default function RegisterPage() {
                 ) : null}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="confirm-password">Confirmar contraseña</Label>
+                <Label htmlFor="confirm-password">{t.auth.confirmPassword}</Label>
                 <Input
                   id="confirm-password"
                   type="password"
@@ -136,16 +138,16 @@ export default function RegisterPage() {
                 </p>
               ) : null}
               <Button type="submit" className="btn-cta min-h-12 w-full rounded-xl text-base font-bold" disabled={loading}>
-                {loading ? 'Creando cuenta…' : 'Crear cuenta'}
+                {loading ? t.auth.creatingAccount : t.auth.registerTitle}
               </Button>
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              ¿Ya tienes cuenta?{' '}
+              {t.auth.haveAccount}{' '}
               <Link
                 href="/login"
                 className="rounded font-semibold text-primary transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                Entrar
+                {t.auth.login}
               </Link>
             </p>
           </CardContent>

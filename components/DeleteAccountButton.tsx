@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { useT } from '@/components/i18n/I18nProvider';
 
 const CONFIRM_WORD = 'ELIMINAR';
 
@@ -29,22 +30,23 @@ export function DeleteAccountButton() {
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const t = useT();
 
   async function handleDelete() {
     setDeleting(true);
     try {
       const res = await fetch('/api/user', { method: 'DELETE' });
       if (res.ok) {
-        toast.success('Tu cuenta y tus datos se han eliminado. ¡Gracias por participar!');
+        toast.success(t.profile.deletedToast);
         // Cierra sesión y redirige a la home (el JWT quedaría huérfano).
         await signOut({ callbackUrl: '/' });
         return;
       }
       const data = (await res.json().catch(() => null)) as { error?: string } | null;
-      toast.error(data?.error ?? 'No se pudo eliminar la cuenta. Inténtalo de nuevo.');
+      toast.error(data?.error ?? t.profile.deleteError);
       setDeleting(false);
     } catch {
-      toast.error('Error de red. Inténtalo de nuevo.');
+      toast.error(t.profile.networkError);
       setDeleting(false);
     }
   }
@@ -58,30 +60,31 @@ export function DeleteAccountButton() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="destructive">Eliminar mi cuenta</Button>
+        <Button variant="destructive">{t.profile.deleteButton}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" aria-hidden="true" />
-            Eliminar cuenta definitivamente
+            {t.profile.deleteDialogTitle}
           </DialogTitle>
           <DialogDescription asChild>
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">
               <p>
-                Esta acción es <strong className="text-foreground">irreversible</strong>. Se borrarán tu
-                cuenta y todos tus datos: reportes, favoritos, comentarios, fotos (también los archivos),
-                notificaciones y avisos push.
+                {t.profile.deleteDialogBody1a}
+                <strong className="text-foreground">{t.profile.deleteDialogIrreversible}</strong>
+                {t.profile.deleteDialogBody1b}
               </p>
               <p>
-                Para confirmar, escribe <strong className="text-foreground">{CONFIRM_WORD}</strong> en el
-                campo de abajo.
+                {t.profile.deleteDialogBody2a}
+                <strong className="text-foreground">{CONFIRM_WORD}</strong>
+                {t.profile.deleteDialogBody2b}
               </p>
             </div>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="delete-confirmation">Confirmación</Label>
+          <Label htmlFor="delete-confirmation">{t.profile.deleteConfirmLabel}</Label>
           <Input
             id="delete-confirmation"
             value={confirmation}
@@ -93,7 +96,7 @@ export function DeleteAccountButton() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={deleting}>
-            Cancelar
+            {t.common.cancel}
           </Button>
           <Button
             variant="destructive"
@@ -101,7 +104,7 @@ export function DeleteAccountButton() {
             disabled={confirmation !== CONFIRM_WORD || deleting}
           >
             {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-            Eliminar para siempre
+            {t.profile.deleteForever}
           </Button>
         </DialogFooter>
       </DialogContent>

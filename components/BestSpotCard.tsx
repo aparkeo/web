@@ -10,6 +10,8 @@ import { DestinationInput } from '@/components/DestinationInput';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useBestSpot } from '@/hooks/useBestSpot';
 import { useDestinationStore } from '@/store/useDestinationStore';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import { formatDistance, formatWalkTime } from '@/lib/utils';
 
 const CONFIDENCE_VARIANT = { Alta: 'success' as const, Media: 'warning' as const, Baja: 'muted' as const };
@@ -21,6 +23,7 @@ export function BestSpotCard() {
   const destination = useDestinationStore((s) => s.destination);
   const setDestination = useDestinationStore((s) => s.setDestination);
   const { data: best, isLoading, isError, refetch, isRefetching } = useBestSpot();
+  const t = useT();
 
   // Quita solo el filtro/interpretación de la búsqueda en lenguaje natural,
   // conservando el destino elegido.
@@ -37,13 +40,13 @@ export function BestSpotCard() {
         <p className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3.5 py-2 text-sm text-muted-foreground">
           <Sparkles className="h-4 w-4 shrink-0 text-primary" />
           <span className="flex-1">
-            Entendido: <strong className="font-semibold text-foreground">{destination.interpretation}</strong>
+            {t.bestSpot.understood} <strong className="font-semibold text-foreground">{destination.interpretation}</strong>
           </span>
           <button
             type="button"
             onClick={clearInterpretation}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Quitar el filtro de la búsqueda"
+            aria-label={t.bestSpot.clearFilter}
           >
             <X className="h-4 w-4" />
           </button>
@@ -55,7 +58,7 @@ export function BestSpotCard() {
       <div aria-live="polite">
       {!destination ? (
         <p className="mx-auto max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
-          Dinos a dónde vas (o usa tu ubicación actual) y te recomendamos la mejor plaza PMR para llegar allí.
+          {t.bestSpot.emptyHint}
         </p>
       ) : isLoading ? (
         <Skeleton className="h-56 w-full rounded-2xl" />
@@ -64,7 +67,7 @@ export function BestSpotCard() {
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <WifiOff className="h-8 w-8 text-muted-foreground" />
             <p className="text-muted-foreground">
-              No se pudo buscar la mejor plaza cerca de «{destination.label}». Revisa tu conexión.
+              {fmt(t.bestSpot.errorText, { label: destination.label })}
             </p>
             <Button
               type="button"
@@ -73,7 +76,7 @@ export function BestSpotCard() {
               disabled={isRefetching}
               className="min-h-11 rounded-xl px-6 transition-[transform,background-color] duration-200 hover:-translate-y-0.5 active:translate-y-0"
             >
-              {isRefetching ? 'Reintentando…' : 'Reintentar'}
+              {isRefetching ? t.common.retrying : t.common.retry}
             </Button>
           </CardContent>
         </Card>
@@ -82,8 +85,7 @@ export function BestSpotCard() {
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <MapPinOff className="h-8 w-8 text-muted-foreground" />
             <p className="text-muted-foreground">
-              No hay plazas PMR cerca de «{destination.label}» con datos suficientes. Explora el mapa para ver más
-              opciones.
+              {fmt(t.bestSpot.noSpotsText, { label: destination.label })}
             </p>
           </CardContent>
         </Card>
@@ -93,7 +95,7 @@ export function BestSpotCard() {
             <div className="flex items-start justify-between gap-3">
               <p className="flex items-center gap-2 pt-0.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
                 <Sparkles className="h-4 w-4" />
-                Recomendación cerca de tu destino
+                {t.bestSpot.recommendation}
               </p>
               <StatusBadge status={best.status} />
             </div>
@@ -104,9 +106,9 @@ export function BestSpotCard() {
                 <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                   <Footprints className="h-4 w-4 shrink-0 text-primary" />
                   <span>
-                    <strong className="font-semibold text-foreground">{formatDistance(best.distanceM)}</strong> de «
-                    {destination.label}»
-                    {formatWalkTime(best.distanceM) ? ` · ${formatWalkTime(best.distanceM)}` : ''}
+                    <strong className="font-semibold text-foreground">{formatDistance(best.distanceM)}</strong>{' '}
+                    {fmt(t.bestSpot.distanceFrom, { label: destination.label })}
+                    {formatWalkTime(best.distanceM, t.time) ? ` · ${formatWalkTime(best.distanceM, t.time)}` : ''}
                   </span>
                 </p>
               ) : null}
@@ -114,10 +116,10 @@ export function BestSpotCard() {
 
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={CONFIDENCE_VARIANT[best.prediction.confidenceLabel]} className="px-3 py-1 text-sm">
-                {Math.round(best.prediction.probabilityFree * 100)}% libre
+                {fmt(t.bestSpot.percentFree, { n: Math.round(best.prediction.probabilityFree * 100) })}
               </Badge>
               <Badge variant="outline" className="px-3 py-1">
-                confianza {best.prediction.confidenceLabel}
+                {fmt(t.bestSpot.confidence, { label: t.prediction.confidence[best.prediction.confidenceLabel] })}
               </Badge>
             </div>
 

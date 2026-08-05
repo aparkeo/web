@@ -18,13 +18,8 @@ import { cn } from '@/lib/utils';
 import { NotificationBell } from '@/components/NotificationBell';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useInstallMenu } from '@/components/InstallPrompt';
-
-const NAV_LINKS = [
-  { href: '/map', label: 'Mapa', icon: MapPin },
-  { href: '/stats', label: 'Estadísticas', icon: BarChart3 },
-  { href: '/analytics', label: 'Analítica', icon: LineChart },
-  { href: '/report', label: 'Reportar', icon: Flag },
-];
+import { LocaleSwitcher } from '@/components/i18n/LocaleSwitcher';
+import { useT } from '@/components/i18n/I18nProvider';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -32,6 +27,14 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const { canInstall, openInstall } = useInstallMenu();
+  const t = useT();
+
+  const NAV_LINKS = [
+    { href: '/map', label: t.nav.map, icon: MapPin },
+    { href: '/stats', label: t.nav.stats, icon: BarChart3 },
+    { href: '/analytics', label: t.nav.analytics, icon: LineChart },
+    { href: '/report', label: t.nav.report, icon: Flag },
+  ] as const;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
@@ -63,6 +66,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <LocaleSwitcher />
           <ThemeToggle />
           {session?.user ? (
             <>
@@ -79,29 +83,29 @@ export function Navbar() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
-                    <User className="mr-2 h-4 w-4" /> Mi perfil
+                    <User className="mr-2 h-4 w-4" /> {t.nav.myProfile}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/apoyo">
-                    <Heart className="mr-2 h-4 w-4" /> Apoya el proyecto
+                    <Heart className="mr-2 h-4 w-4" /> {t.nav.supportProject}
                   </Link>
                 </DropdownMenuItem>
                 {session.user.role === 'ADMIN' ? (
                   <DropdownMenuItem asChild>
                     <Link href="/admin">
-                      <ShieldCheck className="mr-2 h-4 w-4" /> Panel admin
+                      <ShieldCheck className="mr-2 h-4 w-4" /> {t.nav.adminPanel}
                     </Link>
                   </DropdownMenuItem>
                 ) : null}
                 {canInstall ? (
                   <DropdownMenuItem onClick={openInstall}>
-                    <Download className="mr-2 h-4 w-4" /> Instalar app
+                    <Download className="mr-2 h-4 w-4" /> {t.nav.installApp}
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOut className="mr-2 h-4 w-4" /> Cerrar sesión
+                  <LogOut className="mr-2 h-4 w-4" /> {t.nav.logout}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -109,10 +113,10 @@ export function Navbar() {
           ) : (
             <>
               <Button variant="ghost" asChild className="rounded-full">
-                <Link href="/login">Entrar</Link>
+                <Link href="/login">{t.nav.login}</Link>
               </Button>
               <Button asChild className="btn-cta rounded-full px-5">
-                <Link href="/register">Crear cuenta</Link>
+                <Link href="/register">{t.nav.createAccount}</Link>
               </Button>
             </>
           )}
@@ -127,7 +131,7 @@ export function Navbar() {
             size="icon"
             className="min-h-11 min-w-11"
             onClick={() => setOpen((v) => !v)}
-            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
             aria-expanded={open}
             aria-controls="mobile-nav"
           >
@@ -148,7 +152,13 @@ export function Navbar() {
             }
           }}
         >
-          <nav className="container flex flex-col gap-1 py-3" aria-label="Navegación móvil">
+          <nav className="container flex flex-col gap-1 py-3" aria-label={t.nav.mobileNav}>
+            <div className="flex items-center justify-between px-3.5 pb-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {t.nav.language}
+              </span>
+              <LocaleSwitcher />
+            </div>
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -176,7 +186,7 @@ export function Navbar() {
               )}
               aria-current={pathname?.startsWith('/profile') ? 'page' : undefined}
             >
-              <User className="h-4 w-4" /> {session?.user ? 'Mi perfil' : 'Entrar'}
+              <User className="h-4 w-4" /> {session?.user ? t.nav.myProfile : t.nav.login}
             </Link>
             <Link
               href="/apoyo"
@@ -189,7 +199,7 @@ export function Navbar() {
               )}
               aria-current={pathname?.startsWith('/apoyo') ? 'page' : undefined}
             >
-              <Heart className="h-4 w-4" /> Apoya el proyecto
+              <Heart className="h-4 w-4" /> {t.nav.supportProject}
             </Link>
             {session?.user?.role === 'ADMIN' ? (
               <Link
@@ -203,7 +213,7 @@ export function Navbar() {
                 )}
                 aria-current={pathname?.startsWith('/admin') ? 'page' : undefined}
               >
-                <LayoutDashboard className="h-4 w-4" /> Panel admin
+                <LayoutDashboard className="h-4 w-4" /> {t.nav.adminPanel}
               </Link>
             ) : null}
             {canInstall ? (
@@ -215,7 +225,7 @@ export function Navbar() {
                 }}
                 className="flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-left text-sm font-semibold text-muted-foreground transition-colors duration-150 hover:bg-secondary/70 hover:text-foreground"
               >
-                <Download className="h-4 w-4" /> Instalar app
+                <Download className="h-4 w-4" /> {t.nav.installApp}
               </button>
             ) : null}
             {session?.user ? (
@@ -227,7 +237,7 @@ export function Navbar() {
                 }}
                 className="flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-left text-sm font-semibold text-muted-foreground transition-colors duration-150 hover:bg-secondary/70 hover:text-foreground"
               >
-                <LogOut className="h-4 w-4" /> Cerrar sesión
+                <LogOut className="h-4 w-4" /> {t.nav.logout}
               </button>
             ) : null}
           </nav>

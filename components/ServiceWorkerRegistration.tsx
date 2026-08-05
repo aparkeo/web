@@ -2,12 +2,15 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { useT } from '@/components/i18n/I18nProvider';
 
 /**
  * Registra /sw.js solo en producción y avisa cuando hay una versión nueva
  * esperando a activarse. No renderiza nada.
  */
 export function ServiceWorkerRegistration() {
+  const t = useT();
+
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') return;
     if (!('serviceWorker' in navigator)) return;
@@ -17,7 +20,7 @@ export function ServiceWorkerRegistration() {
     const notifyUpdate = () => {
       if (shownUpdateToast) return;
       shownUpdateToast = true;
-      toast.info('Nueva versión disponible — recarga para actualizar', {
+      toast.info(t.common.swUpdateAvailable, {
         duration: Infinity,
       });
     };
@@ -48,7 +51,7 @@ export function ServiceWorkerRegistration() {
     };
 
     register();
-  }, []);
+  }, [t]);
 
   return null;
 }

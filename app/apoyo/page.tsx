@@ -3,6 +3,7 @@ import { Coffee, HandCoins, Heart, Server } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SponsorsSection } from '@/components/SponsorsSection';
 import { SPONSORS, SUPPORT_KOFI_URL, SUPPORT_PAYPAL_URL } from '@/lib/support';
+import { getServerDictionary } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Apoya el proyecto',
@@ -14,48 +15,45 @@ export const metadata: Metadata = {
 const donationButtonClass =
   'btn-cta inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
-export default function ApoyoPage() {
+export default async function ApoyoPage() {
+  const t = await getServerDictionary();
+
   return (
     <div className="container max-w-3xl space-y-6 pb-16 pt-10 sm:pt-14">
       <header className="home-fade-up space-y-3 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-          Proyecto comunitario
+          {t.apoyo.kicker}
         </p>
         <h1 className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Apoya Aparkeo
+          {t.apoyo.title}
         </h1>
         <p className="mx-auto max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Aparkeo nació para responder a una pregunta sencilla: ¿dónde hay una plaza PMR libre en
-          Vigo, ahora mismo? Lo mantiene una sola persona con la ayuda de la comunidad que reporta,
-          sin ánimo de lucro en el núcleo del proyecto.
+          {t.apoyo.intro}
         </p>
       </header>
 
       <Card className="home-fade-up home-fade-up-delay rounded-2xl shadow-elevated">
         <CardHeader>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Transparencia</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.apoyo.transparencyKicker}</p>
           <CardTitle className="flex items-center gap-2 tracking-tight">
             <Server className="h-5 w-5 text-primary" aria-hidden="true" />
-            ¿Qué cubren las aportaciones?
+            {t.apoyo.transparencyTitle}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-          <p>
-            La aplicación es gratis y lo seguirá siendo, pero mantenerla no lo es. Cada aportación
-            va íntegramente a:
-          </p>
+          <p>{t.apoyo.transparencyBody}</p>
           <ul className="list-disc space-y-2 pl-5">
             <li>
-              <strong className="text-foreground">Servidor y base de datos</strong> (Vercel y
-              Supabase), que sostienen el mapa en tiempo real y las notificaciones.
+              <strong className="text-foreground">{t.apoyo.transparencyServer}</strong>{' '}
+              {t.apoyo.transparencyServerBody}
             </li>
             <li>
-              <strong className="text-foreground">Dominio y servicios</strong> asociados al
-              proyecto.
+              <strong className="text-foreground">{t.apoyo.transparencyDomain}</strong>{' '}
+              {t.apoyo.transparencyDomainBody}
             </li>
             <li>
-              <strong className="text-foreground">Tiempo de desarrollo</strong>: nuevas funciones,
-              correcciones y mejoras de accesibilidad que pide la comunidad.
+              <strong className="text-foreground">{t.apoyo.transparencyTime}</strong>
+              {t.apoyo.transparencyTimeBody}
             </li>
           </ul>
         </CardContent>
@@ -66,14 +64,11 @@ export default function ApoyoPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg tracking-tight">
               <Coffee className="h-5 w-5 text-primary" aria-hidden="true" />
-              Invítanos a un café
+              {t.apoyo.kofiTitle}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Donación puntual por Ko-fi, del importe que tú elijas. Sin cuentas ni compromisos: un
-              café para seguir programando.
-            </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{t.apoyo.kofiBody}</p>
             <a
               href={SUPPORT_KOFI_URL}
               target="_blank"
@@ -81,7 +76,7 @@ export default function ApoyoPage() {
               className={donationButtonClass}
             >
               <Coffee className="h-4 w-4" aria-hidden="true" />
-              Donar con Ko-fi
+              {t.apoyo.kofiButton}
             </a>
           </CardContent>
         </Card>
@@ -90,14 +85,11 @@ export default function ApoyoPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg tracking-tight">
               <HandCoins className="h-5 w-5 text-primary" aria-hidden="true" />
-              Donación por PayPal
+              {t.apoyo.paypalTitle}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Si prefieres PayPal, también puedes aportar por ahí. Mismo destino: mantener el mapa
-              vivo y mejorando.
-            </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{t.apoyo.paypalBody}</p>
             <a
               href={SUPPORT_PAYPAL_URL}
               target="_blank"
@@ -105,20 +97,17 @@ export default function ApoyoPage() {
               className={donationButtonClass}
             >
               <HandCoins className="h-4 w-4" aria-hidden="true" />
-              Donar con PayPal
+              {t.apoyo.paypalButton}
             </a>
           </CardContent>
         </Card>
       </div>
 
-      <SponsorsSection sponsors={SPONSORS} />
+      <SponsorsSection sponsors={SPONSORS} labels={t.apoyo} />
 
       <p className="home-fade-up home-fade-up-delay-2 flex items-start justify-center gap-2 text-center text-sm leading-relaxed text-muted-foreground">
         <Heart className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <span>
-          El mapa y los reportes serán siempre gratuitos. Apoyar es voluntario y no desbloquea ni
-          bloquea ninguna función: es solo una forma de ayudar a que Aparkeo siga existiendo.
-        </span>
+        <span>{t.apoyo.closingNote}</span>
       </p>
     </div>
   );

@@ -1,16 +1,21 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import InstitucionesPage from '@/app/instituciones/page';
 import { SUPPORT_CONTACT_EMAIL } from '@/lib/support';
 
+// La página es async y lee la cookie de idioma en servidor; sin cookie → español.
+vi.mock('next/headers', () => ({
+  cookies: async () => ({ get: () => undefined }),
+}));
+
 /**
- * La landing /instituciones es presentacional y estática: basta un test de
+ * La landing /instituciones es presentacional: basta un test de
  * render que verifique el contenido clave, el mailto de contacto y la
  * ausencia de cifras de tracción inventadas.
  */
 describe('Página /instituciones', () => {
-  it('muestra el hero, las capacidades y el modelo de colaboración', () => {
-    render(<InstitucionesPage />);
+  it('muestra el hero, las capacidades y el modelo de colaboración', async () => {
+    render(await InstitucionesPage());
 
     expect(
       screen.getByRole('heading', {
@@ -32,8 +37,8 @@ describe('Página /instituciones', () => {
     expect(screen.getByText('Acuerdo de mantenimiento y extensión')).toBeInTheDocument();
   });
 
-  it('los CTAs de contacto son mailto con el asunto institucional pre-rellenado', () => {
-    render(<InstitucionesPage />);
+  it('los CTAs de contacto son mailto con el asunto institucional pre-rellenado', async () => {
+    render(await InstitucionesPage());
 
     const ctas = screen.getAllByRole('link', { name: /contactar para colaborar/i });
     expect(ctas.length).toBeGreaterThanOrEqual(2);
@@ -44,8 +49,8 @@ describe('Página /instituciones', () => {
     }
   });
 
-  it('enlaza a /apoyo para particulares y no inventa cifras de tracción', () => {
-    const { container } = render(<InstitucionesPage />);
+  it('enlaza a /apoyo para particulares y no inventa cifras de tracción', async () => {
+    const { container } = render(await InstitucionesPage());
 
     expect(screen.getByRole('link', { name: /apoyar el proyecto/i })).toHaveAttribute(
       'href',

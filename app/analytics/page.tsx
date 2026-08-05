@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { ShareButton } from '@/components/ShareButton';
+import { getServerDictionary } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Analítica de la ciudad',
@@ -9,24 +10,24 @@ export const metadata: Metadata = {
   alternates: { canonical: '/analytics' },
 };
 
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
+  const t = await getServerDictionary();
   return (
     <div className="container max-w-5xl pb-16 pt-10 sm:pt-14">
       <header className="home-fade-up mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Datos abiertos · Vigo</p>
-            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Analítica de la ciudad</h1>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.analytics.kicker}</p>
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t.analytics.title}</h1>
           </div>
           <ShareButton
-            label="Compartir"
-            title="Analítica PMR de Vigo | Aparkeo Vigo"
-            text="Mira cómo respira el aparcamiento PMR en Vigo: horas punta, zonas y tendencias en Aparkeo Vigo"
+            label={t.analytics.share}
+            title={t.analytics.shareTitle}
+            text={t.analytics.shareText}
           />
         </div>
         <p className="mt-3 max-w-lg text-pretty leading-relaxed text-muted-foreground">
-          Cómo respira el aparcamiento PMR en Vigo: agregados anónimos de la actividad de la comunidad durante
-          los últimos 30 días.
+          {t.analytics.subtitle}
         </p>
       </header>
       <div className="home-fade-up home-fade-up-delay">

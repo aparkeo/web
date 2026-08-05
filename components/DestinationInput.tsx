@@ -10,6 +10,7 @@ import { parseNaturalQuery } from '@/lib/nlSearch';
 import { geocodeResultsAnnouncement } from '@/lib/a11y';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDestinationStore } from '@/store/useDestinationStore';
+import { useT } from '@/components/i18n/I18nProvider';
 
 export function DestinationInput() {
   const destination = useDestinationStore((s) => s.destination);
@@ -19,6 +20,7 @@ export function DestinationInput() {
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
   const debouncedQuery = useDebouncedValue(query, 350);
+  const t = useT();
 
   // Búsqueda en lenguaje natural: si el parser entiende la consulta
   // («plaza libre cerca del Corte Inglés»), geocodificamos solo el lugar
@@ -36,7 +38,7 @@ export function DestinationInput() {
 
   const useCurrentLocation = () => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setLocError('Geolocalización no disponible en este dispositivo.');
+      setLocError(t.destination.geolocationUnavailable);
       return;
     }
     setLocating(true);
@@ -44,7 +46,7 @@ export function DestinationInput() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setDestination({
-          label: 'Tu ubicación actual',
+          label: t.destination.currentLocationLabel,
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
           source: 'current-location',
@@ -54,7 +56,7 @@ export function DestinationInput() {
         setQuery('');
       },
       (err) => {
-        setLocError(err.code === 1 ? 'Permiso de ubicación denegado.' : 'No se pudo obtener la ubicación.');
+        setLocError(err.code === 1 ? t.destination.permissionDenied : t.destination.locationError);
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 30_000 },
@@ -70,7 +72,7 @@ export function DestinationInput() {
           type="button"
           onClick={() => setDestination(null)}
           className="-mr-1.5 grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Cambiar destino"
+          aria-label={t.destination.changeDestination}
         >
           <X className="h-4 w-4" />
         </button>
@@ -93,8 +95,8 @@ export function DestinationInput() {
           onKeyDown={(e) => {
             if (e.key === 'Escape') setOpen(false);
           }}
-          placeholder="¿A dónde vas? (p. ej. «plaza libre cerca del Corte Inglés»)"
-          aria-label="Destino: dirección o lugar de Vigo"
+          placeholder={t.destination.placeholder}
+          aria-label={t.destination.inputAria}
           role="combobox"
           aria-expanded={open}
           aria-controls="destination-results"
@@ -106,7 +108,7 @@ export function DestinationInput() {
       {/* Región live: anuncia a lectores de pantalla cuántos resultados hay */}
       <p className="sr-only" role="status">
         {open && debouncedQuery.trim().length >= 3 && !isFetching
-          ? geocodeResultsAnnouncement(results.length)
+          ? geocodeResultsAnnouncement(results.length, t.a11y)
           : ''}
       </p>
 
@@ -114,7 +116,7 @@ export function DestinationInput() {
         <Card
           id="destination-results"
           role="listbox"
-          aria-label="Resultados de búsqueda de destino"
+          aria-label={t.destination.resultsAria}
           className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl p-1.5 shadow-elevated"
         >
           <button
@@ -126,7 +128,7 @@ export function DestinationInput() {
             className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors duration-150 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
           >
             <LocateFixed className="h-4 w-4 text-primary" aria-hidden="true" />
-            {locating ? 'Localizando…' : 'Usar mi ubicación actual'}
+            {locating ? t.destination.locating : t.destination.useMyLocation}
           </button>
 
           {locError ? (
@@ -135,9 +137,9 @@ export function DestinationInput() {
 
           {debouncedQuery.trim().length >= 3 ? (
             isFetching ? (
-              <p className="px-3 py-2.5 text-sm text-muted-foreground">Buscando…</p>
+              <p className="px-3 py-2.5 text-sm text-muted-foreground">{t.destination.searching}</p>
             ) : results.length === 0 ? (
-              <p className="px-3 py-2.5 text-sm text-muted-foreground">Sin resultados en Vigo.</p>
+              <p className="px-3 py-2.5 text-sm text-muted-foreground">{t.a11y.noGeocodeResults}</p>
             ) : (
               results.map((r, i) => (
                 <button

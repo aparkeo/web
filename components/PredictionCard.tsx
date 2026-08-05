@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePrediction } from '@/hooks/usePredictions';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import { formatRelativeTime } from '@/lib/utils';
 
 const CONFIDENCE_VARIANT = {
@@ -14,21 +16,15 @@ const CONFIDENCE_VARIANT = {
   Baja: 'muted' as const,
 };
 
-const SOURCE_LABEL: Record<string, string> = {
-  live: 'Reportes en vivo',
-  historical: 'Patrón histórico',
-  blended: 'Vivo + histórico',
-  none: 'Sin datos suficientes',
-};
-
 export function PredictionCard({ spotId }: { spotId: number }) {
   const { data: prediction, isLoading, isError, refetch, isRefetching } = usePrediction(spotId);
+  const t = useT();
 
   return (
     <Card className="rounded-2xl shadow-elevated">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base tracking-tight">
-          <Brain className="h-4 w-4 text-primary" /> Predicción inteligente
+          <Brain className="h-4 w-4 text-primary" /> {t.prediction.title}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -39,9 +35,9 @@ export function PredictionCard({ spotId }: { spotId: number }) {
           </div>
         ) : isError || !prediction ? (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">No se pudo cargar la predicción.</p>
+            <p className="text-sm text-muted-foreground">{t.prediction.loadError}</p>
             <Button type="button" variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
-              {isRefetching ? 'Reintentando…' : 'Reintentar'}
+              {isRefetching ? t.common.retrying : t.common.retry}
             </Button>
           </div>
         ) : (
@@ -50,17 +46,21 @@ export function PredictionCard({ spotId }: { spotId: number }) {
               <span className="text-3xl font-extrabold text-primary">
                 {Math.round(prediction.probabilityFree * 100)}%
               </span>
-              <span className="text-sm text-muted-foreground">probabilidad libre</span>
+              <span className="text-sm text-muted-foreground">{t.prediction.probabilityFree}</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Confianza:</span>
-              <Badge variant={CONFIDENCE_VARIANT[prediction.confidenceLabel]}>{prediction.confidenceLabel}</Badge>
+              <span className="text-muted-foreground">{t.prediction.confidenceLabel}</span>
+              <Badge variant={CONFIDENCE_VARIANT[prediction.confidenceLabel]}>
+                {t.prediction.confidence[prediction.confidenceLabel]}
+              </Badge>
             </div>
 
             <div className="text-xs text-muted-foreground">
-              {SOURCE_LABEL[prediction.source]}
-              {prediction.lastUpdated ? ` · actualizado ${formatRelativeTime(new Date(prediction.lastUpdated))}` : ''}
+              {t.prediction.source[prediction.source as keyof typeof t.prediction.source] ?? prediction.source}
+              {prediction.lastUpdated
+                ? ` · ${fmt(t.prediction.updated, { time: formatRelativeTime(new Date(prediction.lastUpdated), t.time) })}`
+                : ''}
             </div>
           </div>
         )}

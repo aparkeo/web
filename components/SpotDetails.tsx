@@ -19,6 +19,8 @@ import { useRealtimeSpot } from '@/hooks/useRealtimeSpot';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { formatRelativeTime, cn } from '@/lib/utils';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 
 export function SpotDetails({ spotId }: { spotId: number }) {
   const { data: spot, isLoading, isError, refetch, isRefetching } = useSpot(spotId);
@@ -26,6 +28,7 @@ export function SpotDetails({ spotId }: { spotId: number }) {
   const favoriteToggle = useFavoriteToggle();
   const push = usePushSubscription();
   const [reportOpen, setReportOpen] = useState(false);
+  const t = useT();
 
   if (isLoading) {
     return <Card className="h-64 animate-pulse rounded-2xl shadow-elevated" />;
@@ -35,9 +38,9 @@ export function SpotDetails({ spotId }: { spotId: number }) {
     return (
       <Card className="rounded-2xl shadow-elevated">
         <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
-          <p className="text-muted-foreground">No se pudo cargar la información de esta plaza.</p>
+          <p className="text-muted-foreground">{t.spot.loadError}</p>
           <Button type="button" variant="outline" onClick={() => refetch()} disabled={isRefetching}>
-            {isRefetching ? 'Reintentando…' : 'Reintentar'}
+            {isRefetching ? t.common.retrying : t.common.retry}
           </Button>
         </CardContent>
       </Card>
@@ -49,13 +52,13 @@ export function SpotDetails({ spotId }: { spotId: number }) {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="home-fade-up rounded-2xl shadow-elevated">
           <CardHeader>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Plaza PMR · Vigo</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.spot.kicker}</p>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-2xl font-extrabold tracking-tight">{spot.street}</CardTitle>
             <div className="flex items-center">
               <ShareButton
-                title={`Plaza PMR en ${spot.street} | Aparkeo Vigo`}
-                text={`Plaza PMR en ${spot.street} — mira si está libre en Aparkeo Vigo`}
+                title={fmt(t.spot.shareTitle, { street: spot.street })}
+                text={fmt(t.spot.shareText, { street: spot.street })}
               />
               <Button
                 variant="ghost"
@@ -63,7 +66,7 @@ export function SpotDetails({ spotId }: { spotId: number }) {
                 type="button"
                 className="min-h-11 min-w-11"
                 onClick={() => favoriteToggle.mutate(spot.id)}
-                aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Marcar como favorita'}
+                aria-label={spot.isFavorite ? t.spot.removeFavorite : t.spot.markFavorite}
                 aria-pressed={spot.isFavorite}
               >
                 <Star
@@ -79,22 +82,22 @@ export function SpotDetails({ spotId }: { spotId: number }) {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={spot.status} />
-            {spot.confidence === 'CONFIRMED' ? <Badge variant="outline">✓ Confirmada por la comunidad</Badge> : null}
-            {spot.confidence === 'DISPUTED' ? <Badge variant="warning">Informes contradictorios</Badge> : null}
+            {spot.confidence === 'CONFIRMED' ? <Badge variant="outline">{t.status.confirmedByCommunity}</Badge> : null}
+            {spot.confidence === 'DISPUTED' ? <Badge variant="warning">{t.status.disputed}</Badge> : null}
             <LiveIndicator live={live} />
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" aria-hidden="true" />
-            Lat {spot.lat.toFixed(4)}, Lon {spot.lon.toFixed(4)} · {spot.spaces} plaza{spot.spaces > 1 ? 's' : ''}
+            Lat {spot.lat.toFixed(4)}, Lon {spot.lon.toFixed(4)} · {spot.spaces} {spot.spaces > 1 ? t.spot.spaceMany : t.spot.spaceOne}
           </div>
 
           {spot.lastReportAt ? (
             <p className="text-xs text-muted-foreground">
-              Último reporte {formatRelativeTime(new Date(spot.lastReportAt))}
+              {fmt(t.spot.lastReport, { time: formatRelativeTime(new Date(spot.lastReportAt), t.time) })}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">Todavía no hay reportes para esta plaza.</p>
+            <p className="text-xs text-muted-foreground">{t.spot.noReports}</p>
           )}
 
           {spot.isFavorite ? (
@@ -104,10 +107,8 @@ export function SpotDetails({ spotId }: { spotId: number }) {
             >
               <BellRing className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
               <span>
-                Te avisaremos cuando esta plaza quede libre.
-                {push.supported && !push.subscribed
-                  ? ' Activa los avisos desde la campana para recibir el push en este dispositivo.'
-                  : ''}
+                {t.spot.willNotify}
+                {push.supported && !push.subscribed ? t.spot.enablePushHint : ''}
               </span>
             </div>
           ) : null}
@@ -117,7 +118,7 @@ export function SpotDetails({ spotId }: { spotId: number }) {
           <div className="flex flex-col gap-2 sm:flex-row">
             <NavigationButton lat={spot.lat} lon={spot.lon} street={spot.street} className="btn-cta" />
             <Button variant="outline" size="lg" className="gap-2" type="button" onClick={() => setReportOpen(true)}>
-              <Flag className="h-4 w-4" /> Reportar estado
+              <Flag className="h-4 w-4" /> {t.spot.reportStatus}
             </Button>
           </div>
         </CardContent>

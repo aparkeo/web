@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useDeleteSpotPhoto, useHideSpotPhoto, useSpotPhotos, useUploadSpotPhoto } from '@/hooks/useSpotPhotos';
 import { compressImage } from '@/lib/compressImage';
 import { formatRelativeTime } from '@/lib/utils';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import type { SpotPhotoDTO } from '@/lib/spotContent';
 
 /**
@@ -21,18 +23,19 @@ export function SpotPhotos({ spotId, street }: { spotId: number; street: string 
   const { data: session } = useSession();
   const { data: photos, isLoading } = useSpotPhotos(spotId);
   const [lightbox, setLightbox] = useState<SpotPhotoDTO | null>(null);
+  const t = useT();
 
   const isModerator = session?.user.role === 'MODERATOR' || session?.user.role === 'ADMIN';
 
   return (
     <Card className="home-fade-up home-fade-up-delay rounded-2xl shadow-elevated">
       <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
-        <CardTitle className="text-lg font-bold tracking-tight">Fotos</CardTitle>
+        <CardTitle className="text-lg font-bold tracking-tight">{t.photos.title}</CardTitle>
         {session?.user ? (
           <UploadButton spotId={spotId} />
         ) : (
           <Button asChild variant="outline" size="sm" className="min-h-11">
-            <Link href="/login">Entra para subir fotos</Link>
+            <Link href="/login">{t.photos.loginToUpload}</Link>
           </Button>
         )}
       </CardHeader>
@@ -47,7 +50,7 @@ export function SpotPhotos({ spotId, street }: { spotId: number; street: string 
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <ImageOff className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
             <p className="text-sm text-muted-foreground">
-              Todavía no hay fotos de esta plaza. ¡Sube la primera!
+              {t.photos.empty}
             </p>
           </div>
         ) : (
@@ -69,17 +72,17 @@ export function SpotPhotos({ spotId, street }: { spotId: number; street: string 
 
       <Dialog open={lightbox !== null} onOpenChange={(open) => !open && setLightbox(null)}>
         <DialogContent className="max-w-3xl p-2 sm:p-4" aria-describedby={undefined}>
-          <DialogTitle className="sr-only">Foto de la plaza en {street}</DialogTitle>
+          <DialogTitle className="sr-only">{fmt(t.photos.lightboxTitle, { street })}</DialogTitle>
           {lightbox ? (
             <div className="space-y-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- URL dinámica de Supabase Storage */}
               <img
                 src={lightbox.url}
-                alt={`Foto de la plaza en ${street} subida por ${lightbox.authorName}`}
+                alt={fmt(t.photos.lightboxAlt, { street, name: lightbox.authorName })}
                 className="max-h-[75vh] w-full rounded-xl object-contain"
               />
               <p className="text-center text-xs text-muted-foreground">
-                {lightbox.authorName} · {formatRelativeTime(new Date(lightbox.createdAt))}
+                {lightbox.authorName} · {formatRelativeTime(new Date(lightbox.createdAt), t.time)}
               </p>
             </div>
           ) : null}
@@ -106,6 +109,7 @@ function PhotoTile({
 }) {
   const deletePhoto = useDeleteSpotPhoto(spotId);
   const hidePhoto = useHideSpotPhoto(spotId);
+  const t = useT();
 
   return (
     <div className="group relative">
@@ -128,7 +132,7 @@ function PhotoTile({
           type="button"
           onClick={() => deletePhoto.mutate(photo.id)}
           disabled={deletePhoto.isPending}
-          aria-label="Eliminar mi foto"
+          aria-label={t.photos.deleteMine}
           className="absolute right-1.5 top-1.5 flex min-h-11 min-w-11 items-center justify-center rounded-full bg-background/80 text-destructive opacity-100 shadow-sm backdrop-blur transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
@@ -138,7 +142,7 @@ function PhotoTile({
           type="button"
           onClick={() => hidePhoto.mutate(photo.id)}
           disabled={hidePhoto.isPending}
-          aria-label="Ocultar foto (moderación)"
+          aria-label={t.photos.hideModeration}
           className="absolute right-1.5 top-1.5 flex min-h-11 min-w-11 items-center justify-center rounded-full bg-background/80 text-muted-foreground opacity-100 shadow-sm backdrop-blur transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
         >
           <EyeOff className="h-4 w-4" />
@@ -152,6 +156,7 @@ function UploadButton({ spotId }: { spotId: number }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useUploadSpotPhoto(spotId);
   const [pending, setPending] = useState<{ file: File; previewUrl: string } | null>(null);
+  const t = useT();
 
   const clearPending = () => {
     if (pending) URL.revokeObjectURL(pending.previewUrl);
@@ -190,29 +195,29 @@ function UploadButton({ spotId }: { spotId: number }) {
         disabled={upload.isPending}
       >
         <Camera className="h-4 w-4" aria-hidden="true" />
-        {upload.isPending ? 'Subiendo…' : 'Subir foto'}
+        {upload.isPending ? t.photos.uploading : t.photos.upload}
       </Button>
 
       <Dialog open={pending !== null} onOpenChange={(open) => !open && clearPending()}>
         <DialogContent className="max-w-md" aria-describedby={undefined}>
-          <DialogTitle>¿Subir esta foto?</DialogTitle>
+          <DialogTitle>{t.photos.confirmTitle}</DialogTitle>
           {pending ? (
             <div className="space-y-4">
               {/* eslint-disable-next-line @next/next/no-img-element -- preview local de blob: */}
               <img
                 src={pending.previewUrl}
-                alt="Vista previa de la foto a subir"
+                alt={t.photos.previewAlt}
                 className="max-h-[50vh] w-full rounded-xl object-contain"
               />
               <p className="text-xs text-muted-foreground">
-                Se redimensionará a un máximo de 1600 px y se publicará con tu nombre.
+                {t.photos.resizeNote}
               </p>
               <div className="flex gap-2">
                 <Button type="button" className="btn-cta min-h-11 flex-1 gap-2" onClick={confirmUpload}>
-                  <Camera className="h-4 w-4" aria-hidden="true" /> Publicar foto
+                  <Camera className="h-4 w-4" aria-hidden="true" /> {t.photos.publish}
                 </Button>
                 <Button type="button" variant="outline" className="min-h-11 gap-2" onClick={clearPending}>
-                  <X className="h-4 w-4" aria-hidden="true" /> Cancelar
+                  <X className="h-4 w-4" aria-hidden="true" /> {t.common.cancel}
                 </Button>
               </div>
             </div>

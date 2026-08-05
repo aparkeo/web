@@ -4,14 +4,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
 import { useFilterStore } from '@/store/useFilterStore';
+import { useT } from '@/components/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 import type { StatusFilter } from '@/types';
-
-const OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: 'ALL', label: 'Todas' },
-  { value: 'FREE', label: 'Libres' },
-  { value: 'OCCUPIED', label: 'Ocupadas' },
-];
 
 export function Filters() {
   const { status, setStatus, favoritesOnly, toggleFavoritesOnly } = useFilterStore(
@@ -22,6 +17,13 @@ export function Filters() {
       toggleFavoritesOnly: s.toggleFavoritesOnly,
     })),
   );
+  const t = useT();
+
+  const OPTIONS: { value: StatusFilter; label: string }[] = [
+    { value: 'ALL', label: t.status.all },
+    { value: 'FREE', label: t.status.freePlural },
+    { value: 'OCCUPIED', label: t.status.occupiedPlural },
+  ];
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -54,7 +56,7 @@ export function Filters() {
         )}
       >
         <Star className={cn('h-4 w-4', favoritesOnly && 'fill-current')} />
-        Favoritas
+        {t.map.favorites}
       </Button>
     </div>
   );

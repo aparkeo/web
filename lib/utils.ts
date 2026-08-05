@@ -1,5 +1,9 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { es } from '@/lib/i18n';
+import { fmt } from '@/lib/i18n/format';
+
+export type RelativeTimeStrings = typeof es.time;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,10 +14,10 @@ export function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1)} km`;
 }
 
-export function formatWalkTime(meters: number): string | null {
+export function formatWalkTime(meters: number, strings: RelativeTimeStrings = es.time): string | null {
   if (meters > 2000) return null;
   const mins = Math.max(1, Math.round(meters / 80));
-  return `~${mins} min a pie`;
+  return fmt(strings.walkTime, { n: mins });
 }
 
 export function distanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -26,14 +30,17 @@ export function distanceMeters(lat1: number, lon1: number, lat2: number, lon2: n
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export function formatRelativeTime(timestamp: number | Date): string {
+export function formatRelativeTime(
+  timestamp: number | Date,
+  strings: RelativeTimeStrings = es.time,
+): string {
   const ts = timestamp instanceof Date ? timestamp.getTime() : timestamp;
   const min = Math.max(0, Math.floor((Date.now() - ts) / 60000));
-  if (min < 1) return 'ahora mismo';
-  if (min < 60) return `hace ${min} min`;
+  if (min < 1) return strings.justNow;
+  if (min < 60) return fmt(strings.minutesAgo, { n: min });
   const hours = Math.floor(min / 60);
-  if (hours < 24) return `hace ${hours} h`;
-  return `hace ${Math.floor(hours / 24)} d`;
+  if (hours < 24) return fmt(strings.hoursAgo, { n: hours });
+  return fmt(strings.daysAgo, { n: Math.floor(hours / 24) });
 }
 
 export function labelForStatus(status: 'FREE' | 'OCCUPIED' | 'UNKNOWN'): string {

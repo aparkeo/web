@@ -1,5 +1,6 @@
 import { Store, Mail } from 'lucide-react';
 import { SUPPORT_CONTACT_EMAIL, type Sponsor } from '@/lib/support';
+import { es, type Dictionary } from '@/lib/i18n';
 
 const sponsorMailto = `mailto:${SUPPORT_CONTACT_EMAIL}?subject=${encodeURIComponent(
   'Patrocinio de Aparkeo',
@@ -9,9 +10,18 @@ const sponsorMailto = `mailto:${SUPPORT_CONTACT_EMAIL}?subject=${encodeURICompon
  * Sección «Con el apoyo de» de la página /apoyo. Si no hay patrocinadores
  * configurados muestra una invitación elegante a empresas locales de Vigo;
  * si los hay, los presenta en un grid. Recibe la lista por props para ser
- * presentacional y testeable.
+ * presentacional y testeable; los textos llegan por `labels` desde la página
+ * (diccionario i18n) con el español como fallback.
  */
-export function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
+export function SponsorsSection({
+  sponsors,
+  labels,
+}: {
+  sponsors: Sponsor[];
+  labels?: Dictionary['apoyo'];
+}) {
+  const l = labels ?? es.apoyo;
+
   if (sponsors.length === 0) {
     return (
       <section aria-labelledby="patrocinio-heading" className="home-fade-up home-fade-up-delay-2">
@@ -20,19 +30,17 @@ export function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
             <Store className="h-5 w-5" aria-hidden="true" />
           </span>
           <h2 id="patrocinio-heading" className="text-lg font-bold tracking-tight">
-            Con el apoyo de… ¿tu negocio?
+            {l.sponsorsEmptyTitle}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            ¿Tienes un negocio en Vigo y quieres apoyar la movilidad accesible en tu ciudad? Tu logo
-            puede aparecer aquí, junto a un proyecto que usa la comunidad cada día. Escríbenos y te
-            contamos cómo funciona.
+            {l.sponsorsEmptyBody}
           </p>
           <a
             href={sponsorMailto}
             className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground shadow-sm transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:bg-secondary/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0"
           >
             <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
-            Quiero patrocinar
+            {l.sponsorsEmptyCta}
           </a>
         </div>
       </section>
@@ -42,7 +50,7 @@ export function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
   return (
     <section aria-labelledby="patrocinio-heading" className="home-fade-up home-fade-up-delay-2 space-y-4">
       <h2 id="patrocinio-heading" className="text-center text-lg font-bold tracking-tight">
-        Con el apoyo de
+        {l.sponsorsTitle}
       </h2>
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {sponsors.map((sponsor) => (

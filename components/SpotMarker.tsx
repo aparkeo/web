@@ -4,8 +4,11 @@ import { memo, useCallback } from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import Link from 'next/link';
-import { colorForStatus, labelForStatus, statusTextClass, formatDistance } from '@/lib/utils';
+import { colorForStatus, statusTextClass, formatDistance } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
+import type { Dictionary } from '@/lib/i18n';
 import type { SpotDTO, SpotStatus } from '@/types';
 
 // Cache de iconos: máximo 6 instancias de L.divIcon (3 estados x 2 selección).
@@ -31,6 +34,10 @@ function spotIcon(status: SpotStatus, selected: boolean): L.DivIcon {
   return icon;
 }
 
+function statusLabel(t: Dictionary, status: SpotStatus): string {
+  return status === 'FREE' ? t.status.free : status === 'OCCUPIED' ? t.status.occupied : t.status.unknown;
+}
+
 interface SpotMarkerProps {
   spot: SpotDTO;
   selected: boolean;
@@ -38,8 +45,10 @@ interface SpotMarkerProps {
 }
 
 export const SpotMarker = memo(function SpotMarker({ spot, selected, onSelect }: SpotMarkerProps) {
+  const t = useT();
   const icon = spotIcon(spot.status, selected);
   const handleClick = useCallback(() => onSelect(spot.id), [onSelect, spot.id]);
+  const label = statusLabel(t, spot.status);
 
   return (
     // title da nombre accesible al marcador: Leaflet pone tabindex=0 +
@@ -48,7 +57,7 @@ export const SpotMarker = memo(function SpotMarker({ spot, selected, onSelect }:
     <Marker
       position={[spot.lat, spot.lon]}
       icon={icon}
-      title={`Plaza PMR en ${spot.street} — ${labelForStatus(spot.status)}`}
+      title={fmt(t.map.markerTitle, { street: spot.street, status: label })}
       eventHandlers={{ click: handleClick }}
     >
       {/* El contenido del popup solo se monta para el marcador seleccionado */}
@@ -56,14 +65,12 @@ export const SpotMarker = memo(function SpotMarker({ spot, selected, onSelect }:
         <Popup>
           <div className="flex flex-col gap-1 text-sm">
             <span className="font-semibold">{spot.street}</span>
-            <span className={`font-medium ${statusTextClass(spot.status)}`}>
-              {labelForStatus(spot.status)}
-            </span>
+            <span className={`font-medium ${statusTextClass(spot.status)}`}>{label}</span>
             {spot.distanceM !== undefined ? (
               <span className="text-muted-foreground">{formatDistance(spot.distanceM)}</span>
             ) : null}
             <Button asChild size="sm" className="mt-1">
-              <Link href={`/spots/${spot.id}`}>Ver detalles</Link>
+              <Link href={`/spots/${spot.id}`}>{t.map.viewDetails}</Link>
             </Button>
           </div>
         </Popup>

@@ -18,6 +18,7 @@ import {
   type BeforeInstallPromptEvent,
 } from '@/lib/installPrompt';
 import { INSTALL_ENGAGEMENT_MS } from '@/lib/installPrompt';
+import { useT } from '@/components/i18n/I18nProvider';
 
 /**
  * Prompt de instalación PWA («Añadir a pantalla de inicio»).
@@ -233,17 +234,19 @@ interface BannerProps {
 }
 
 function InstallPromptBanner({ variant, onInstall, onDismiss, onClose }: BannerProps) {
+  const t = useT();
+
   return (
     <div
       role="region"
-      aria-label="Instalar la aplicación Aparkeo"
+      aria-label={t.install.regionAria}
       className="home-fade-up fixed inset-x-4 bottom-4 z-50 sm:inset-x-auto sm:right-6 sm:w-[22rem]"
     >
       <div className="relative rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-elevated">
         <button
           type="button"
           onClick={onClose}
-          aria-label="Cerrar aviso de instalación"
+          aria-label={t.install.closeAria}
           className="absolute right-2 top-2 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
           <X className="h-4 w-4" aria-hidden="true" />
@@ -259,25 +262,24 @@ function InstallPromptBanner({ variant, onInstall, onDismiss, onClose }: BannerP
             className="h-12 w-12 shrink-0 rounded-xl shadow-sm"
           />
           <div className="min-w-0 pr-8">
-            <p className="text-sm font-bold leading-tight">Instala Aparkeo</p>
+            <p className="text-sm font-bold leading-tight">{t.install.title}</p>
             {variant === 'native' ? (
               <p className="mt-1 text-sm text-muted-foreground">
-                Añádela a tu pantalla de inicio y encuentra plazas PMR con un toque, incluso sin
-                cobertura.
+                {t.install.nativeBody}
               </p>
             ) : (
               <div className="mt-1 text-sm text-muted-foreground">
-                <p>En tu iPhone o iPad se instala en dos pasos:</p>
+                <p>{t.install.iosIntro}</p>
                 <ol className="mt-1.5 list-decimal space-y-1 pl-4">
                   <li className="flex flex-wrap items-center gap-1">
-                    Pulsa
+                    {t.install.iosStep1a}
                     <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-1.5 py-0.5 text-xs font-semibold text-secondary-foreground">
                       <Share className="h-3.5 w-3.5" aria-hidden="true" />
-                      Compartir
+                      {t.install.iosShare}
                     </span>
-                    en Safari
+                    {t.install.iosStep1b}
                   </li>
-                  <li>Elige «Añadir a pantalla de inicio»</li>
+                  <li>{t.install.iosStep2}</li>
                 </ol>
               </div>
             )}
@@ -292,7 +294,7 @@ function InstallPromptBanner({ variant, onInstall, onDismiss, onClose }: BannerP
               className="btn-cta flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
-              Instalar app
+              {t.install.installButton}
             </button>
           ) : null}
           <button
@@ -302,7 +304,7 @@ function InstallPromptBanner({ variant, onInstall, onDismiss, onClose }: BannerP
               variant === 'native' ? '' : 'flex-1'
             }`}
           >
-            Ahora no
+            {t.install.notNow}
           </button>
         </div>
       </div>

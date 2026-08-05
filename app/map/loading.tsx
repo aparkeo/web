@@ -1,6 +1,9 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { getServerDictionary } from '@/lib/i18n/server';
 
-export default function MapLoading() {
+export default async function MapLoading() {
+  const t = await getServerDictionary();
+
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:flex-row">
       <aside className="hidden w-96 shrink-0 border-r border-border bg-background md:block" aria-hidden="true">
@@ -15,7 +18,7 @@ export default function MapLoading() {
         </div>
       </aside>
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-muted-foreground">Cargando mapa…</p>
+        <p className="text-muted-foreground">{t.common.loadingMap}</p>
       </div>
     </div>
   );

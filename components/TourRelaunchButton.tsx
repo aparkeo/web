@@ -2,6 +2,7 @@
 
 import { CircleHelp } from 'lucide-react';
 import { useOnboardingTour } from '@/components/OnboardingTour';
+import { useT } from '@/components/i18n/I18nProvider';
 
 /**
  * Entrada permanente para re-lanzar el tour de onboarding desde el pie de
@@ -10,6 +11,7 @@ import { useOnboardingTour } from '@/components/OnboardingTour';
  */
 export function TourRelaunchButton() {
   const { startTour } = useOnboardingTour();
+  const t = useT();
 
   return (
     <button
@@ -17,7 +19,7 @@ export function TourRelaunchButton() {
       onClick={startTour}
       className="flex min-h-11 items-center gap-1.5 transition-colors hover:text-foreground"
     >
-      <CircleHelp className="h-4 w-4" aria-hidden="true" /> Ver tour
+      <CircleHelp className="h-4 w-4" aria-hidden="true" /> {t.footer.viewTour}
     </button>
   );
 }

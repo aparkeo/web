@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useT } from '@/components/i18n/I18nProvider';
 import type { StatsSummary } from '@/types';
 
 // recharts se carga de forma diferida (chunk aparte) con skeleton de fallback
@@ -23,6 +24,7 @@ async function fetchStats(): Promise<StatsSummary> {
 
 export function StatsDashboard() {
   const { data, isLoading } = useQuery({ queryKey: ['stats'], queryFn: fetchStats, refetchInterval: 60_000 });
+  const t = useT();
 
   if (isLoading || !data) {
     return (
@@ -35,10 +37,10 @@ export function StatsDashboard() {
   }
 
   const cards = [
-    { label: 'Plazas totales', value: data.totalSpots },
-    { label: 'Reportes (24h)', value: data.reportsLast24h },
-    { label: 'Reportes totales', value: data.totalReports },
-    { label: 'Usuarios activos (24h)', value: data.activeUsers },
+    { label: t.stats.totalSpots, value: data.totalSpots },
+    { label: t.stats.reports24h, value: data.reportsLast24h },
+    { label: t.stats.totalReports, value: data.totalReports },
+    { label: t.stats.activeUsers, value: data.activeUsers },
   ];
 
   return (
@@ -56,7 +58,7 @@ export function StatsDashboard() {
 
       <Card className="rounded-2xl shadow-elevated">
         <CardHeader>
-          <CardTitle className="tracking-tight">Estado actual de las plazas</CardTitle>
+          <CardTitle className="tracking-tight">{t.stats.currentStatus}</CardTitle>
         </CardHeader>
         <CardContent className="h-72">
           <StatusPieChart free={data.free} occupied={data.occupied} unknown={data.unknown} />

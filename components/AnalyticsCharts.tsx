@@ -11,6 +11,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import type { DailyBucket, HourlyBucket, WeekdayBucket } from '@/lib/analytics';
 import { ANALYTICS_COLORS } from '@/components/analyticsColors';
 
@@ -34,8 +36,9 @@ function EmptyChart({ label }: { label: string }) {
 
 /** Histograma de reportes por hora del día (Libre/Ocupada apilados). */
 export function HourlyChart({ data }: { data: HourlyBucket[] }) {
+  const t = useT();
   if (data.every((b) => b.free + b.occupied === 0)) {
-    return <EmptyChart label="Aún no hay suficientes datos esta semana" />;
+    return <EmptyChart label={t.analytics.emptyWeek} />;
   }
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -44,8 +47,8 @@ export function HourlyChart({ data }: { data: HourlyBucket[] }) {
         <XAxis dataKey="hour" tick={AXIS_TICK} tickLine={false} axisLine={false} tickFormatter={(h: number) => `${h}h`} />
         <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(h) => `${h}:00 – ${Number(h) + 1}:00`} />
-        <Bar dataKey="free" name="Libres" stackId="a" fill={ANALYTICS_COLORS.free} radius={[0, 0, 0, 0]} />
-        <Bar dataKey="occupied" name="Ocupadas" stackId="a" fill={ANALYTICS_COLORS.occupied} radius={[3, 3, 0, 0]} />
+        <Bar dataKey="free" name={t.status.freePlural} stackId="a" fill={ANALYTICS_COLORS.free} radius={[0, 0, 0, 0]} />
+        <Bar dataKey="occupied" name={t.status.occupiedPlural} stackId="a" fill={ANALYTICS_COLORS.occupied} radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -53,18 +56,22 @@ export function HourlyChart({ data }: { data: HourlyBucket[] }) {
 
 /** Reportes por día de la semana (Libre/Ocupada apilados). */
 export function WeekdayChart({ data }: { data: WeekdayBucket[] }) {
+  const t = useT();
   if (data.every((b) => b.free + b.occupied === 0)) {
-    return <EmptyChart label="Aún no hay suficientes datos esta semana" />;
+    return <EmptyChart label={t.analytics.emptyWeek} />;
   }
+  // Las etiquetas llegan de la API en español (Lun, Mar…): se traducen aquí.
+  const weekdayLabel = (label: string) =>
+    t.analytics.weekdays[label as keyof typeof t.analytics.weekdays] ?? label;
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-        <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+        <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} tickFormatter={weekdayLabel} />
         <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} allowDecimals={false} />
-        <Tooltip contentStyle={TOOLTIP_STYLE} />
-        <Bar dataKey="free" name="Libres" stackId="a" fill={ANALYTICS_COLORS.free} radius={[0, 0, 0, 0]} />
-        <Bar dataKey="occupied" name="Ocupadas" stackId="a" fill={ANALYTICS_COLORS.occupied} radius={[3, 3, 0, 0]} />
+        <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={weekdayLabel} />
+        <Bar dataKey="free" name={t.status.freePlural} stackId="a" fill={ANALYTICS_COLORS.free} radius={[0, 0, 0, 0]} />
+        <Bar dataKey="occupied" name={t.status.occupiedPlural} stackId="a" fill={ANALYTICS_COLORS.occupied} radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -72,8 +79,9 @@ export function WeekdayChart({ data }: { data: WeekdayBucket[] }) {
 
 /** Tendencia diaria de reportes en la ventana temporal. */
 export function TrendChart({ data }: { data: DailyBucket[] }) {
+  const t = useT();
   if (data.every((b) => b.total === 0)) {
-    return <EmptyChart label="Aún no hay suficientes datos en este periodo" />;
+    return <EmptyChart label={t.analytics.emptyPeriod} />;
   }
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -95,8 +103,8 @@ export function TrendChart({ data }: { data: DailyBucket[] }) {
             return `${day}/${m}/${y}`;
           }}
         />
-        <Area type="monotone" dataKey="free" name="Libres" stackId="a" stroke={ANALYTICS_COLORS.free} fill={ANALYTICS_COLORS.free} fillOpacity={0.25} />
-        <Area type="monotone" dataKey="occupied" name="Ocupadas" stackId="a" stroke={ANALYTICS_COLORS.occupied} fill={ANALYTICS_COLORS.occupied} fillOpacity={0.25} />
+        <Area type="monotone" dataKey="free" name={t.status.freePlural} stackId="a" stroke={ANALYTICS_COLORS.free} fill={ANALYTICS_COLORS.free} fillOpacity={0.25} />
+        <Area type="monotone" dataKey="occupied" name={t.status.occupiedPlural} stackId="a" stroke={ANALYTICS_COLORS.occupied} fill={ANALYTICS_COLORS.occupied} fillOpacity={0.25} />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -104,17 +112,18 @@ export function TrendChart({ data }: { data: DailyBucket[] }) {
 
 /** Barra apilada Libre/Ocupada para el resumen del estado actual. */
 export function CurrentStatusBar({ free, occupied, unknown }: { free: number; occupied: number; unknown: number }) {
+  const t = useT();
   const total = free + occupied + unknown;
-  if (total === 0) return <EmptyChart label="Sin plazas registradas todavía" />;
+  if (total === 0) return <EmptyChart label={t.analytics.noSpotsYet} />;
   const segments = [
-    { label: 'Libres', value: free, color: ANALYTICS_COLORS.free },
-    { label: 'Ocupadas', value: occupied, color: ANALYTICS_COLORS.occupied },
-    { label: 'Sin datos', value: unknown, color: ANALYTICS_COLORS.muted },
+    { label: t.status.freePlural, value: free, color: ANALYTICS_COLORS.free },
+    { label: t.status.occupiedPlural, value: occupied, color: ANALYTICS_COLORS.occupied },
+    { label: t.status.unknown, value: unknown, color: ANALYTICS_COLORS.muted },
   ];
   return (
     <div>
       <div className="flex h-4 w-full overflow-hidden rounded-full bg-muted" role="img"
-        aria-label={`Estado actual: ${free} libres, ${occupied} ocupadas, ${unknown} sin datos de un total de ${total} plazas`}>
+        aria-label={fmt(t.analytics.statusBarAria, { free, occupied, unknown, total })}>
         {segments.map((s) =>
           s.value > 0 ? (
             <div key={s.label} style={{ width: `${(s.value / total) * 100}%`, backgroundColor: s.color }} />

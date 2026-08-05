@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/components/i18n/I18nProvider';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useT();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +27,11 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res?.error) {
-      setError('Email o contraseña incorrectos');
-      toast.error('Email o contraseña incorrectos');
+      setError(t.auth.invalidCredentials);
+      toast.error(t.auth.invalidCredentials);
       return;
     }
-    toast.success('Sesión iniciada');
+    toast.success(t.auth.sessionStarted);
     router.push('/');
     router.refresh();
   };
@@ -39,14 +41,14 @@ export default function LoginPage() {
       <div className="container flex min-h-[80vh] max-w-md items-center py-8">
         <Card className="home-fade-up w-full rounded-2xl shadow-elevated">
           <CardHeader className="gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Aparkeo</p>
-            <CardTitle className="text-2xl font-extrabold tracking-tight">Entrar</CardTitle>
-            <CardDescription>Accede a tu cuenta de Aparkeo</CardDescription>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.auth.brand}</p>
+            <CardTitle className="text-2xl font-extrabold tracking-tight">{t.auth.loginTitle}</CardTitle>
+            <CardDescription>{t.auth.loginSubtitle}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.auth.email}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -60,7 +62,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">{t.auth.password}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -79,16 +81,16 @@ export default function LoginPage() {
                 </p>
               ) : null}
               <Button type="submit" className="btn-cta min-h-12 w-full rounded-xl text-base font-bold" disabled={loading}>
-                {loading ? 'Entrando…' : 'Entrar'}
+                {loading ? t.auth.loggingIn : t.auth.loginTitle}
               </Button>
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              ¿No tienes cuenta?{' '}
+              {t.auth.noAccount}{' '}
               <Link
                 href="/register"
                 className="rounded font-semibold text-primary transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                Crear cuenta
+                {t.auth.createAccount}
               </Link>
             </p>
           </CardContent>
