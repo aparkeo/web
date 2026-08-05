@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Heart } from 'lucide-react';
+import { Github, Heart, Landmark } from 'lucide-react';
 import { SITE_GITHUB_URL } from '@/lib/site';
 import { TourRelaunchButton } from '@/components/TourRelaunchButton';
 
@@ -32,6 +32,12 @@ export function Footer() {
             className="flex min-h-11 items-center gap-1.5 transition-colors hover:text-foreground"
           >
             <Heart className="h-4 w-4" aria-hidden="true" /> Apoya el proyecto
+          </Link>
+          <Link
+            href="/instituciones"
+            className="flex min-h-11 items-center gap-1.5 transition-colors hover:text-foreground"
+          >
+            <Landmark className="h-4 w-4" aria-hidden="true" /> Para instituciones
           </Link>
           <TourRelaunchButton />
         </nav>

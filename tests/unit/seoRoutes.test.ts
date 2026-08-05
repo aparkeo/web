@@ -35,6 +35,7 @@ describe('sitemap.ts', () => {
     expect(urls).toContain(`${SITE_URL}/analytics`);
     expect(urls).toContain(`${SITE_URL}/report`);
     expect(urls).toContain(`${SITE_URL}/stats`);
+    expect(urls).toContain(`${SITE_URL}/instituciones`);
     expect(urls).toContain(`${SITE_URL}/spots/7`);
 
     const spotEntry = entries.find((e) => e.url === `${SITE_URL}/spots/7`);
