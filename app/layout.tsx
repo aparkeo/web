@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Navbar } from '@/components/Navbar';
+import { SITE_URL, SITE_TAGLINE, SITE_DESCRIPTION } from '@/lib/site';
 import { Providers } from './providers';
 import './globals.css';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://minusvigo.app';
 
 export const viewport: Viewport = {
   themeColor: [
@@ -15,28 +14,36 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'MinusVigo — Plazas PMR libres en Vigo',
+    default: `MinusVigo — ${SITE_TAGLINE.split(',')[0]}`,
     template: '%s · MinusVigo',
   },
-  description:
-    'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.',
-  keywords: ['PMR', 'aparcamiento', 'Vigo', 'movilidad reducida', 'parking accesible'],
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'PMR Vigo',
+    'aparcamiento movilidad reducida',
+    'plazas PMR libres',
+    'parking accesible Vigo',
+    'aparcamiento Vigo',
+    'movilidad reducida',
+    'discapacidad Vigo',
+  ],
   authors: [{ name: 'MinusVigo' }],
   robots: { index: true, follow: true },
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'es_ES',
     url: SITE_URL,
     siteName: 'MinusVigo',
-    title: 'MinusVigo — Plazas PMR libres en Vigo',
-    description: 'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real.',
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'MinusVigo' }],
+    title: `MinusVigo — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    // Las imágenes (PNG 1200×630) las generan app/opengraph-image.tsx y
+    // app/twitter-image.tsx por convención de archivos de Next.
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MinusVigo — Plazas PMR libres en Vigo',
-    description: 'Encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real.',
-    images: ['/og-image.svg'],
+    title: `MinusVigo — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {

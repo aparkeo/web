@@ -13,6 +13,7 @@ import { ReportModal } from '@/components/ReportModal';
 import { SpotPhotos } from '@/components/SpotPhotos';
 import { SpotComments } from '@/components/SpotComments';
 import { LiveIndicator } from '@/components/LiveIndicator';
+import { ShareButton } from '@/components/ShareButton';
 import { useSpot } from '@/hooks/useSpot';
 import { useRealtimeSpot } from '@/hooks/useRealtimeSpot';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
@@ -51,17 +52,23 @@ export function SpotDetails({ spotId }: { spotId: number }) {
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Plaza PMR · Vigo</p>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-2xl font-extrabold tracking-tight">{spot.street}</CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              type="button"
-              className="min-h-11 min-w-11"
-              onClick={() => favoriteToggle.mutate(spot.id)}
-              aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Marcar como favorita'}
-              aria-pressed={spot.isFavorite}
-            >
-              <Star className={cn('h-5 w-5', spot.isFavorite && 'fill-yellow-400 text-yellow-400')} />
-            </Button>
+            <div className="flex items-center">
+              <ShareButton
+                title={`Plaza PMR en ${spot.street} | MinusVigo`}
+                text={`Plaza PMR en ${spot.street} — mira si está libre en MinusVigo`}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                className="min-h-11 min-w-11"
+                onClick={() => favoriteToggle.mutate(spot.id)}
+                aria-label={spot.isFavorite ? 'Quitar de favoritas' : 'Marcar como favorita'}
+                aria-pressed={spot.isFavorite}
+              >
+                <Star className={cn('h-5 w-5', spot.isFavorite && 'fill-yellow-400 text-yellow-400')} />
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

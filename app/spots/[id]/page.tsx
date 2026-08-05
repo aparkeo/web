@@ -1,14 +1,22 @@
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { SpotDetails } from '@/components/SpotDetails';
+import { labelForStatus } from '@/lib/utils';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const spot = await prisma.parkingSpot.findUnique({ where: { id: Number(id) } });
   if (!spot) return { title: 'Plaza no encontrada' };
+  const title = `Plaza PMR en ${spot.street}`;
+  const description = `Plaza PMR en ${spot.street}, Vigo — ahora mismo: ${labelForStatus(spot.status).toLowerCase()}. Estado en tiempo real, predicción de disponibilidad y reportes de la comunidad.`;
   return {
-    title: `Plaza PMR en ${spot.street}`,
-    description: `Estado en tiempo real y predicción de disponibilidad de la plaza PMR en ${spot.street}, Vigo.`,
+    title,
+    description,
+    alternates: { canonical: `/spots/${spot.id}` },
+    openGraph: {
+      title: `${title} | MinusVigo`,
+      description,
+    },
   };
 }
 
