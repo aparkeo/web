@@ -23,7 +23,7 @@ describe('Página /instituciones', () => {
     expect(screen.getByText('Mapa en tiempo real de plazas PMR')).toBeInTheDocument();
     expect(screen.getByText('Datos agregados de ocupación y demanda')).toBeInTheDocument();
     expect(screen.getByText('Canal ciudadano verificado')).toBeInTheDocument();
-    expect(screen.getByText('Tecnología abierta y auditable')).toBeInTheDocument();
+    expect(screen.getByText('Tecnología transparente y auditable')).toBeInTheDocument();
 
     expect(screen.getByRole('heading', { name: 'Por qué ahora' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Modelo de colaboración' })).toBeInTheDocument();

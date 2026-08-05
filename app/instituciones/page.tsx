@@ -51,8 +51,8 @@ const OFFERINGS: Offering[] = [
   },
   {
     Icon: ShieldCheck,
-    title: 'Tecnología abierta y auditable',
-    body: 'Código abierto y auditable, cumplimiento del RGPD por diseño (exportación y borrado de datos en self-service) y despliegue en infraestructura europea. Sin caja negra ni dependencia de proveedor.',
+    title: 'Tecnología transparente y auditable',
+    body: 'Código disponible para auditoría institucional, cumplimiento del RGPD por diseño (exportación y borrado de datos en self-service) y despliegue en infraestructura europea. Sin caja negra ni dependencia de proveedor.',
   },
 ];
 

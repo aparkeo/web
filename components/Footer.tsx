@@ -5,7 +5,7 @@ import { TourRelaunchButton } from '@/components/TourRelaunchButton';
 
 /**
  * Pie discreto del sitio: enlaces de transparencia (privacidad RGPD, código
- * abierto en GitHub y panel público de analítica).
+ * auditable en GitHub y panel público de analítica).
  */
 export function Footer() {
   return (
