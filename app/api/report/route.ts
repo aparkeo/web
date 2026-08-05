@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { recalculateSpotStatus } from '@/lib/prediction';
+import { notifyFavoriteFreed } from '@/lib/notifications';
 import { getClientIp, rateLimit } from '@/lib/rateLimit';
 import { distanceMeters } from '@/lib/utils';
 
@@ -138,9 +139,26 @@ export async function POST(req: NextRequest) {
     throw error;
   }
 
-  await recalculateSpotStatus(spotId);
+  const statusChange = await recalculateSpotStatus(spotId);
   // El recálculo de predicciones históricas se movió al cron nocturno
   // /api/cron/recompute-predictions para no alargar el hot path del reporte.
+
+  // Fan-out FAVORITE_FREED: solo en transición real hacia FREE. Se programa
+  // con `after()` (Next 15 — en Vercel usa waitUntil bajo el capó), así la
+  // respuesta no espera a las notificaciones pero el trabajo NO se corta al
+  // congelarse la función serverless, como pasaría con un fire-and-forget.
+  // Se excluye al autor del reporte: no tiene sentido avisarle de lo que
+  // acaba de reportar él mismo.
+  if (statusChange.transitionedToFree && statusChange.street) {
+    const street = statusChange.street;
+    after(async () => {
+      try {
+        await notifyFavoriteFreed(spotId, street, { excludeUserId: user.id });
+      } catch (error) {
+        console.error('Error creando notificaciones FAVORITE_FREED', error);
+      }
+    });
+  }
 
   await prisma.event.create({
     data: { userId: user.id, type: 'spot_report', metadata: { spotId, status } },

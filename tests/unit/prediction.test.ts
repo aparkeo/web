@@ -11,11 +11,10 @@ import {
   type SpotPrediction,
 } from '@/lib/prediction';
 import { prisma } from '@/lib/prisma';
-import { notifyFavoriteFreed } from '@/lib/notifications';
 import type { ParkingSpot } from '@prisma/client';
 
-// Los tests de recalculateSpotStatus NO tocan la base de datos: Prisma y las
-// notificaciones están mockeados a nivel de módulo.
+// Los tests de recalculateSpotStatus NO tocan la base de datos: Prisma está
+// mockeado a nivel de módulo.
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     report: { findMany: vi.fn() },
@@ -25,21 +24,15 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-vi.mock('@/lib/notifications', () => ({
-  notifyFavoriteFreed: vi.fn(),
-}));
-
 const reportFindMany = prisma.report.findMany as unknown as Mock;
 const spotFindUnique = prisma.parkingSpot.findUnique as unknown as Mock;
 const spotUpdate = prisma.parkingSpot.update as unknown as Mock;
 const executeRaw = prisma.$executeRaw as unknown as Mock;
-const notifyMock = notifyFavoriteFreed as unknown as Mock;
 
 beforeEach(() => {
   vi.clearAllMocks();
   spotUpdate.mockResolvedValue({});
   executeRaw.mockResolvedValue(1);
-  notifyMock.mockResolvedValue(undefined);
 });
 
 describe('computeConsensus (lógica pura de consenso live)', () => {
@@ -168,34 +161,40 @@ describe('recalculateSpotStatus (integración con Prisma mockeado)', () => {
     });
   });
 
-  it('notifica FAVORITE_FREED solo en la transición a FREE', async () => {
+  it('detecta la transición OCCUPIED → FREE (devuelve transitionedToFree + calle)', async () => {
     reportFindMany.mockResolvedValueOnce([{ status: 'FREE', weight: 2, reportedAt: new Date() }]);
     spotFindUnique.mockResolvedValueOnce({ status: 'OCCUPIED', street: 'Calle Test' });
     reportFindMany.mockResolvedValueOnce([]); // ventana 24 h
 
-    await recalculateSpotStatus(7);
-    expect(notifyMock).toHaveBeenCalledWith(7, 'Calle Test');
+    const change = await recalculateSpotStatus(7);
+    expect(change).toEqual({ transitionedToFree: true, street: 'Calle Test' });
   });
 
-  it('NO notifica si la plaza ya estaba FREE', async () => {
+  it('detecta la transición UNKNOWN → FREE', async () => {
+    reportFindMany.mockResolvedValueOnce([{ status: 'FREE', weight: 2, reportedAt: new Date() }]);
+    spotFindUnique.mockResolvedValueOnce({ status: 'UNKNOWN', street: 'Calle Test' });
+    reportFindMany.mockResolvedValueOnce([]);
+
+    const change = await recalculateSpotStatus(7);
+    expect(change.transitionedToFree).toBe(true);
+  });
+
+  it('NO hay transición si la plaza ya estaba FREE (FREE → FREE)', async () => {
     reportFindMany.mockResolvedValueOnce([{ status: 'FREE', weight: 2, reportedAt: new Date() }]);
     spotFindUnique.mockResolvedValueOnce({ status: 'FREE', street: 'Calle Test' });
     reportFindMany.mockResolvedValueOnce([]);
 
-    await recalculateSpotStatus(7);
-    expect(notifyMock).not.toHaveBeenCalled();
+    const change = await recalculateSpotStatus(7);
+    expect(change.transitionedToFree).toBe(false);
   });
 
-  it('un fallo al notificar no rompe el recálculo', async () => {
-    reportFindMany.mockResolvedValueOnce([{ status: 'FREE', weight: 2, reportedAt: new Date() }]);
-    spotFindUnique.mockResolvedValueOnce({ status: 'UNKNOWN', street: 'Calle Test' });
+  it('NO hay transición cuando la plaza pasa a OCCUPIED (FREE → OCCUPIED)', async () => {
+    reportFindMany.mockResolvedValueOnce([{ status: 'OCCUPIED', weight: 2, reportedAt: new Date() }]);
+    spotFindUnique.mockResolvedValueOnce({ status: 'FREE', street: 'Calle Test' });
     reportFindMany.mockResolvedValueOnce([]);
-    notifyMock.mockRejectedValueOnce(new Error('push caído'));
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    await expect(recalculateSpotStatus(7)).resolves.toBeUndefined();
-    expect(spotUpdate).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    const change = await recalculateSpotStatus(7);
+    expect(change).toEqual({ transitionedToFree: false, street: 'Calle Test' });
   });
 
   it('con consenso CONFIRMED ajusta reputación con clamp SQL (GREATEST/LEAST)', async () => {

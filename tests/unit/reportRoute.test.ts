@@ -10,6 +10,15 @@ const reportFindFirst = vi.hoisted(() => vi.fn());
 const transaction = vi.hoisted(() => vi.fn());
 const eventCreate = vi.hoisted(() => vi.fn());
 const recalculateSpotStatus = vi.hoisted(() => vi.fn());
+const notifyFavoriteFreed = vi.hoisted(() => vi.fn());
+const afterMock = vi.hoisted(() => vi.fn());
+
+// Se mockea solo `after` de next/server (se conservan NextRequest/NextResponse):
+// en los tests capturamos el callback del fan-out y lo ejecutamos a mano.
+vi.mock('next/server', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('next/server')>();
+  return { ...actual, after: afterMock };
+});
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -30,6 +39,8 @@ vi.mock('@/lib/rateLimit', () => ({
 }));
 
 vi.mock('@/lib/prediction', () => ({ recalculateSpotStatus }));
+
+vi.mock('@/lib/notifications', () => ({ notifyFavoriteFreed }));
 
 import { POST } from '@/app/api/report/route';
 
@@ -56,6 +67,8 @@ describe('POST /api/report', () => {
     reportFindFirst.mockResolvedValue(null);
     transaction.mockResolvedValue([{ id: 'r1' }, {}]);
     eventCreate.mockResolvedValue({});
+    recalculateSpotStatus.mockResolvedValue({ transitionedToFree: false, street: 'Calle Test' });
+    notifyFavoriteFreed.mockResolvedValue(0);
   });
 
   it('flujo normal: crea el reporte y devuelve ok', async () => {
@@ -121,5 +134,41 @@ describe('POST /api/report', () => {
     const res = await POST(postReq(VALID_BODY));
     expect(res.status).toBe(401);
     expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('transición a FREE: programa el fan-out con after() excluyendo al autor del reporte', async () => {
+    recalculateSpotStatus.mockResolvedValue({ transitionedToFree: true, street: 'Calle Test' });
+
+    const res = await POST(postReq(VALID_BODY));
+    expect(res.status).toBe(200);
+
+    // El fan-out NO va en el hot path: se delega en after() y la respuesta
+    // ya se ha compuesto. Ejecutamos el callback capturado a mano.
+    expect(afterMock).toHaveBeenCalledOnce();
+    const fanout = afterMock.mock.calls[0][0] as () => Promise<void>;
+    await fanout();
+    expect(notifyFavoriteFreed).toHaveBeenCalledWith(7, 'Calle Test', { excludeUserId: 'user-1' });
+  });
+
+  it('sin transición a FREE no se programa ningún fan-out', async () => {
+    recalculateSpotStatus.mockResolvedValue({ transitionedToFree: false, street: 'Calle Test' });
+
+    const res = await POST(postReq(VALID_BODY));
+    expect(res.status).toBe(200);
+    expect(afterMock).not.toHaveBeenCalled();
+    expect(notifyFavoriteFreed).not.toHaveBeenCalled();
+  });
+
+  it('un fallo del fan-out no rompe nada: el callback de after() lo captura', async () => {
+    recalculateSpotStatus.mockResolvedValue({ transitionedToFree: true, street: 'Calle Test' });
+    notifyFavoriteFreed.mockRejectedValue(new Error('DB caída'));
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const res = await POST(postReq(VALID_BODY));
+    expect(res.status).toBe(200);
+
+    const fanout = afterMock.mock.calls[0][0] as () => Promise<void>;
+    await expect(fanout()).resolves.toBeUndefined();
+    consoleSpy.mockRestore();
   });
 });

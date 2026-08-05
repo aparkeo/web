@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, MapPin, Flag } from 'lucide-react';
+import { Star, MapPin, Flag, BellRing } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -16,12 +16,14 @@ import { LiveIndicator } from '@/components/LiveIndicator';
 import { useSpot } from '@/hooks/useSpot';
 import { useRealtimeSpot } from '@/hooks/useRealtimeSpot';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { formatRelativeTime, cn } from '@/lib/utils';
 
 export function SpotDetails({ spotId }: { spotId: number }) {
   const { data: spot, isLoading, isError, refetch, isRefetching } = useSpot(spotId);
   const live = useRealtimeSpot(spotId);
   const favoriteToggle = useFavoriteToggle();
+  const push = usePushSubscription();
   const [reportOpen, setReportOpen] = useState(false);
 
   if (isLoading) {
@@ -82,6 +84,21 @@ export function SpotDetails({ spotId }: { spotId: number }) {
           ) : (
             <p className="text-xs text-muted-foreground">Todavía no hay reportes para esta plaza.</p>
           )}
+
+          {spot.isFavorite ? (
+            <div
+              role="status"
+              className="flex items-start gap-2 rounded-xl border border-border bg-secondary/60 p-3 text-sm"
+            >
+              <BellRing className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <span>
+                Te avisaremos cuando esta plaza quede libre.
+                {push.supported && !push.subscribed
+                  ? ' Activa los avisos desde la campana para recibir el push en este dispositivo.'
+                  : ''}
+              </span>
+            </div>
+          ) : null}
 
           <Separator />
 

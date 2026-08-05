@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { notifyFavoriteFreed } from '@/lib/notifications';
+import { isFreeTransition } from '@/lib/notifications';
 import type { ParkingSpot, Prediction, Confidence, SpotStatus } from '@prisma/client';
 
 /**
@@ -123,7 +123,18 @@ export function classifyReputationReports(
   return { agreeing, contradicting };
 }
 
-export async function recalculateSpotStatus(spotId: number): Promise<void> {
+/**
+ * Resultado del recálculo: si la plaza acaba de transicionar a FREE (desde
+ * OCCUPIED/UNKNOWN) el caller puede lanzar el fan-out FAVORITE_FREED. El
+ * aviso NO se hace aquí dentro a propósito: va después de la respuesta de la
+ * API (vía `after()` en la ruta de reportes) para no alargar el hot path.
+ */
+export interface SpotStatusChange {
+  transitionedToFree: boolean;
+  street: string | null;
+}
+
+export async function recalculateSpotStatus(spotId: number): Promise<SpotStatusChange> {
   const since = new Date(Date.now() - RECENT_WINDOW_MS);
   const recent = await prisma.report.findMany({
     where: { spotId, reportedAt: { gte: since } },
@@ -133,7 +144,7 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
   const { status, confidence } = computeConsensus(recent);
 
   // Estado previo: necesario para detectar la TRANSICIÓN a FREE (no basta
-  // con que el nuevo estado sea FREE — solo notificamos cuando cambia).
+  // con que el nuevo estado sea FREE — solo se avisa cuando cambia).
   const previous = await prisma.parkingSpot.findUnique({
     where: { id: spotId },
     select: { status: true, street: true },
@@ -143,17 +154,6 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
     where: { id: spotId },
     data: { status, confidence, lastReportAt: recent[0]?.reportedAt ?? undefined },
   });
-
-  // Disparador FAVORITE_FREED: la plaza acaba de quedar libre. Se hace tras
-  // el update, en el mismo hot path (con pocas plazas es barato), pero un
-  // fallo aquí no debe romper el reporte que originó el recálculo.
-  if (previous && previous.status !== 'FREE' && status === 'FREE') {
-    try {
-      await notifyFavoriteFreed(spotId, previous.street);
-    } catch (error) {
-      console.error('Error creando notificaciones FAVORITE_FREED', error);
-    }
-  }
 
   // Reputación: cuando hay consenso fuerte (CONFIRMED) se compara con los
   // reportes de las últimas 24 h. Los autores que lo contradijeron pierden
@@ -184,6 +184,11 @@ export async function recalculateSpotStatus(spotId: number): Promise<void> {
     }
     await Promise.all(updates);
   }
+
+  return {
+    transitionedToFree: isFreeTransition(previous?.status, status),
+    street: previous?.street ?? null,
+  };
 }
 
 /** Recalcula la tabla Prediction para una plaza a partir de todo su historial de Report. */

@@ -32,6 +32,11 @@ npm run test:watch   # modo watch
     memoria ante errores de Redis, `getClientIp`.
   - `components/StatusBadge.tsx` — patrón base de test de componentes con
     Testing Library.
+  - `lib/notifications.ts` — detector de transición puro (`isFreeTransition`)
+    y fan-out FAVORITE_FREED: exclusión del autor, push solo a usuarios con
+    suscripción, anti-spam de 2 h por usuario+plaza.
+  - `lib/push.ts` — `sendPushToUser` con web-push mockeado: conteo de envíos,
+    limpieza de suscripciones caducadas (404/410), errores sin propagar.
 
 ## Tests E2E (Playwright)
 
