@@ -48,6 +48,7 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
+              data-tour={link.href === '/report' ? 'report' : undefined}
               className={cn(
                 'flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors duration-150',
                 pathname?.startsWith(link.href)

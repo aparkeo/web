@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Github } from 'lucide-react';
 import { SITE_GITHUB_URL } from '@/lib/site';
+import { TourRelaunchButton } from '@/components/TourRelaunchButton';
 
 /**
  * Pie discreto del sitio: enlaces de transparencia (privacidad RGPD, código
@@ -26,6 +27,7 @@ export function Footer() {
           <Link href="/analytics" className="transition-colors hover:text-foreground">
             Analítica
           </Link>
+          <TourRelaunchButton />
         </nav>
       </div>
     </footer>

@@ -81,6 +81,7 @@ export function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative min-h-11 min-w-11"
+          data-tour="notifications"
           aria-label={
             unreadCount > 0 ? `Notificaciones, ${unreadCount} sin leer` : 'Notificaciones'
           }

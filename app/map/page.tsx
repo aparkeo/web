@@ -60,6 +60,7 @@ export default function MapPage() {
         className={`relative flex-1 ${mobileView === 'map' ? 'block' : 'hidden md:block'}`}
         aria-label="Mapa interactivo"
         role="region"
+        data-tour="map"
       >
         <MapErrorBoundary>
           <MapView visible={mobileView === 'map'} />
