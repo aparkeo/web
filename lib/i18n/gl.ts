@@ -52,7 +52,7 @@ export const gl: Dictionary = {
     toDark: 'Cambiar a modo escuro',
   },
   home: {
-    kicker: 'Prazas PMR en directo — comeza pola túa cidade',
+    kicker: 'Prazas PMR en directo — feito en Galicia',
     title: 'Onde aparco?',
     subtitle:
       'Dinos a onde vas e recomendámosche a mellor praza PMR libre para chegar alí. Sen explorar mapas.',
@@ -89,7 +89,7 @@ export const gl: Dictionary = {
   map: {
     listAria: 'Lista de prazas',
     regionAria: 'Mapa interactivo',
-    fullAria: 'Mapa interactivo de prazas de mobilidade reducida en España',
+    fullAria: 'Mapa interactivo de prazas de mobilidade reducida en Galicia e toda España',
     viewList: 'Ver a lista',
     viewMap: 'Ver o mapa',
     viewListAria: 'Ver a lista de prazas',
@@ -478,12 +478,12 @@ export const gl: Dictionary = {
     badge: 'Para institucións',
     title: 'Datos de mobilidade PMR en tempo real, ao servizo das administracións',
     intro:
-      'Aparkeo Vigo converte a participación cidadá en información operativa sobre as prazas de aparcadoiro para persoas con mobilidade reducida. Unha plataforma xa construída e operativa, lista para pilotar con concellos, deputacións e entidades do terceiro sector.',
+      'Aparkeo converte a participación cidadá en información operativa sobre as prazas de aparcadoiro para persoas con mobilidade reducida. Unha plataforma feita en Galicia, xa construída e operativa, lista para pilotar con concellos, a Xunta de Galicia, as deputacións e entidades do terceiro sector.',
     contactCta: 'Contactar para colaborar',
     offeringsTitle: 'Que ofrece a plataforma',
     offering1Title: 'Mapa en tempo real de prazas PMR',
     offering1Body:
-      'Cada praza de mobilidade reducida do concello co seu estado (libre ou ocupada) alimentado por informes cidadáns verificados con GPS. Información operativa que hoxe ningunha administración ten sen instalar sensores.',
+      'Cada praza de mobilidade reducida do territorio co seu estado (libre ou ocupada) alimentado por informes cidadáns verificados con GPS. A plataforma xa opera en toda España combinando datos abertos e comunidade: información operativa que hoxe ningunha administración ten sen instalar sensores.',
     offering2Title: 'Datos agregados de ocupación e demanda',
     offering2Body:
       'Histórico de informes convertible en evidencia para a planificación urbana: que zonas precisan máis prazas PMR, en que franxas se concentra a presión e onde convén actuar primeiro.',
@@ -496,24 +496,24 @@ export const gl: Dictionary = {
     contextKicker: 'Contexto',
     contextTitle: 'Por que agora',
     contextBody1:
-      'A Axenda Urbana Española, os fondos europeos de inclusión e mobilidade sostible —como a European Urban Initiative e a Nova Bauhaus Europea— e os plans de accesibilidade autonómicos financian precisamente este tipo de proxectos: accesibilidade real, participación cidadá e datos para decidir mellor.',
-    contextBody2a: 'A diferenza de Aparkeo Vigo é que ',
+      'A Axenda Urbana Española, os fondos europeos de inclusión e mobilidade sostible —como a European Urban Initiative e a Nova Bauhaus Europea— e os plans de accesibilidade da Xunta de Galicia e das deputacións financian precisamente este tipo de proxectos: accesibilidade real, participación cidadá e datos para decidir mellor.',
+    contextBody2a: 'A diferenza de Aparkeo é que ',
     contextBody2Strong: 'a plataforma xa está construída e operativa',
     contextBody2b:
       '. Non hai que orzar un desenvolvemento nin agardar meses de execución: o risco técnico do piloto é cero, e cada euro dunha eventual colaboración vai a operación e mellora, non a construír o que xa existe.',
     modelTitle: 'Modelo de colaboración',
     step1Title: 'Piloto gratuito de 6 meses',
     step1Body:
-      'Co Concello de Vigo, sen custo nin compromiso. A plataforma xa funciona hoxe: o piloto comeza cando a institución o decida, non cando remate un desenvolvemento.',
+      'Co Concello de Vigo como piloto de referencia, sen custo nin compromiso. A plataforma xa funciona hoxe: o piloto comeza cando a institución o decida, non cando remate un desenvolvemento.',
     step2Title: 'Avaliación con datos reais',
     step2Body:
       'Ao peche do piloto, informe de impacto construído sobre os datos agregados de uso e demanda: que aportou a canle cidadá e que zonas concentran a necesidade.',
     step3Title: 'Acordo de mantemento e extensión',
     step3Body:
-      'Se a avaliación é positiva, acordo de mantemento a custo axustado e posibilidade de estender a plataforma a outros concellos da provincia ou da comunidade autónoma.',
+      'Se a avaliación é positiva, acordo de mantemento a custo axustado e extensión da plataforma ao resto de concellos de Galicia, da man da Xunta e das deputacións.',
     pilotTitle: 'Falemos dun piloto',
     pilotBody:
-      'Se representas a un concello, unha deputación ou unha entidade do terceiro sector e queres explorar unha colaboración, escríbenos e preparamos unha proposta concreta.',
+      'Se representas a un concello, á Xunta de Galicia, a unha deputación ou a unha entidade do terceiro sector e queres explorar unha colaboración, escríbenos e preparamos unha proposta concreta.',
     individualPrefix: 'Es un particular? Tamén podes ',
     individualLink: 'apoiar o proxecto',
   },

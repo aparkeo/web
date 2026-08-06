@@ -15,14 +15,14 @@ import { SUPPORT_CONTACT_EMAIL } from '@/lib/support';
 import { getServerDictionary } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
-  title: 'Aparkeo Vigo para instituciones',
+  title: 'Aparkeo para instituciones',
   description:
-    'Datos de movilidad PMR en tiempo real, generados por la ciudadanía, al servicio de ayuntamientos, diputaciones y entidades del tercer sector. Piloto gratuito con el Concello de Vigo: la plataforma ya está construida y operativa.',
+    'Datos de movilidad PMR en tiempo real, generados por la ciudadanía, al servicio de concellos, Xunta de Galicia, diputaciones y entidades del tercer sector. Piloto de referencia en Vigo y extensión al resto de Galicia: la plataforma ya está construida y operativa en toda España.',
   alternates: { canonical: '/instituciones' },
 };
 
 const contactMailto = `mailto:${SUPPORT_CONTACT_EMAIL}?subject=${encodeURIComponent(
-  'Colaboración institucional — Aparkeo Vigo',
+  'Colaboración institucional — Aparkeo',
 )}`;
 
 const ctaButtonClass =
@@ -35,10 +35,10 @@ interface Offering {
 }
 
 /**
- * Landing institucional (B2G/B2B): la página que se enseña a ayuntamientos,
- * diputaciones y entidades del tercer sector para vender la plataforma.
- * Server component, sin cifras de tracción inventadas: se habla de
- * capacidades de la plataforma, no de estadísticas de uso.
+ * Landing institucional (B2G/B2B): la página que se enseña a concellos,
+ * Xunta de Galicia, diputaciones y entidades del tercer sector para vender
+ * la plataforma. Server component, sin cifras de tracción inventadas: se
+ * habla de capacidades de la plataforma, no de estadísticas de uso.
  */
 export default async function InstitucionesPage() {
   const t = await getServerDictionary();

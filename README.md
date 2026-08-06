@@ -1,7 +1,8 @@
 # Aparkeo Web
 
-Versión web de Aparkeo Vigo — encuentra plazas PMR libres en Vigo, con predicción
-inteligente, reportes de la comunidad, panel de administración y estadísticas.
+Versión web de Aparkeo — plataforma hecha en Galicia para encontrar plazas PMR
+libres en Galicia y toda España, con predicción inteligente, reportes de la
+comunidad, panel de administración y estadísticas.
 
 **Proyecto totalmente independiente de la app móvil** (carpeta `minusvigo`).
 No comparte código, base de datos ni backend. Solo el dominio del problema.

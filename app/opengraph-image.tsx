@@ -44,7 +44,7 @@ export default function OpenGraphImage() {
               Aparkeo
             </div>
             <div style={{ fontSize: 42, fontWeight: 600, color: '#CFF2EA', marginTop: 16 }}>
-              Plazas PMR en vivo · España
+              Plazas PMR en vivo · Galicia y España
             </div>
           </div>
         </div>

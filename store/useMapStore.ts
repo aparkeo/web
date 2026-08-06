@@ -14,16 +14,18 @@ interface MapState {
   setBbox: (bbox: Bbox | null) => void;
 }
 
-// Vista inicial por defecto: España completa (roadmap nº29). Si el usuario
-// concede geolocalización, RecenterOnUser centra en su posición como antes.
-const SPAIN_CENTER: [number, number] = [40.3, -3.7];
-const SPAIN_ZOOM = 6;
+// Vista inicial por defecto: Galicia completa (roadmap nº30, posicionamiento
+// Galicia-first). Los datos nacionales siguen ahí: al alejar el mapa la carga
+// por viewport los trae igual que antes. Si el usuario concede
+// geolocalización, RecenterOnUser centra en su posición como hasta ahora.
+const GALICIA_CENTER: [number, number] = [42.65, -8.0];
+const GALICIA_ZOOM = 8;
 
 export const useMapStore = create<MapState>((set) => ({
   selectedSpotId: null,
   userLocation: null,
-  center: SPAIN_CENTER,
-  zoom: SPAIN_ZOOM,
+  center: GALICIA_CENTER,
+  zoom: GALICIA_ZOOM,
   bbox: null,
   setSelectedSpot: (id) => set({ selectedSpotId: id }),
   setUserLocation: (loc) => set({ userLocation: loc }),

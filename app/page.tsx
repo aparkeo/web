@@ -18,6 +18,7 @@ const jsonLd = {
   applicationCategory: 'UtilitiesApplication',
   operatingSystem: 'Any',
   inLanguage: 'es',
+  areaServed: ['Galicia', 'España'],
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
 };
 
