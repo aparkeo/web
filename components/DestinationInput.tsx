@@ -10,11 +10,15 @@ import { parseNaturalQuery } from '@/lib/nlSearch';
 import { geocodeResultsAnnouncement } from '@/lib/a11y';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useDestinationStore } from '@/store/useDestinationStore';
+import { useMapStore } from '@/store/useMapStore';
 import { useT } from '@/components/i18n/I18nProvider';
 
 export function DestinationInput() {
   const destination = useDestinationStore((s) => s.destination);
   const setDestination = useDestinationStore((s) => s.setDestination);
+  // Al elegir un resultado el mapa queda apuntando al destino: al abrirlo
+  // (home → /map) arranca volado al lugar buscado.
+  const setMapCenter = useMapStore((s) => s.setCenter);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -51,6 +55,7 @@ export function DestinationInput() {
           longitude: pos.coords.longitude,
           source: 'current-location',
         });
+        setMapCenter([pos.coords.latitude, pos.coords.longitude], 16);
         setLocating(false);
         setOpen(false);
         setQuery('');
@@ -156,6 +161,7 @@ export function DestinationInput() {
                       statusFilter: parsed.status ?? undefined,
                       interpretation: parsed.interpretation ?? undefined,
                     });
+                    setMapCenter([r.lat, r.lon], 16);
                     setOpen(false);
                     setQuery('');
                   }}

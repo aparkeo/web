@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from 'react-leaflet';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { MapContainer, TileLayer, Marker, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { useTheme } from 'next-themes';
@@ -10,13 +11,15 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { useSpots } from '@/hooks/useSpots';
+import { useSpot } from '@/hooks/useSpot';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { useMapStore } from '@/store/useMapStore';
 import { useBaseLayerStore } from '@/store/useBaseLayerStore';
 import { colorForStatus } from '@/lib/utils';
+import { dedupeSpotsByProximity } from '@/lib/dedupeSpots';
 import { SpotMarker } from '@/components/SpotMarker';
 import { useT } from '@/components/i18n/I18nProvider';
-import type { SpotStatus } from '@/types';
+import type { Bbox, SpotStatus } from '@/types';
 
 // Icono de cluster: círculo con el color del estado dominante entre sus hijos.
 // El estado se detecta por el color del divIcon de cada marcador hijo.
@@ -124,6 +127,103 @@ function RecenterOnUser() {
   return null;
 }
 
+// Debounce (ms) entre el último moveend y la petición de plazas del viewport.
+const VIEWPORT_DEBOUNCE_MS = 400;
+// Padding del bbox para que un paneo pequeño no deje huecos en los bordes.
+const VIEWPORT_PAD_RATIO = 0.15;
+
+const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
+
+/**
+ * Publica el viewport actual en el store (con debounce y padding): useSpots
+ * lo usa como queryKey/queryFn, así cada zona visitada queda cacheada por
+ * React Query y volver a ella no repite la petición.
+ */
+function ViewportSync() {
+  const setBbox = useMapStore((s) => s.setBbox);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const map = useMapEvents({
+    moveend: () => schedulePublish(),
+  });
+
+  const schedulePublish = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      const b = map.getBounds();
+      const latPad = (b.getNorth() - b.getSouth()) * VIEWPORT_PAD_RATIO;
+      const lonPad = (b.getEast() - b.getWest()) * VIEWPORT_PAD_RATIO;
+      // 3 decimales (~111 m): evita entradas de caché por paneos mínimos.
+      const bbox: Bbox = [
+        Number(clamp(b.getSouth() - latPad, -90, 90).toFixed(3)),
+        Number(clamp(b.getWest() - lonPad, -180, 180).toFixed(3)),
+        Number(clamp(b.getNorth() + latPad, -90, 90).toFixed(3)),
+        Number(clamp(b.getEast() + lonPad, -180, 180).toFixed(3)),
+      ];
+      setBbox(bbox);
+    }, VIEWPORT_DEBOUNCE_MS);
+  }, [map, setBbox]);
+
+  useEffect(() => {
+    // Carga inicial: publica el viewport en cuanto el mapa existe.
+    schedulePublish();
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [schedulePublish]);
+
+  return null;
+}
+
+/**
+ * Vuela al centro/zoom del store cuando cambian por una acción externa
+ * (chips de ciudades, ?spot=, resultado de búsqueda). El paneo manual del
+ * usuario NO escribe en el store, así que no hay bucle.
+ */
+function FlyToCenter() {
+  const map = useMap();
+  const center = useMapStore((s) => s.center);
+  const zoom = useMapStore((s) => s.zoom);
+  const lastRef = useRef<[number, number, number] | null>(null);
+
+  useEffect(() => {
+    const key: [number, number, number] = [center[0], center[1], zoom];
+    const last = lastRef.current;
+    lastRef.current = key;
+    // Primera pasada: el MapContainer ya nace en center/zoom, no hace falta volar.
+    if (last === null) return;
+    if (last[0] === key[0] && last[1] === key[1] && last[2] === key[2]) return;
+    map.flyTo(center, zoom, { duration: 0.8 });
+  }, [center, zoom, map]);
+
+  return null;
+}
+
+/**
+ * Apertura directa de una plaza (?spot=id): se pide por id aunque no esté
+ * en el viewport actual, se selecciona y se centra el mapa en ella.
+ */
+function useSpotFromQuery() {
+  const searchParams = useSearchParams();
+  const setSelectedSpot = useMapStore((s) => s.setSelectedSpot);
+  const setCenter = useMapStore((s) => s.setCenter);
+
+  const raw = searchParams.get('spot');
+  const spotId = raw !== null && /^\d+$/.test(raw) ? Number(raw) : null;
+
+  const { data: spot } = useSpot(spotId);
+  const handledRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!spot || spotId === null || handledRef.current === spotId) return;
+    handledRef.current = spotId;
+    setSelectedSpot(spotId);
+    setCenter([spot.lat, spot.lon], 17);
+  }, [spot, spotId, setSelectedSpot, setCenter]);
+
+  return spot ?? null;
+}
+
 // Al alternar entre lista y mapa en móvil el contenedor cambia de tamaño
 // (display: none -> block); Leaflet necesita invalidateSize() para recalcular.
 function InvalidateSizeOnVisible({ visible }: { visible: boolean }) {
@@ -204,7 +304,8 @@ function BaseLayerControl() {
 }
 
 export function MapView({ visible = true }: { visible?: boolean }) {
-  const { data: spots = [], isLoading } = useSpots();
+  const { data: spots = [], isLoading } = useSpots({ viewport: true });
+  const queriedSpot = useSpotFromQuery();
   const center = useMapStore((s) => s.center);
   const zoom = useMapStore((s) => s.zoom);
   const selectedSpotId = useMapStore((s) => s.selectedSpotId);
@@ -223,6 +324,14 @@ export function MapView({ visible = true }: { visible?: boolean }) {
     [],
   );
 
+  // La plaza de ?spot= se muestra aunque esté fuera del viewport cargado, y
+  // se eliminan los duplicados físicos Vigo-oficial vs OSM (solo visual).
+  const visibleSpots = useMemo(() => {
+    const merged =
+      queriedSpot && !spots.some((s) => s.id === queriedSpot.id) ? [...spots, queriedSpot] : spots;
+    return dedupeSpotsByProximity(merged);
+  }, [spots, queriedSpot]);
+
   return (
     <div className="relative h-full w-full">
       {/* keyboard es true por defecto en Leaflet (pan/zoom con teclado y
@@ -238,6 +347,8 @@ export function MapView({ visible = true }: { visible?: boolean }) {
         <BaseLayers />
         <ZoomControl position="bottomright" />
         <RecenterOnUser />
+        <ViewportSync />
+        <FlyToCenter />
         <InvalidateSizeOnVisible visible={visible} />
 
         {userLocation ? (
@@ -257,7 +368,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
           iconCreateFunction={clusterIcon}
         >
           {!isLoading &&
-            spots.map((spot) => (
+            visibleSpots.map((spot) => (
               <SpotMarker
                 key={spot.id}
                 spot={spot}

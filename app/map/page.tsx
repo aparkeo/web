@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { List, Map as MapIcon, MapPinOff } from 'lucide-react';
 import { SearchBar } from '@/components/SearchBar';
+import { QuickCities } from '@/components/QuickCities';
 import { Filters } from '@/components/Filters';
 import { SpotCard } from '@/components/SpotCard';
 import { MapErrorBoundary } from '@/components/MapErrorBoundary';
@@ -26,7 +27,7 @@ function MapLoadingFallback() {
 }
 
 export default function MapPage() {
-  const { data: spots = [], isLoading } = useSpots();
+  const { data: spots = [], isLoading } = useSpots({ viewport: true });
   const live = useRealtimeSpots();
   const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
   const t = useT();
@@ -40,6 +41,7 @@ export default function MapPage() {
         aria-label={t.map.listAria}
       >
         <div className="space-y-3 p-4">
+          <QuickCities />
           <SearchBar />
           <Filters />
           <LiveIndicator live={live} />

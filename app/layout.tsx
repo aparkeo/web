@@ -17,18 +17,18 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `Aparkeo Vigo — ${SITE_TAGLINE.split(',')[0]}`,
+    default: `Aparkeo — ${SITE_TAGLINE.split(',')[0]}`,
     template: '%s · Aparkeo',
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    'PMR Vigo',
+    'plazas PMR',
     'aparcamiento movilidad reducida',
     'plazas PMR libres',
-    'parking accesible Vigo',
-    'aparcamiento Vigo',
+    'parking accesible España',
+    'aparcamiento PMR España',
     'movilidad reducida',
-    'discapacidad Vigo',
+    'PMR Vigo',
   ],
   authors: [{ name: 'Aparkeo' }],
   robots: { index: true, follow: true },
@@ -37,15 +37,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_ES',
     url: SITE_URL,
-    siteName: 'Aparkeo Vigo',
-    title: `Aparkeo Vigo — ${SITE_TAGLINE}`,
+    siteName: 'Aparkeo',
+    title: `Aparkeo — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     // Las imágenes (PNG 1200×630) las generan app/opengraph-image.tsx y
     // app/twitter-image.tsx por convención de archivos de Next.
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Aparkeo Vigo — ${SITE_TAGLINE}`,
+    title: `Aparkeo — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
   },
   manifest: '/manifest.webmanifest',

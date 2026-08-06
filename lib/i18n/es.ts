@@ -59,13 +59,13 @@ export const es = {
     toDark: 'Cambiar a modo oscuro',
   },
   home: {
-    kicker: 'Plazas PMR en Vigo',
+    kicker: 'Plazas PMR en vivo — empieza por tu ciudad',
     title: '¿Dónde aparco?',
     subtitle:
       'Dinos a dónde vas y te recomendamos la mejor plaza PMR libre para llegar allí. Sin explorar mapas.',
     viewMap: 'Ver mapa completo',
     viewStats: 'Ver estadísticas',
-    exploreAria: 'Explorar Aparkeo Vigo',
+    exploreAria: 'Explorar Aparkeo',
   },
   status: {
     free: 'Libre',
@@ -89,18 +89,19 @@ export const es = {
     noSpotsMatch: 'Ninguna plaza coincide con los filtros.',
     oneSpotShown: 'Se muestra 1 plaza.',
     spotsShown: 'Se muestran {n} plazas.',
-    noGeocodeResults: 'Sin resultados en Vigo.',
+    noGeocodeResults: 'Sin resultados.',
     oneGeocodeResult: '1 resultado encontrado.',
     geocodeResults: '{n} resultados encontrados.',
   },
   map: {
     listAria: 'Lista de plazas',
     regionAria: 'Mapa interactivo',
-    fullAria: 'Mapa interactivo de plazas de movilidad reducida en Vigo',
+    fullAria: 'Mapa interactivo de plazas de movilidad reducida en España',
     viewList: 'Ver lista',
     viewMap: 'Ver mapa',
     viewListAria: 'Ver lista de plazas',
     viewMapAria: 'Ver mapa',
+    quickCities: 'Ciudades principales',
     searchPlaceholder: 'Buscar calle o zona…',
     searchAria: 'Buscar plaza por calle',
     clearSearch: 'Limpiar búsqueda',
@@ -140,7 +141,7 @@ export const es = {
   },
   destination: {
     placeholder: '¿A dónde vas? (p. ej. «plaza libre cerca del Corte Inglés»)',
-    inputAria: 'Destino: dirección o lugar de Vigo',
+    inputAria: 'Destino: dirección o lugar',
     resultsAria: 'Resultados de búsqueda de destino',
     useMyLocation: 'Usar mi ubicación actual',
     locating: 'Localizando…',
@@ -192,7 +193,7 @@ export const es = {
     steps: {
       'map-status': {
         title: 'El mapa, de un vistazo',
-        body: 'Cada punto es una plaza PMR de Vigo: verde si está libre, rojo si está ocupada y gris si aún no hay datos. Toca un punto para ver la calle, la distancia y cómo llegar.',
+        body: 'Cada punto es una plaza PMR: verde si está libre, rojo si está ocupada y gris si aún no hay datos. Toca un punto para ver la calle, la distancia y cómo llegar.',
       },
       report: {
         title: '¿Ves una plaza? Cuéntalo',
@@ -281,9 +282,9 @@ export const es = {
     networkError: 'Error de red. Inténtalo de nuevo.',
   },
   spot: {
-    kicker: 'Plaza PMR · Vigo',
-    shareTitle: 'Plaza PMR en {street} | Aparkeo Vigo',
-    shareText: 'Plaza PMR en {street} — mira si está libre en Aparkeo Vigo',
+    kicker: 'Plaza PMR',
+    shareTitle: 'Plaza PMR en {street} | Aparkeo',
+    shareText: 'Plaza PMR en {street} — mira si está libre en Aparkeo',
     markFavorite: 'Marcar como favorita',
     removeFavorite: 'Quitar de favoritas',
     spaceOne: 'plaza',
@@ -342,7 +343,7 @@ export const es = {
     publish: 'Comentar',
   },
   stats: {
-    kicker: 'En vivo · Vigo',
+    kicker: 'En vivo · España',
     title: 'Estadísticas',
     subtitle:
       'Pulso en tiempo real de las plazas PMR: disponibilidad, reportes y actividad de la comunidad.',
@@ -353,15 +354,15 @@ export const es = {
     currentStatus: 'Estado actual de las plazas',
   },
   analytics: {
-    kicker: 'Datos abiertos · Vigo',
-    title: 'Analítica de la ciudad',
+    kicker: 'Datos abiertos · España',
+    title: 'Analítica nacional',
     share: 'Compartir',
-    shareTitle: 'Analítica PMR de Vigo | Aparkeo Vigo',
+    shareTitle: 'Analítica PMR de España | Aparkeo',
     shareText:
-      'Mira cómo respira el aparcamiento PMR en Vigo: horas punta, zonas y tendencias en Aparkeo Vigo',
+      'Mira cómo respira el aparcamiento PMR en España: horas punta, zonas y tendencias en Aparkeo',
     subtitle:
-      'Cómo respira el aparcamiento PMR en Vigo: agregados anónimos de la actividad de la comunidad durante los últimos 30 días.',
-    loadError: 'No se pudo cargar la analítica de la ciudad.',
+      'Cómo respira el aparcamiento PMR en España: agregados anónimos de la actividad de la comunidad durante los últimos 30 días.',
+    loadError: 'No se pudo cargar la analítica nacional.',
     kpiSpots: 'Plazas registradas',
     kpiFreeNow: 'Libres ahora',
     kpiOccupiedNow: 'Ocupadas ahora',
@@ -476,7 +477,7 @@ export const es = {
       'El mapa y los reportes serán siempre gratuitos. Apoyar es voluntario y no desbloquea ni bloquea ninguna función: es solo una forma de ayudar a que Aparkeo siga existiendo.',
     sponsorsEmptyTitle: 'Con el apoyo de… ¿tu negocio?',
     sponsorsEmptyBody:
-      '¿Tienes un negocio en Vigo y quieres apoyar la movilidad accesible en tu ciudad? Tu logo puede aparecer aquí, junto a un proyecto que usa la comunidad cada día. Escríbenos y te contamos cómo funciona.',
+      '¿Tienes un negocio y quieres apoyar la movilidad accesible en tu ciudad? Tu logo puede aparecer aquí, junto a un proyecto que usa la comunidad cada día. Escríbenos y te contamos cómo funciona.',
     sponsorsEmptyCta: 'Quiero patrocinar',
     sponsorsTitle: 'Con el apoyo de',
   },

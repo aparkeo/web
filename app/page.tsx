@@ -12,7 +12,7 @@ const secondaryLinkClass =
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Aparkeo Vigo',
+  name: 'Aparkeo',
   url: SITE_URL,
   description: SITE_DESCRIPTION,
   applicationCategory: 'UtilitiesApplication',

@@ -5,12 +5,12 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Reportar estado de una plaza',
   description:
-    'Reporta si una plaza PMR de Vigo está libre u ocupada. Cada reporte de la comunidad mantiene el mapa fiable para todas las personas con movilidad reducida.',
+    'Reporta si una plaza PMR está libre u ocupada. Cada reporte de la comunidad mantiene el mapa fiable para todas las personas con movilidad reducida.',
   alternates: { canonical: '/report' },
   openGraph: {
-    title: 'Reportar estado de una plaza PMR | Aparkeo Vigo',
+    title: 'Reportar estado de una plaza PMR | Aparkeo',
     description:
-      'Ayuda a la comunidad PMR de Vigo: reporta el estado de las plazas que ves y mantén el mapa al día.',
+      'Ayuda a la comunidad PMR: reporta el estado de las plazas que ves y mantén el mapa al día.',
   },
 };
 

@@ -52,13 +52,13 @@ export const gl: Dictionary = {
     toDark: 'Cambiar a modo escuro',
   },
   home: {
-    kicker: 'Prazas PMR en Vigo',
+    kicker: 'Prazas PMR en directo — comeza pola túa cidade',
     title: 'Onde aparco?',
     subtitle:
       'Dinos a onde vas e recomendámosche a mellor praza PMR libre para chegar alí. Sen explorar mapas.',
     viewMap: 'Ver o mapa completo',
     viewStats: 'Ver as estatísticas',
-    exploreAria: 'Explorar Aparkeo Vigo',
+    exploreAria: 'Explorar Aparkeo',
   },
   status: {
     free: 'Libre',
@@ -82,18 +82,19 @@ export const gl: Dictionary = {
     noSpotsMatch: 'Ningunha praza coincide cos filtros.',
     oneSpotShown: 'Móstrase 1 praza.',
     spotsShown: 'Móstranse {n} prazas.',
-    noGeocodeResults: 'Sen resultados en Vigo.',
+    noGeocodeResults: 'Sen resultados.',
     oneGeocodeResult: '1 resultado atopado.',
     geocodeResults: '{n} resultados atopados.',
   },
   map: {
     listAria: 'Lista de prazas',
     regionAria: 'Mapa interactivo',
-    fullAria: 'Mapa interactivo de prazas de mobilidade reducida en Vigo',
+    fullAria: 'Mapa interactivo de prazas de mobilidade reducida en España',
     viewList: 'Ver a lista',
     viewMap: 'Ver o mapa',
     viewListAria: 'Ver a lista de prazas',
     viewMapAria: 'Ver o mapa',
+    quickCities: 'Cidades principais',
     searchPlaceholder: 'Buscar rúa ou zona…',
     searchAria: 'Buscar praza por rúa',
     clearSearch: 'Limpar a busca',
@@ -133,7 +134,7 @@ export const gl: Dictionary = {
   },
   destination: {
     placeholder: 'A onde vas? (p. ex. «praza libre preto do Corte Inglés»)',
-    inputAria: 'Destino: enderezo ou lugar de Vigo',
+    inputAria: 'Destino: enderezo ou lugar',
     resultsAria: 'Resultados de busca de destino',
     useMyLocation: 'Usar a miña localización actual',
     locating: 'Localizando…',
@@ -185,7 +186,7 @@ export const gl: Dictionary = {
     steps: {
       'map-status': {
         title: 'O mapa, dunha ollada',
-        body: 'Cada punto é unha praza PMR de Vigo: verde se está libre, vermello se está ocupada e gris se aínda non hai datos. Toca un punto para ver a rúa, a distancia e como chegar.',
+        body: 'Cada punto é unha praza PMR: verde se está libre, vermello se está ocupada e gris se aínda non hai datos. Toca un punto para ver a rúa, a distancia e como chegar.',
       },
       report: {
         title: 'Ves unha praza? Cóntao',
@@ -274,9 +275,9 @@ export const gl: Dictionary = {
     networkError: 'Erro de rede. Téntao de novo.',
   },
   spot: {
-    kicker: 'Praza PMR · Vigo',
-    shareTitle: 'Praza PMR en {street} | Aparkeo Vigo',
-    shareText: 'Praza PMR en {street} — mira se está libre en Aparkeo Vigo',
+    kicker: 'Praza PMR',
+    shareTitle: 'Praza PMR en {street} | Aparkeo',
+    shareText: 'Praza PMR en {street} — mira se está libre en Aparkeo',
     markFavorite: 'Marcar como favorita',
     removeFavorite: 'Quitar de favoritas',
     spaceOne: 'praza',
@@ -335,7 +336,7 @@ export const gl: Dictionary = {
     publish: 'Comentar',
   },
   stats: {
-    kicker: 'En directo · Vigo',
+    kicker: 'En directo · España',
     title: 'Estatísticas',
     subtitle:
       'Pulso en tempo real das prazas PMR: dispoñibilidade, informes e actividade da comunidade.',
@@ -346,15 +347,15 @@ export const gl: Dictionary = {
     currentStatus: 'Estado actual das prazas',
   },
   analytics: {
-    kicker: 'Datos abertos · Vigo',
-    title: 'Analítica da cidade',
+    kicker: 'Datos abertos · España',
+    title: 'Analítica nacional',
     share: 'Compartir',
-    shareTitle: 'Analítica PMR de Vigo | Aparkeo Vigo',
+    shareTitle: 'Analítica PMR de España | Aparkeo',
     shareText:
-      'Mira como respira o aparcadoiro PMR en Vigo: horas punta, zonas e tendencias en Aparkeo Vigo',
+      'Mira como respira o aparcadoiro PMR en España: horas punta, zonas e tendencias en Aparkeo',
     subtitle:
-      'Como respira o aparcadoiro PMR en Vigo: agregados anónimos da actividade da comunidade durante os últimos 30 días.',
-    loadError: 'Non se puido cargar a analítica da cidade.',
+      'Como respira o aparcadoiro PMR en España: agregados anónimos da actividade da comunidade durante os últimos 30 días.',
+    loadError: 'Non se puido cargar a analítica nacional.',
     kpiSpots: 'Prazas rexistradas',
     kpiFreeNow: 'Libres agora',
     kpiOccupiedNow: 'Ocupadas agora',
@@ -469,7 +470,7 @@ export const gl: Dictionary = {
       'O mapa e os informes serán sempre gratuitos. Apoiar é voluntario e non desbloquea nin bloquea ningunha función: é só unha forma de axudar a que Aparkeo siga existindo.',
     sponsorsEmptyTitle: 'Co apoio de… o teu negocio?',
     sponsorsEmptyBody:
-      'Tes un negocio en Vigo e queres apoiar a mobilidade accesible na túa cidade? O teu logo pode aparecer aquí, xunto a un proxecto que a comunidade usa cada día. Escríbenos e contámosche como funciona.',
+      'Tes un negocio e queres apoiar a mobilidade accesible na túa cidade? O teu logo pode aparecer aquí, xunto a un proxecto que a comunidade usa cada día. Escríbenos e contámosche como funciona.',
     sponsorsEmptyCta: 'Quero patrocinar',
     sponsorsTitle: 'Co apoio de',
   },

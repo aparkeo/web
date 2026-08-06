@@ -10,10 +10,15 @@ export interface SpotDTO {
   spaces: number;
   status: SpotStatus;
   confidence: Confidence;
+  /** Origen del dato ("vigo-opendata", "osm", ...); null en registros legado. */
+  source?: string | null;
   lastReportAt: string | null;
   distanceM?: number;
   isFavorite?: boolean;
 }
+
+/** Bounding box geográfica: [south, west, north, east]. */
+export type Bbox = [number, number, number, number];
 
 export interface PredictionDTO {
   spotId: number;

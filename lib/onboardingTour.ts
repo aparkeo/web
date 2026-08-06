@@ -38,7 +38,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     id: 'map-status',
     targetSelector: '[data-tour="map"]',
     title: 'El mapa, de un vistazo',
-    body: 'Cada punto es una plaza PMR de Vigo: verde si está libre, rojo si está ocupada y gris si aún no hay datos. Toca un punto para ver la calle, la distancia y cómo llegar.',
+    body: 'Cada punto es una plaza PMR: verde si está libre, rojo si está ocupada y gris si aún no hay datos. Toca un punto para ver la calle, la distancia y cómo llegar.',
   },
   {
     id: 'report',

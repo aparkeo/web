@@ -4,7 +4,7 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://minusvigo-w
 export const SITE_NAME = 'Aparkeo';
 export const SITE_TAGLINE = 'Plazas PMR en vivo';
 export const SITE_DESCRIPTION =
-  'Aparkeo Vigo: encuentra plazas de aparcamiento PMR libres en Vigo en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.';
+  'Aparkeo: encuentra plazas de aparcamiento PMR libres en toda España en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad.';
 // Repositorio público del proyecto: vía de contacto con el mantenedor y
 // canal para ejercer derechos RGPD (no hay entidad legal detrás).
 export const SITE_GITHUB_URL = 'https://github.com/adrianalvarezfreire11/minusvigo-web';

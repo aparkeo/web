@@ -18,7 +18,7 @@ describe('spotsCountAnnouncement', () => {
 
 describe('geocodeResultsAnnouncement', () => {
   it('anuncia la ausencia de resultados', () => {
-    expect(geocodeResultsAnnouncement(0)).toBe('Sin resultados en Vigo.');
+    expect(geocodeResultsAnnouncement(0)).toBe('Sin resultados.');
   });
 
   it('usa singular con 1 resultado', () => {

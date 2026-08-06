@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 // Tarjeta OG de marca (1200×630): la primera impresión al pegar el enlace en
 // WhatsApp, X o Telegram. SVG no vale: esas plataformas exigen PNG/JPG.
 export const runtime = 'edge';
-export const alt = 'Aparkeo Vigo — Plazas PMR en vivo';
+export const alt = 'Aparkeo — Plazas PMR en vivo';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -44,7 +44,7 @@ export default function OpenGraphImage() {
               Aparkeo
             </div>
             <div style={{ fontSize: 42, fontWeight: 600, color: '#CFF2EA', marginTop: 16 }}>
-              Plazas PMR en vivo · Vigo
+              Plazas PMR en vivo · España
             </div>
           </div>
         </div>

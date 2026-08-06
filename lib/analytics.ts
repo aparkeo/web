@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
 
 // ---------------------------------------------------------------------------
-// Panel de analítica de ciudad (roadmap nº15).
+// Panel de analítica nacional (roadmap nº15 como panel de ciudad; ampliado a
+// agregado de toda España con la expansión multi-ciudad del roadmap nº29).
 //
 // Toda la agregación pesada se hace EN BASE DE DATOS ($queryRaw con
 // GROUP BY / FILTER); el servidor solo rellena buckets vacíos y calcula
@@ -9,7 +10,7 @@ import { prisma } from '@/lib/prisma';
 //
 // Zona horaria: `reportedAt` es `timestamp without time zone` y la sesión
 // de la DB corre en UTC (Supabase), así que los buckets por hora/día se
-// calculan convirtiendo a hora local de Vigo:
+// calculan convirtiendo a hora peninsular:
 //   (reportedAt AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Madrid'
 // ---------------------------------------------------------------------------
 

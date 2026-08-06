@@ -5,12 +5,12 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Mapa de plazas PMR',
   description:
-    'Mapa interactivo de plazas de aparcamiento PMR en Vigo con su estado en tiempo real: libres, ocupadas y reportes de la comunidad.',
+    'Mapa interactivo de plazas de aparcamiento PMR en España con su estado en tiempo real: libres, ocupadas y reportes de la comunidad.',
   alternates: { canonical: '/map' },
   openGraph: {
-    title: 'Mapa de plazas PMR en Vigo | Aparkeo Vigo',
+    title: 'Mapa de plazas PMR en España | Aparkeo',
     description:
-      'Explora el mapa de plazas de aparcamiento PMR en Vigo y mira cuáles están libres ahora mismo.',
+      'Explora el mapa de plazas de aparcamiento PMR en España y mira cuáles están libres ahora mismo.',
   },
 };
 

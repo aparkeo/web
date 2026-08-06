@@ -7,7 +7,7 @@ describe('SponsorsSection', () => {
     render(<SponsorsSection sponsors={[]} />);
 
     expect(screen.getByRole('heading', { name: /¿tu negocio\?/i })).toBeInTheDocument();
-    expect(screen.getByText(/¿Tienes un negocio en Vigo/)).toBeInTheDocument();
+    expect(screen.getByText(/¿Tienes un negocio y quieres apoyar la movilidad accesible/)).toBeInTheDocument();
 
     const cta = screen.getByRole('link', { name: /quiero patrocinar/i });
     expect(cta).toHaveAttribute('href', expect.stringMatching(/^mailto:/));

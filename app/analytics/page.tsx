@@ -4,9 +4,9 @@ import { ShareButton } from '@/components/ShareButton';
 import { getServerDictionary } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
-  title: 'Analítica de la ciudad',
+  title: 'Analítica nacional',
   description:
-    'Panel público de analítica del aparcamiento PMR en Vigo: horas punta, ocupación por zonas, tendencias y plazas más reportadas. Datos agregados y anónimos.',
+    'Panel público de analítica del aparcamiento PMR en España: horas punta, ocupación por zonas, tendencias y plazas más reportadas. Datos agregados y anónimos.',
   alternates: { canonical: '/analytics' },
 };
 

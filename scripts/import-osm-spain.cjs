@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Aparkeo — importación de plazas PMR de OpenStreetMap para toda España
  * (roadmap nº28, fase 1: datos).

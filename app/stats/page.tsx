@@ -4,7 +4,7 @@ import { getServerDictionary } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Estadísticas',
-  description: 'Estadísticas en vivo de plazas PMR libres y ocupadas en Vigo.',
+  description: 'Estadísticas en vivo de plazas PMR libres y ocupadas en toda España.',
 };
 
 export default async function StatsPage() {
