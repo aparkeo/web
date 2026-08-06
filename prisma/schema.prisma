@@ -90,12 +90,20 @@ enum Role {
 // ---------------------------------------------------------------------------
 
 model ParkingSpot {
-  id        Int       @id // mismo id que el dataset oficial del Concello (compartido con la app móvil)
+  id        Int       @id // mismo id que el dataset oficial del Concello (compartido con la app móvil); los spots OSM usan ids asignados desde un rango alto (>= 20000000)
   city      String    @default("Vigo")
   street    String
   lat       Float
   lon       Float
   spaces    Int       @default(1)
+
+  // Campos territoriales y de procedencia (roadmap nº28 — expansión a toda España).
+  // Opcionales: los 843 spots originales de Vigo los llevan rellenos tras la
+  // migración; `source`+`externalId` permiten deduplicar re-importaciones.
+  province   String? // provincia (p. ej. "Pontevedra")
+  community  String? // comunidad autónoma (p. ej. "Galicia")
+  source     String? // origen del dato: "vigo-opendata", "osm", ...
+  externalId String? // id en la fuente original (p. ej. "node/123456" en OSM)
 
   // Estado cacheado: se recalcula a partir de Report en cada escritura,
   // para no tener que agregar reports en cada lectura del mapa.
@@ -116,6 +124,11 @@ model ParkingSpot {
   @@index([city])
   @@index([status])
   @@index([lat, lon])
+  // En Postgres los NULL no colisionan en índices únicos, así que los spots
+  // sin source/externalId (legado) no chocan entre sí.
+  @@unique([source, externalId])
+  @@index([community])
+  @@index([province])
   @@map("parking_spots")
 }
 
