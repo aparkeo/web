@@ -19,7 +19,7 @@ No comparte código, base de datos ni backend. Solo el dominio del problema.
 ## Estructura del proyecto
 
 ```
-minusvigo-web/
+web/
 ├── app/                  # Next.js App Router: páginas + API routes + SEO
 │   ├── api/               # Endpoints backend (route handlers)
 │   ├── admin/              # Panel de administración (protegido)
@@ -58,7 +58,7 @@ minusvigo-web/
 ## Arranque local
 
 ```bash
-cd minusvigo-web
+cd web
 npm install
 cp .env.example .env        # rellena DATABASE_URL y AUTH_SECRET
 npx prisma db push          # crea las tablas
@@ -94,7 +94,7 @@ Si hay señal viva fuerte, gana esa. Si no, se usa el histórico, o una mezcla
 
 ## Despliegue en Vercel
 
-1. Conecta el repo, **Root Directory = `minusvigo-web`**.
+1. Conecta el repo `aparkeo/web` (Root Directory = raíz del repo).
 2. Variables de entorno: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL` (la URL de
    producción), opcionalmente `NEXT_PUBLIC_MAPBOX_TOKEN` y `NEXT_PUBLIC_SITE_URL`.
 3. Build command ya incluye `prisma generate` (ver `package.json`).

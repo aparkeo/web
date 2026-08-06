@@ -7,4 +7,4 @@ export const SITE_DESCRIPTION =
   'Aparkeo: encuentra plazas de aparcamiento PMR libres en Galicia y toda España en tiempo real. Mapa, predicciones inteligentes y reportes de la comunidad. Hecho en Galicia.';
 // Repositorio público del proyecto: vía de contacto con el mantenedor y
 // canal para ejercer derechos RGPD (no hay entidad legal detrás).
-export const SITE_GITHUB_URL = 'https://github.com/aparkeo/minusvigo-web';
+export const SITE_GITHUB_URL = 'https://github.com/aparkeo/web';

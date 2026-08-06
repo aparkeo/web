@@ -24,14 +24,14 @@ describe('ShareButton', () => {
     const share = vi.fn().mockResolvedValue(undefined);
     setNavigatorProp('share', share);
 
-    render(<ShareButton title="Plaza PMR en Gran Vía | Aparkeo Vigo" text="Plaza PMR en Gran Vía — mira si está libre en Aparkeo Vigo" url="https://minusvigo-web.vercel.app/spots/7" />);
+    render(<ShareButton title="Plaza PMR en Gran Vía | Aparkeo Vigo" text="Plaza PMR en Gran Vía — mira si está libre en Aparkeo Vigo" url="https://aparkeo.com/spots/7" />);
     fireEvent.click(screen.getByRole('button', { name: 'Compartir' }));
 
     await waitFor(() => {
       expect(share).toHaveBeenCalledWith({
         title: 'Plaza PMR en Gran Vía | Aparkeo Vigo',
         text: 'Plaza PMR en Gran Vía — mira si está libre en Aparkeo Vigo',
-        url: 'https://minusvigo-web.vercel.app/spots/7',
+        url: 'https://aparkeo.com/spots/7',
       });
     });
     expect(toastSuccess).not.toHaveBeenCalled();
@@ -67,10 +67,10 @@ describe('ShareButton', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     setNavigatorProp('clipboard', { writeText });
 
-    render(<ShareButton title="T" text="x" url="https://minusvigo-web.vercel.app/analytics" />);
+    render(<ShareButton title="T" text="x" url="https://aparkeo.com/analytics" />);
     fireEvent.click(screen.getByRole('button', { name: 'Compartir' }));
 
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith('https://minusvigo-web.vercel.app/analytics'));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('https://aparkeo.com/analytics'));
     expect(toastSuccess).toHaveBeenCalledWith('Enlace copiado');
   });
 

@@ -28,7 +28,7 @@ function postReq(report: unknown): NextRequest {
 const REPORT = {
   'violated-directive': 'script-src-elem',
   'blocked-uri': 'https://evil.example.com/track.js?token=abc123&user=42',
-  'document-uri': 'https://minusvigo-web.vercel.app/map?spot=7&foo=bar#frag',
+  'document-uri': 'https://aparkeo.com/map?spot=7&foo=bar#frag',
   disposition: 'enforce',
 };
 

@@ -60,7 +60,7 @@ describe('sitemap.ts', () => {
 
 describe('lib/site', () => {
   it('usa el dominio de producción como base por defecto', () => {
-    // En los tests no hay NEXT_PUBLIC_SITE_URL: debe caer al dominio de Vercel.
-    expect(SITE_URL).toBe('https://minusvigo-web.vercel.app');
+    // En los tests no hay NEXT_PUBLIC_SITE_URL: debe caer al dominio propio.
+    expect(SITE_URL).toBe('https://aparkeo.com');
   });
 });

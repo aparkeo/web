@@ -13,7 +13,7 @@ auditoría a11y (roadmap nº20). Duración estimada: **30–45 minutos**.
 1. Descarga NVDA (gratuito): https://www.nvaccess.org/download/
 2. Navegador recomendado: **Chrome, Edge o Firefox** (Brave es Chromium y funciona,
    pero si algo raro pasa, contrasta con Chrome).
-3. Abre https://minusvigo-web.vercel.app y arranca NVDA (`Ctrl+Alt+N`).
+3. Abre https://aparkeo.com y arranca NVDA (`Ctrl+Alt+N`).
 4. Prueba en **modo claro y oscuro** (el toggle está en la navbar).
 
 ### Comandos NVDA esenciales
