@@ -16,7 +16,7 @@ solo falta la autenticación (interactiva, la hace el propietario).
 ## Opción A — Dashboard (recomendada, 5 min)
 
 1. Entra en https://vercel.com/new e inicia sesión con GitHub
-2. Importa el repo `adrianalvarezfreire11/minusvigo-web`
+2. Importa el repo `aparkeo/minusvigo-web`
 3. En **Environment Variables**, añade las de la tabla de abajo
 4. Pulsa **Deploy**
 
