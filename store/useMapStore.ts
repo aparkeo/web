@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Bbox, UserLocation } from '@/types';
 
 interface MapState {
@@ -21,14 +22,26 @@ interface MapState {
 const GALICIA_CENTER: [number, number] = [42.65, -8.0];
 const GALICIA_ZOOM = 8;
 
-export const useMapStore = create<MapState>((set) => ({
-  selectedSpotId: null,
-  userLocation: null,
-  center: GALICIA_CENTER,
-  zoom: GALICIA_ZOOM,
-  bbox: null,
-  setSelectedSpot: (id) => set({ selectedSpotId: id }),
-  setUserLocation: (loc) => set({ userLocation: loc }),
-  setCenter: (center, zoom) => set((s) => ({ center, zoom: zoom ?? s.zoom })),
-  setBbox: (bbox) => set({ bbox }),
-}));
+export const useMapStore = create<MapState>()(
+  persist(
+    (set) => ({
+      selectedSpotId: null,
+      userLocation: null,
+      center: GALICIA_CENTER,
+      zoom: GALICIA_ZOOM,
+      bbox: null,
+      setSelectedSpot: (id) => set({ selectedSpotId: id }),
+      setUserLocation: (loc) => set({ userLocation: loc }),
+      setCenter: (center, zoom) => set((s) => ({ center, zoom: zoom ?? s.zoom })),
+      setBbox: (bbox) => set({ bbox }),
+    }),
+    {
+      // Solo se persiste el viewport (center+zoom): al volver a la app el mapa
+      // se abre donde lo dejó el usuario. Selección, ubicación GPS y bbox son
+      // efímeros por diseño.
+      name: 'aparkeo-map-viewport',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ center: s.center, zoom: s.zoom }),
+    },
+  ),
+);

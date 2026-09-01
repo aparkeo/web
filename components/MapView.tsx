@@ -141,6 +141,7 @@ const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min)
  */
 function ViewportSync() {
   const setBbox = useMapStore((s) => s.setBbox);
+  const setCenter = useMapStore((s) => s.setCenter);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const map = useMapEvents({
@@ -161,8 +162,16 @@ function ViewportSync() {
         Number(clamp(b.getEast() + lonPad, -180, 180).toFixed(3)),
       ];
       setBbox(bbox);
+      // Persistir el viewport real (paneo manual incluido): center+zoom se
+      // guardan en localStorage vía persist y el mapa se abre aquí al volver.
+      // FlyToCenter no reacciona porque el mapa YA está en esta posición.
+      const c = map.getCenter();
+      setCenter(
+        [Number(c.lat.toFixed(5)), Number(c.lng.toFixed(5))],
+        Number(map.getZoom().toFixed(2)),
+      );
     }, VIEWPORT_DEBOUNCE_MS);
-  }, [map, setBbox]);
+  }, [map, setBbox, setCenter]);
 
   useEffect(() => {
     // Carga inicial: publica el viewport en cuanto el mapa existe.
@@ -178,21 +187,24 @@ function ViewportSync() {
 /**
  * Vuela al centro/zoom del store cuando cambian por una acción externa
  * (chips de ciudades, ?spot=, resultado de búsqueda). El paneo manual del
- * usuario NO escribe en el store, así que no hay bucle.
+ * usuario TAMBIÉN escribe en el store (ViewportSync, para persistir el
+ * viewport), así que la guarda compara con la posición REAL actual del mapa:
+ * si el mapa ya está ahí (paneo manual, primer render) no se vuela.
  */
 function FlyToCenter() {
   const map = useMap();
   const center = useMapStore((s) => s.center);
   const zoom = useMapStore((s) => s.zoom);
-  const lastRef = useRef<[number, number, number] | null>(null);
 
   useEffect(() => {
-    const key: [number, number, number] = [center[0], center[1], zoom];
-    const last = lastRef.current;
-    lastRef.current = key;
-    // Primera pasada: el MapContainer ya nace en center/zoom, no hace falta volar.
-    if (last === null) return;
-    if (last[0] === key[0] && last[1] === key[1] && last[2] === key[2]) return;
+    const c = map.getCenter();
+    const z = map.getZoom();
+    // Épsilon ~11 m: cubre el redondeo a 5 decimales de ViewportSync.
+    const alreadyThere =
+      Math.abs(c.lat - center[0]) < 1e-4 &&
+      Math.abs(c.lng - center[1]) < 1e-4 &&
+      Math.abs(z - zoom) < 0.01;
+    if (alreadyThere) return;
     map.flyTo(center, zoom, { duration: 0.8 });
   }, [center, zoom, map]);
 
