@@ -27,7 +27,7 @@
  * directamente (no al importarlo desde Vitest).
  */
 import 'dotenv/config';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PrismaClient } from '@prisma/client';
@@ -107,6 +107,7 @@ export interface ReportRow {
 }
 
 export interface DatasetRow {
+  spotId: number;
   features: number[];
   label: number; // 1 = FREE, 0 = OCCUPIED
   reportedAt: Date;
@@ -129,6 +130,7 @@ export function buildDataset(reports: ReportRow[]): DatasetRow[] {
     const { dayOfWeek, hour } = vigoBucket(r.reportedAt);
 
     rows.push({
+      spotId: r.spotId,
       features: buildFeatures({
         dayOfWeek,
         hour,
@@ -146,6 +148,33 @@ export function buildDataset(reports: ReportRow[]): DatasetRow[] {
     perSpot.set(r.spotId, agg);
   }
   return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Entrada alternativa: CSV sintético (modo --synthetic, sin tocar la BD)
+// ---------------------------------------------------------------------------
+
+/** Parsea un CSV con cabecera `spotId,status,weight,reportedAt` (ISO). */
+export function parseReportsCsv(csv: string): ReportRow[] {
+  const lines = csv.trim().split(/\r?\n/);
+  const rows: ReportRow[] = [];
+  for (const [i, line] of lines.entries()) {
+    if (i === 0 && line.toLowerCase().startsWith('spotid')) continue; // cabecera
+    const [spotId, status, weight, reportedAt] = line.split(',');
+    if (status !== 'FREE' && status !== 'OCCUPIED') {
+      throw new Error(`CSV línea ${i + 1}: status inválido "${status}"`);
+    }
+    const date = new Date(reportedAt);
+    if (Number.isNaN(date.getTime())) {
+      throw new Error(`CSV línea ${i + 1}: reportedAt inválido "${reportedAt}"`);
+    }
+    rows.push({ spotId: Number(spotId), status, weight: Number(weight), reportedAt: date });
+  }
+  return rows;
+}
+
+export async function loadReportsFromCsv(csvPath: string): Promise<ReportRow[]> {
+  return parseReportsCsv(await readFile(csvPath, 'utf8'));
 }
 
 // ---------------------------------------------------------------------------
@@ -374,128 +403,218 @@ export function predictProba(model: TrainedModel, features: number[]): number {
   return sigmoid(predictRaw(model, features));
 }
 
+/**
+ * Baseline por bucket: la media histórica por plaza/día/hora que usa hoy la
+ * producción (ponderada por weight, como recomputeHistoricalPredictions),
+ * calculada SOLO con el set de train. Si un bucket de test no existe en
+ * train, cae a la media global de train.
+ */
+export function bucketBaselineProbs(train: DatasetRow[], test: DatasetRow[]): number[] {
+  const buckets = new Map<string, { free: number; total: number }>();
+  for (const r of train) {
+    const weight = r.features[5];
+    const key = `${r.spotId}-${r.features[0]}-${r.features[1]}`;
+    const agg = buckets.get(key) ?? { free: 0, total: 0 };
+    agg.total += weight;
+    agg.free += weight * r.label;
+    buckets.set(key, agg);
+  }
+  const globalMean = train.reduce((a, r) => a + r.label, 0) / Math.max(1, train.length);
+  return test.map((r) => {
+    const agg = buckets.get(`${r.spotId}-${r.features[0]}-${r.features[1]}`);
+    return agg && agg.total > 0 ? agg.free / agg.total : globalMean;
+  });
+}
+
 // ---------------------------------------------------------------------------
-// main(): carga BD, entrena, valida y (solo si supera al baseline) escribe
+// main(): carga BD o CSV (--synthetic), entrena, valida y escribe
 // ---------------------------------------------------------------------------
 
 const MIN_REPORTS_TO_TRAIN = 50;
 
 interface TrainMetrics {
   trainedAt: string;
+  mode: 'production' | 'synthetic';
   trainSize: number;
   testSize: number;
   params: typeof GBM_PARAMS;
   baseline: { logLoss: number; accuracy: number };
+  bucketBaseline: { logLoss: number; accuracy: number };
   model: { logLoss: number; accuracy: number };
   beatsBaseline: boolean;
+  beatsBucketBaseline: boolean;
 }
 
 async function main(): Promise<void> {
-  const prisma = new PrismaClient();
-  try {
-    const reports = await prisma.report.findMany({
-      where: { status: { not: 'UNKNOWN' } },
-      orderBy: { reportedAt: 'asc' },
-      select: { spotId: true, status: true, weight: true, reportedAt: true },
-    });
-    console.log(`Reportes cargados (status != UNKNOWN): ${reports.length}`);
+  // --synthetic <ruta.csv>: entrena desde CSV (sin tocar la BD) y escribe en
+  // ficheros ".synthetic" — NUNCA sobrescribe el modelo de producción.
+  const args = process.argv.slice(2);
+  const synthIdx = args.indexOf('--synthetic');
+  const syntheticCsv = synthIdx >= 0 ? args[synthIdx + 1] : undefined;
+  if (synthIdx >= 0 && !syntheticCsv) {
+    console.error('Uso: tsx scripts/train-prediction-model.ts --synthetic <ruta.csv>');
+    process.exitCode = 1;
+    return;
+  }
+  const mode: 'production' | 'synthetic' = syntheticCsv ? 'synthetic' : 'production';
 
-    if (reports.length < MIN_REPORTS_TO_TRAIN) {
-      console.warn(
-        `Insuficientes reportes para entrenar (mínimo ${MIN_REPORTS_TO_TRAIN}). No se escribe ningún modelo; el placeholder sigue activo.`,
-      );
-      return;
-    }
-
-    const rows = buildDataset(
-      reports.map((r) => ({
+  let reportRows: ReportRow[];
+  if (syntheticCsv) {
+    // Camino sintético: Prisma ni se instancia.
+    reportRows = await loadReportsFromCsv(syntheticCsv);
+    console.log(`Reportes cargados desde CSV sintético (${syntheticCsv}): ${reportRows.length}`);
+  } else {
+    const prisma = new PrismaClient();
+    try {
+      const reports = await prisma.report.findMany({
+        where: { status: { not: 'UNKNOWN' } },
+        orderBy: { reportedAt: 'asc' },
+        select: { spotId: true, status: true, weight: true, reportedAt: true },
+      });
+      console.log(`Reportes cargados (status != UNKNOWN): ${reports.length}`);
+      reportRows = reports.map((r) => ({
         spotId: r.spotId,
         status: r.status as 'FREE' | 'OCCUPIED',
         weight: r.weight,
         reportedAt: r.reportedAt,
-      })),
-    );
-
-    // Split temporal 80/20 — NUNCA aleatorio: el test debe ser "el futuro".
-    const splitIdx = Math.floor(rows.length * 0.8);
-    const train = rows.slice(0, splitIdx);
-    const test = rows.slice(splitIdx);
-    if (test.length === 0) {
-      console.warn('Split temporal dejó el set de test vacío. No se escribe ningún modelo.');
-      return;
+      }));
+    } finally {
+      await prisma.$disconnect();
     }
-    console.log(`Split temporal: ${train.length} train / ${test.length} test`);
-
-    const Xtr = train.map((r) => r.features);
-    const ytr = train.map((r) => r.label);
-    const Xte = test.map((r) => r.features);
-    const yte = test.map((r) => r.label);
-
-    // Baseline: media global de train como probabilidad constante.
-    const baselineP = ytr.reduce((a, b) => a + b, 0) / ytr.length;
-
-    const model = fitGbm(Xtr, ytr);
-    const modelProbs = Xte.map((f) => predictProba(model, f));
-    const baselineProbs = Xte.map(() => baselineP);
-
-    const metrics: TrainMetrics = {
-      trainedAt: new Date().toISOString(),
-      trainSize: train.length,
-      testSize: test.length,
-      params: GBM_PARAMS,
-      baseline: { logLoss: logLoss(yte, baselineProbs), accuracy: accuracy(yte, baselineProbs) },
-      model: { logLoss: logLoss(yte, modelProbs), accuracy: accuracy(yte, modelProbs) },
-      beatsBaseline: false,
-    };
-    metrics.beatsBaseline = metrics.model.logLoss < metrics.baseline.logLoss;
-
-    console.log('--- Métricas (JSON) ---');
-    console.log(JSON.stringify(metrics, null, 2));
-    console.log('------------------------');
-
-    const here = path.dirname(fileURLToPath(import.meta.url));
-    const reportPath = path.resolve(here, '..', 'docs', 'model-report.md');
-    await mkdir(path.dirname(reportPath), { recursive: true });
-    await writeFile(reportPath, renderMarkdownReport(metrics), 'utf8');
-    console.log(`Informe escrito en ${reportPath}`);
-
-    if (!metrics.beatsBaseline) {
-      console.warn(
-        `El modelo NO supera al baseline en test (log-loss ${metrics.model.logLoss.toFixed(4)} vs ${metrics.baseline.logLoss.toFixed(4)}). NO se escribe lib/model/prediction-model.json.`,
-      );
-      return;
-    }
-
-    const modelPath = path.resolve(here, '..', 'lib', 'model', 'prediction-model.json');
-    await mkdir(path.dirname(modelPath), { recursive: true });
-    await writeFile(
-      modelPath,
-      JSON.stringify(
-        {
-          version: 1,
-          trainedAt: metrics.trainedAt,
-          featureNames: [...FEATURE_NAMES],
-          initScore: model.initScore,
-          learningRate: model.learningRate,
-          trees: model.trees,
-          trainMetrics: metrics,
-        },
-        null,
-        2,
-      ),
-      'utf8',
-    );
-    console.log(`Modelo escrito en ${modelPath} (${model.trees.length} árboles).`);
-  } finally {
-    await prisma.$disconnect();
   }
+
+  if (reportRows.length < MIN_REPORTS_TO_TRAIN) {
+    console.warn(
+      `Insuficientes reportes para entrenar (mínimo ${MIN_REPORTS_TO_TRAIN}). No se escribe ningún modelo; el placeholder sigue activo.`,
+    );
+    return;
+  }
+
+  const rows = buildDataset(reportRows);
+
+  // Split temporal 80/20 — NUNCA aleatorio: el test debe ser "el futuro".
+  const splitIdx = Math.floor(rows.length * 0.8);
+  const train = rows.slice(0, splitIdx);
+  const test = rows.slice(splitIdx);
+  if (test.length === 0) {
+    console.warn('Split temporal dejó el set de test vacío. No se escribe ningún modelo.');
+    return;
+  }
+  console.log(`Split temporal: ${train.length} train / ${test.length} test`);
+
+  const Xtr = train.map((r) => r.features);
+  const ytr = train.map((r) => r.label);
+  const Xte = test.map((r) => r.features);
+  const yte = test.map((r) => r.label);
+
+  // Baselines: media global de train (constante) y media por bucket
+  // spot/día/hora (lo que hace hoy producción).
+  const baselineP = ytr.reduce((a, b) => a + b, 0) / ytr.length;
+  const baselineProbs = Xte.map(() => baselineP);
+  const bucketProbs = bucketBaselineProbs(train, test);
+
+  const model = fitGbm(Xtr, ytr);
+  const modelProbs = Xte.map((f) => predictProba(model, f));
+
+  const metrics: TrainMetrics = {
+    trainedAt: new Date().toISOString(),
+    mode,
+    trainSize: train.length,
+    testSize: test.length,
+    params: GBM_PARAMS,
+    baseline: { logLoss: logLoss(yte, baselineProbs), accuracy: accuracy(yte, baselineProbs) },
+    bucketBaseline: { logLoss: logLoss(yte, bucketProbs), accuracy: accuracy(yte, bucketProbs) },
+    model: { logLoss: logLoss(yte, modelProbs), accuracy: accuracy(yte, modelProbs) },
+    beatsBaseline: false,
+    beatsBucketBaseline: false,
+  };
+  metrics.beatsBaseline = metrics.model.logLoss < metrics.baseline.logLoss;
+  metrics.beatsBucketBaseline = metrics.model.logLoss < metrics.bucketBaseline.logLoss;
+
+  const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
+  console.log('--- Comparativa en test ---');
+  console.log('                       log-loss   accuracy');
+  console.log(
+    `  Baseline global      ${metrics.baseline.logLoss.toFixed(4)}     ${pct(metrics.baseline.accuracy)}`,
+  );
+  console.log(
+    `  Baseline bucket      ${metrics.bucketBaseline.logLoss.toFixed(4)}     ${pct(metrics.bucketBaseline.accuracy)}`,
+  );
+  console.log(
+    `  Modelo GBM           ${metrics.model.logLoss.toFixed(4)}     ${pct(metrics.model.accuracy)}`,
+  );
+  console.log('--- Métricas (JSON) ---');
+  console.log(JSON.stringify(metrics, null, 2));
+  console.log('------------------------');
+
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const reportName = mode === 'synthetic' ? 'model-report-synthetic.md' : 'model-report.md';
+  const reportPath = path.resolve(here, '..', 'docs', reportName);
+  await mkdir(path.dirname(reportPath), { recursive: true });
+  await writeFile(reportPath, renderMarkdownReport(metrics), 'utf8');
+  console.log(`Informe escrito en ${reportPath}`);
+
+  if (!metrics.beatsBaseline) {
+    console.warn(
+      `El modelo NO supera al baseline global en test (log-loss ${metrics.model.logLoss.toFixed(4)} vs ${metrics.baseline.logLoss.toFixed(4)}).`,
+    );
+    if (mode === 'production') {
+      console.warn('NO se escribe lib/model/prediction-model.json.');
+      return;
+    }
+  }
+  if (!metrics.beatsBucketBaseline) {
+    console.warn(
+      `Aviso: el modelo NO supera al baseline por bucket de producción (log-loss ${metrics.model.logLoss.toFixed(4)} vs ${metrics.bucketBaseline.logLoss.toFixed(4)}).`,
+    );
+  }
+
+  // En modo sintético se escribe SIEMPRE en un fichero aparte, para poder
+  // inspeccionar el modelo sin arriesgar producción.
+  const modelName =
+    mode === 'synthetic' ? 'prediction-model.synthetic.json' : 'prediction-model.json';
+  const modelPath = path.resolve(here, '..', 'lib', 'model', modelName);
+  await mkdir(path.dirname(modelPath), { recursive: true });
+  await writeFile(
+    modelPath,
+    JSON.stringify(
+      {
+        version: 1,
+        trainedAt: metrics.trainedAt,
+        featureNames: [...FEATURE_NAMES],
+        initScore: model.initScore,
+        learningRate: model.learningRate,
+        trees: model.trees,
+        trainMetrics: metrics,
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
+  console.log(`Modelo escrito en ${modelPath} (${model.trees.length} árboles).`);
 }
 
 function renderMarkdownReport(m: TrainMetrics): string {
   const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
-  return `# Informe de entrenamiento del modelo de predicción
+  const title =
+    m.mode === 'synthetic'
+      ? 'Informe de entrenamiento del modelo de predicción (dataset SINTÉTICO)'
+      : 'Informe de entrenamiento del modelo de predicción';
+  const result = m.beatsBaseline
+    ? m.beatsBucketBaseline
+      ? 'el modelo supera al baseline global Y al baseline por bucket de producción.'
+      : 'el modelo supera al baseline global pero NO al baseline por bucket de producción.'
+    : 'el modelo NO supera al baseline global.';
+  const written =
+    m.mode === 'synthetic'
+      ? '`lib/model/prediction-model.synthetic.json` (fichero de evaluación; producción sigue con el placeholder)'
+      : m.beatsBaseline
+        ? '`lib/model/prediction-model.json`'
+        : 'ninguno (sigue el fallback por buckets)';
+  return `# ${title}
 
-Generado por \`scripts/train-prediction-model.ts\` el ${m.trainedAt}.
+Generado por \`scripts/train-prediction-model.ts\` el ${m.trainedAt} (modo: ${m.mode}).
 
 ## Datos
 
@@ -505,12 +624,12 @@ Generado por \`scripts/train-prediction-model.ts\` el ${m.trainedAt}.
 
 ## Métricas en test
 
-| Métrica   | Baseline (media global) | Modelo GBM |
-| --------- | ----------------------- | ---------- |
-| Log-loss  | ${m.baseline.logLoss.toFixed(4)} | ${m.model.logLoss.toFixed(4)} |
-| Accuracy  | ${pct(m.baseline.accuracy)} | ${pct(m.model.accuracy)} |
+| Métrica   | Baseline global | Baseline bucket (producción) | Modelo GBM |
+| --------- | --------------- | ---------------------------- | ---------- |
+| Log-loss  | ${m.baseline.logLoss.toFixed(4)} | ${m.bucketBaseline.logLoss.toFixed(4)} | ${m.model.logLoss.toFixed(4)} |
+| Accuracy  | ${pct(m.baseline.accuracy)} | ${pct(m.bucketBaseline.accuracy)} | ${pct(m.model.accuracy)} |
 
-**Resultado:** ${m.beatsBaseline ? 'el modelo supera al baseline y se ha escrito `lib/model/prediction-model.json`.' : 'el modelo NO supera al baseline; NO se ha escrito el modelo (sigue el fallback por buckets).'}
+**Resultado:** ${result} Modelo escrito en: ${written}.
 `;
 }
 

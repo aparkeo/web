@@ -16,6 +16,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:import-spots": "tsx scripts/import-spots.ts",
     "train:model": "tsx scripts/train-prediction-model.ts",
+    "gen:synthetic": "tsx scripts/gen-synthetic-reports.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
