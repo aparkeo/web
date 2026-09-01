@@ -4,12 +4,11 @@
  * comunitario y gratuito; esta fase solo financia costes (servidor, base de
  * datos, dominio, tiempo de desarrollo).
  *
- * ⚠️ PLACEHOLDERS: aquí se configuran los enlaces reales. Sustituir por las
- * URLs definitivas antes de publicitar la página /apoyo:
+ * Contacto institucional y de patrocinio: SUPPORT_CONTACT_EMAIL (real).
+ * Donaciones: Ko-fi y PayPal siguen siendo placeholders hasta que exista
+ * el perfil; no publicitar /apoyo como canal de cobro hasta sustituirlos.
  * - SUPPORT_KOFI_URL    → perfil real de Ko-fi
  * - SUPPORT_PAYPAL_URL  → enlace real de PayPal.Me (o botón de donación)
- * - SUPPORT_CONTACT_EMAIL → email real de contacto para patrocinadores
- *   (se usa en un mailto; no inventar dominios en producción)
  */
 
 /** PLACEHOLDER — sustituir por el perfil real de Ko-fi. */
@@ -18,8 +17,8 @@ export const SUPPORT_KOFI_URL = 'https://ko-fi.com/minusvigo';
 /** PLACEHOLDER — sustituir por el enlace real de PayPal. */
 export const SUPPORT_PAYPAL_URL = 'https://www.paypal.com/paypalme/minusvigo';
 
-/** PLACEHOLDER — email de contacto para empresas locales interesadas en patrocinar. */
-export const SUPPORT_CONTACT_EMAIL = 'hola@minusvigo.example.com';
+/** Buzón público: instituciones, patrocinio y derechos RGPD. */
+export const SUPPORT_CONTACT_EMAIL = 'hola@aparkeo.com';
 
 /** Patrocinador local que se muestra en la sección «Con el apoyo de» de /apoyo. */
 export interface Sponsor {

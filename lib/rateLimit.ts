@@ -83,7 +83,8 @@ const upstashConfigured = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
 
 let redis: Redis | null = null;
 // Un Ratelimit por combinación (límite, ventana): register 5/hora,
-// geocode 20/min, report 15/min. Se crean perezosamente y se reutilizan.
+// login 10/15 min, geocode 20/min, report 15/min. Se crean perezosamente
+// y se reutilizan.
 const limiters = new Map<string, Ratelimit>();
 
 function getUpstashLimiter(limit: number, windowMs: number): Ratelimit {

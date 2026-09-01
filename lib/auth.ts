@@ -25,11 +25,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;
 
-        // TODO: rate limit por IP contra fuerza bruta en login. authorize() no
-        // recibe la Request, así que no hay IP fiable aquí; la vía es mover el
-        // signIn a un route handler propio o usar un wrapper con headers().
-        // Mientras tanto, el rate limit de /api/register cubre el vector de
-        // creación masiva de cuentas (lib/rateLimit.ts).
+        // Rate limit por IP: app/api/auth/[...nextauth]/route.ts envuelve
+        // POST y corta /callback/credentials (y /signin/credentials) con
+        // 429 antes de llegar aquí. authorize() no ve la Request, así que
+        // la IP no se puede limitar en este callback.
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user?.password) return null;
 

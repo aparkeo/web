@@ -15,8 +15,8 @@ describe('lib/support', () => {
     expect(SUPPORT_PAYPAL_URL).toContain('paypal');
   });
 
-  it('define un email de contacto de patrocinio con forma válida', () => {
-    expect(SUPPORT_CONTACT_EMAIL).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  it('define el email público de contacto en el dominio de producción', () => {
+    expect(SUPPORT_CONTACT_EMAIL).toBe('hola@aparkeo.com');
   });
 
   it('la lista de patrocinadores arranca vacía y hasSponsors() es false', () => {

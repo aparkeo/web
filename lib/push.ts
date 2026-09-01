@@ -44,7 +44,7 @@ function ensureVapidConfigured(): boolean {
     return false;
   }
 
-  webpush.setVapidDetails('mailto:admin@minusvigo.app', publicKey, privateKey);
+  webpush.setVapidDetails('mailto:hola@aparkeo.com', publicKey, privateKey);
   vapidConfigured = true;
   return true;
 }

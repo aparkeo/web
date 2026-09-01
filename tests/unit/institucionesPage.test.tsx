@@ -45,6 +45,7 @@ describe('Página /instituciones', () => {
     for (const cta of ctas) {
       const href = cta.getAttribute('href') ?? '';
       expect(href.startsWith(`mailto:${SUPPORT_CONTACT_EMAIL}`)).toBe(true);
+      expect(href).toContain('hola@aparkeo.com');
       expect(href).toContain(encodeURIComponent('Colaboración institucional — Aparkeo'));
     }
   });

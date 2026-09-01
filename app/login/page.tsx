@@ -26,6 +26,11 @@ export default function LoginPage() {
     const res = await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
 
+    if (res?.status === 429) {
+      setError(t.auth.tooManyAttempts);
+      toast.error(t.auth.tooManyAttempts);
+      return;
+    }
     if (res?.error) {
       setError(t.auth.invalidCredentials);
       toast.error(t.auth.invalidCredentials);

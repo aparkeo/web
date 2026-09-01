@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SITE_GITHUB_URL } from '@/lib/site';
+import { SUPPORT_CONTACT_EMAIL } from '@/lib/support';
 import { getServerDictionary } from '@/lib/i18n/server';
 import { fmt } from '@/lib/i18n/format';
 
@@ -49,6 +50,13 @@ export default async function PrivacyPage() {
         <p>
           {t.privacy.responsibleBody2a}
           <a
+            href={`mailto:${SUPPORT_CONTACT_EMAIL}`}
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {SUPPORT_CONTACT_EMAIL}
+          </a>
+          {t.privacy.responsibleBody2b}
+          <a
             href={SITE_GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
@@ -56,7 +64,7 @@ export default async function PrivacyPage() {
           >
             {SITE_GITHUB_URL.replace('https://', '')}
           </a>
-          {t.privacy.responsibleBody2b}
+          {t.privacy.responsibleBody2c}
         </p>
       </Section>
 
@@ -150,6 +158,13 @@ export default async function PrivacyPage() {
         </ul>
         <p>
           {t.privacy.rightsContactA}
+          <a
+            href={`mailto:${SUPPORT_CONTACT_EMAIL}`}
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {SUPPORT_CONTACT_EMAIL}
+          </a>
+          {t.privacy.rightsContactMid}
           <a
             href={SITE_GITHUB_URL}
             target="_blank"

@@ -233,6 +233,7 @@ export const es = {
     email: 'Email',
     password: 'Contraseña',
     invalidCredentials: 'Email o contraseña incorrectos',
+    tooManyAttempts: 'Demasiados intentos. Inténtalo de nuevo más tarde.',
     sessionStarted: 'Sesión iniciada',
     loggingIn: 'Entrando…',
     noAccount: '¿No tienes cuenta?',
@@ -528,14 +529,14 @@ export const es = {
     title: 'Privacidad',
     intro:
       'Aparkeo es un proyecto comunitario y sin ánimo de lucro. Esta página explica, en llano, qué datos recoge la aplicación, para qué los usa y cómo puedes ejercer tus derechos. Última actualización: {date}.',
-    lastUpdated: '5 de agosto de 2026',
+    lastUpdated: '19 de agosto de 2026',
     responsibleKicker: 'Responsable',
     responsibleTitle: 'Quién está detrás',
     responsibleBody1:
       'El responsable del tratamiento es el mantenedor del proyecto Aparkeo, un proyecto comunitario independiente (no hay empresa ni entidad legal detrás).',
-    responsibleBody2a:
-      'Para cualquier cuestión de privacidad puedes contactar a través del repositorio público del proyecto en GitHub: ',
-    responsibleBody2b: ' (abre una issue o usa los canales del repositorio).',
+    responsibleBody2a: 'Para cualquier cuestión de privacidad escríbenos a ',
+    responsibleBody2b: '. También puedes abrir una issue en el repositorio: ',
+    responsibleBody2c: '.',
     dataKicker: 'Datos',
     dataTitle: 'Qué datos recogemos y para qué',
     dataIntro: 'Solo recogemos lo necesario para que la aplicación funcione:',
@@ -598,7 +599,8 @@ export const es = {
     rightsObjection: 'Oposición',
     rightsObjectionBody:
       ': desactiva los avisos push desde la campana de notificaciones o elimina tu cuenta para oponerte a cualquier tratamiento.',
-    rightsContactA: 'Si lo prefieres, también puedes ejercer cualquiera de estos derechos contactando a través del ',
+    rightsContactA: 'Si lo prefieres, también puedes ejercer cualquiera de estos derechos escribiendo a ',
+    rightsContactMid: ' o a través del ',
     rightsContactRepo: 'repositorio en GitHub',
     rightsContactB:
       '. Y si crees que tus derechos no se han respetado, puedes reclamar ante la Agencia Española de Protección de Datos (AEPD).',

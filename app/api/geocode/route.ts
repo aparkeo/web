@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'AparkeoWeb/1.0 (contacto: admin@minusvigo.dev)' },
+      headers: { 'User-Agent': 'AparkeoWeb/1.0 (contacto: hola@aparkeo.com)' },
     });
     if (!res.ok) throw new Error(`Nominatim ${res.status}`);
 
