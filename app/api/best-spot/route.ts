@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { distanceMeters } from '@/lib/utils';
-import { getSpotPrediction, rankSpotsByRecommendation, vigoNow } from '@/lib/prediction';
+import {
+  getSpotPrediction,
+  rankSpotsByRecommendation,
+  vigoNow,
+  type SpotModelStats,
+} from '@/lib/prediction';
 import type { Prediction } from '@prisma/client';
 import type { SpotWithPrediction } from '@/types';
 
@@ -48,14 +53,44 @@ export async function GET(req: NextRequest) {
   // Una sola query para todas las predicciones históricas del bucket actual
   // (hora local de Vigo), en lugar de un findUnique por plaza (N+1).
   const { dayOfWeek, hour } = vigoNow();
+  const spotIds = withDistance.map(({ spot }) => spot.id);
   const historicals = await prisma.prediction.findMany({
-    where: { spotId: { in: withDistance.map(({ spot }) => spot.id) }, dayOfWeek, hour },
+    where: { spotId: { in: spotIds }, dayOfWeek, hour },
   });
   const historicalBySpot = new Map<number, Prediction>(historicals.map((p) => [p.spotId, p]));
 
+  // Una sola query agregada con las stats globales por plaza que usa el
+  // modelo ML (tasa FREE histórica ponderada + nº de reportes), en lugar de
+  // un groupBy por plaza dentro de getSpotPrediction (N+1).
+  const statsGroups = await prisma.report.groupBy({
+    by: ['spotId', 'status'],
+    where: { spotId: { in: spotIds }, status: { not: 'UNKNOWN' } },
+    _sum: { weight: true },
+    _count: { _all: true },
+  });
+  const statsAcc = new Map<number, { freeW: number; totalW: number; count: number }>();
+  for (const g of statsGroups) {
+    const acc = statsAcc.get(g.spotId) ?? { freeW: 0, totalW: 0, count: 0 };
+    const w = g._sum.weight ?? 0;
+    acc.totalW += w;
+    acc.count += g._count._all;
+    if (g.status === 'FREE') acc.freeW += w;
+    statsAcc.set(g.spotId, acc);
+  }
+  const statsBySpot = new Map<number, SpotModelStats>(
+    [...statsAcc].map(([spotId, a]) => [
+      spotId,
+      { freeRate: a.totalW > 0 ? a.freeW / a.totalW : 0.5, reportCount: a.count },
+    ]),
+  );
+
   const withPrediction = await Promise.all(
     withDistance.map(async ({ spot, distanceM }) => {
-      const prediction = await getSpotPrediction(spot, historicalBySpot.get(spot.id) ?? null);
+      const prediction = await getSpotPrediction(
+        spot,
+        historicalBySpot.get(spot.id) ?? null,
+        statsBySpot.get(spot.id) ?? null,
+      );
       const dto: SpotWithPrediction & { distanceM: number } = {
         id: spot.id,
         city: spot.city,

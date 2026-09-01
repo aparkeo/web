@@ -1,12 +1,13 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { isFreeTransition } from '@/lib/notifications';
+import { buildModelFeatures, hasValidModel, scoreWithModel } from '@/lib/predictionModel';
 import type { ParkingSpot, Prediction, Confidence, SpotStatus } from '@prisma/client';
 
 /**
  * Módulo de predicción de Aparkeo Web.
  *
- * Dos señales se combinan:
+ * Tres señales se combinan:
  *  1. "Live" — consenso en tiempo real de los últimos 15 min de Report
  *     (idéntico al algoritmo de consensus.ts de la app móvil: >=2 de peso
  *     y mayoría → CONFIRMED, 1 solo voto → LOW, votos contradictorios →
@@ -14,6 +15,12 @@ import type { ParkingSpot, Prediction, Confidence, SpotStatus } from '@prisma/cl
  *  2. "Histórico" — probabilidad agregada de estar libre para esa plaza,
  *     ese día de la semana y esa hora, calculada sobre todo el historial
  *     de Report (tabla Prediction, recalculada por recomputeHistoricalPredictions).
+ *  3. "Modelo" — GBM entrenado offline sobre todo el historial de Report
+ *     (scripts/train-prediction-model.ts → lib/model/prediction-model.json,
+ *     scorer en lib/predictionModel.ts). Solo se mezcla cuando el bucket
+ *     histórico tiene muestra suficiente (>=8): p = modelo·w + bucket·(1−w)
+ *     con w = min(0.7, sampleSize/50), de modo que el bucket siempre ancla.
+ *     Si no hay modelo entrenado (placeholder version 0), no cambia nada.
  *
  * Si hay una señal "live" fuerte (CONFIRMED y reciente) esa gana. Si solo
  * hay una señal débil o no hay ninguna reciente, se usa el histórico —o una
@@ -225,16 +232,57 @@ export function confidenceLabel(score: number): 'Alta' | 'Media' | 'Baja' {
   return 'Baja';
 }
 
+/** Estadísticas globales de reportes de una plaza (features del modelo ML). */
+export interface SpotModelStats {
+  /** Tasa FREE histórica de la plaza ponderada por weight (0-1). */
+  freeRate: number;
+  /** Nº de reportes con status != UNKNOWN. */
+  reportCount: number;
+}
+
+// Mínimo de muestra del bucket histórico para mezclar con el modelo, y peso
+// máximo del modelo en la mezcla (el bucket siempre ancla al menos un 30%).
+const MODEL_MIN_SAMPLE = 8;
+const MODEL_MAX_WEIGHT = 0.7;
+
+/**
+ * Stats globales de la plaza en UNA query agregada (groupBy por status).
+ * `null` si la plaza no tiene reportes útiles todavía.
+ */
+async function loadSpotModelStats(spotId: number): Promise<SpotModelStats | null> {
+  const groups = await prisma.report.groupBy({
+    by: ['status'],
+    where: { spotId, status: { not: 'UNKNOWN' } },
+    _sum: { weight: true },
+    _count: { _all: true },
+  });
+  let freeW = 0;
+  let totalW = 0;
+  let count = 0;
+  for (const g of groups) {
+    const w = g._sum.weight ?? 0;
+    totalW += w;
+    count += g._count._all;
+    if (g.status === 'FREE') freeW += w;
+  }
+  if (count === 0) return null;
+  return { freeRate: totalW > 0 ? freeW / totalW : 0.5, reportCount: count };
+}
+
 /**
  * Predicción combinada para una plaza, lista para mostrar en PredictionCard.
  *
  * `preloadedHistorical` permite pasar la fila de Prediction ya cargada
  * (p.ej. por best-spot, que la trae en batch para evitar N+1). Si es
  * `undefined` se consulta aquí; si es `null` se asume que no existe.
+ *
+ * `preloadedSpotStats` (opcional) permite pasar las stats globales de la
+ * plaza para el modelo ML en batch (mismo motivo: evitar N+1).
  */
 export async function getSpotPrediction(
   spot: ParkingSpot,
   preloadedHistorical?: Prediction | null,
+  preloadedSpotStats?: SpotModelStats | null,
 ): Promise<SpotPrediction> {
   const now = new Date();
   const isRecent = !!spot.lastReportAt && now.getTime() - spot.lastReportAt.getTime() < RECENT_WINDOW_MS;
@@ -260,9 +308,34 @@ export async function getSpotPrediction(
 
   if (historical && historical.sampleSize > 0) {
     let probabilityFree = historical.freeProbability;
+
+    // Tercera señal: modelo GBM entrenado offline. Solo se mezcla si el
+    // bucket tiene muestra suficiente y hay un modelo válido cargado (el
+    // placeholder sin entrenar hace que esto no toque ni la BD).
+    if (historical.sampleSize >= MODEL_MIN_SAMPLE && hasValidModel()) {
+      const stats =
+        preloadedSpotStats !== undefined ? preloadedSpotStats : await loadSpotModelStats(spot.id);
+      if (stats) {
+        const modelP = scoreWithModel(
+          buildModelFeatures({
+            dayOfWeek,
+            hour,
+            weight: 1, // scoring "en frío": no hay reporte concreto, peso neutro
+            spotFreeRate: stats.freeRate,
+            spotReportsBefore: stats.reportCount,
+          }),
+        );
+        if (modelP !== null) {
+          // A más muestra histórica, más peso al modelo (máx. 0.7).
+          const w = Math.min(MODEL_MAX_WEIGHT, historical.sampleSize / 50);
+          probabilityFree = modelP * w + probabilityFree * (1 - w);
+        }
+      }
+    }
+
     if (isRecent) {
       const liveSignal = spot.status === 'FREE' ? 1 : spot.status === 'OCCUPIED' ? 0 : 0.5;
-      probabilityFree = liveSignal * 0.6 + historical.freeProbability * 0.4;
+      probabilityFree = liveSignal * 0.6 + probabilityFree * 0.4;
     }
     return {
       spotId: spot.id,

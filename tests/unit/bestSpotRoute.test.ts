@@ -3,11 +3,13 @@ import { NextRequest } from 'next/server';
 
 const findManySpots = vi.hoisted(() => vi.fn());
 const findManyPredictions = vi.hoisted(() => vi.fn());
+const groupByReports = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     parkingSpot: { findMany: findManySpots },
     prediction: { findMany: findManyPredictions },
+    report: { groupBy: groupByReports },
   },
 }));
 
@@ -46,8 +48,10 @@ describe('GET /api/best-spot — parámetro status', () => {
   beforeEach(() => {
     findManySpots.mockReset();
     findManyPredictions.mockReset();
+    groupByReports.mockReset();
     findManySpots.mockResolvedValue([SPOT]);
     findManyPredictions.mockResolvedValue([]);
+    groupByReports.mockResolvedValue([]);
   });
 
   it('sin status no filtra por estado en la query de DB', async () => {

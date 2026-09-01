@@ -1,0 +1,18 @@
+{
+  "version": 0,
+  "trainedAt": null,
+  "featureNames": [
+    "dayOfWeek",
+    "hour",
+    "isWeekend",
+    "hourSin",
+    "hourCos",
+    "weight",
+    "spotFreeRate",
+    "spotReportsBeforeLog"
+  ],
+  "initScore": 0,
+  "learningRate": 0.1,
+  "trees": [],
+  "trainMetrics": null
+}
