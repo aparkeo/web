@@ -401,6 +401,25 @@ export const gl: Dictionary = {
     emptyWeek: 'Aínda non hai datos suficientes esta semana',
     emptyPeriod: 'Aínda non hai datos suficientes neste período',
     noSpotsYet: 'Sen prazas rexistradas aínda',
+    model: {
+      title: 'Modelo de predición',
+      desc: 'Como acerta o modelo de gradient boosting que alimenta as predicións, medido con validación temporal (a proba é sempre «o futuro»).',
+      badgeReal: 'Datos reais',
+      badgeSynthetic: 'Validación con datos sintéticos',
+      accuracyModel: 'Precisión do modelo',
+      accuracyBaseline: 'Precisión da media histórica',
+      logloss: 'Log-loss (menor é mellor)',
+      vsBaseline: 'media histórica: {n}',
+      trainedAt: 'Adestrado o {date}',
+      trainTest: '{train} reportes de adestramento · {test} de proba',
+      trees: '{n} árbores de decisión',
+      progressLabel: '{n} de {min} reportes para o primeiro adestramento',
+      progressAria: 'Progreso cara ao primeiro adestramento: {n} de {min} reportes',
+      pendingText:
+        'A precisión mellora con cada reporte da comunidade: en canto haxa reportes reais abondos, o modelo adestrarase con eles e as súas métricas aparecerán aquí.',
+      syntheticNote:
+        'Pipeline validado con reportes simulados realistas; estas métricas son orientativas ata o primeiro adestramento con datos reais.',
+    },
     weekdays: {
       Lun: 'Lun',
       Mar: 'Mar',

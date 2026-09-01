@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
+import { ModelAccuracyCard } from '@/components/ModelAccuracyCard';
 import { ShareButton } from '@/components/ShareButton';
 import { getServerDictionary } from '@/lib/i18n/server';
+import { getModelAnalyticsInfo } from '@/lib/modelAnalytics';
 
 export const metadata: Metadata = {
   title: 'Analítica nacional',
@@ -12,6 +14,10 @@ export const metadata: Metadata = {
 
 export default async function AnalyticsPage() {
   const t = await getServerDictionary();
+  // DTO del modelo de predicción (conteo real de reportes + métricas de los
+  // JSON de modelo, si existen). Se calcula en servidor; el card es cliente
+  // solo por el contexto i18n.
+  const modelInfo = await getModelAnalyticsInfo();
   return (
     <div className="container max-w-5xl pb-16 pt-10 sm:pt-14">
       <header className="home-fade-up mb-8">
@@ -30,8 +36,9 @@ export default async function AnalyticsPage() {
           {t.analytics.subtitle}
         </p>
       </header>
-      <div className="home-fade-up home-fade-up-delay">
+      <div className="home-fade-up home-fade-up-delay space-y-6">
         <AnalyticsDashboard />
+        <ModelAccuracyCard info={modelInfo} />
       </div>
     </div>
   );

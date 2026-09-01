@@ -408,6 +408,25 @@ export const es = {
     emptyWeek: 'Aún no hay suficientes datos esta semana',
     emptyPeriod: 'Aún no hay suficientes datos en este periodo',
     noSpotsYet: 'Sin plazas registradas todavía',
+    model: {
+      title: 'Modelo de predicción',
+      desc: 'Cómo acierta el modelo de gradient boosting que alimenta las predicciones, medido con validación temporal (el test siempre es «el futuro»).',
+      badgeReal: 'Datos reales',
+      badgeSynthetic: 'Validación con datos sintéticos',
+      accuracyModel: 'Precisión del modelo',
+      accuracyBaseline: 'Precisión de la media histórica',
+      logloss: 'Log-loss (menor es mejor)',
+      vsBaseline: 'media histórica: {n}',
+      trainedAt: 'Entrenado el {date}',
+      trainTest: '{train} reportes de entrenamiento · {test} de test',
+      trees: '{n} árboles de decisión',
+      progressLabel: '{n} de {min} reportes para el primer entrenamiento',
+      progressAria: 'Progreso hacia el primer entrenamiento: {n} de {min} reportes',
+      pendingText:
+        'La precisión mejora con cada reporte de la comunidad: en cuanto haya suficientes reportes reales, el modelo se entrenará con ellos y sus métricas aparecerán aquí.',
+      syntheticNote:
+        'Pipeline validado con reportes simulados realistas; estas métricas son orientativas hasta el primer entrenamiento con datos reales.',
+    },
     weekdays: {
       Lun: 'Lun',
       Mar: 'Mar',
