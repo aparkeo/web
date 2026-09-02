@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
@@ -13,6 +13,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { useSpots } from '@/hooks/useSpots';
 import { useSpot } from '@/hooks/useSpot';
 import { useUserLocation } from '@/hooks/useUserLocation';
+import { useRoute } from '@/hooks/useRoute';
 import { useMapStore } from '@/store/useMapStore';
 import { useBaseLayerStore } from '@/store/useBaseLayerStore';
 import { colorForStatus } from '@/lib/utils';
@@ -20,8 +21,10 @@ import { WHEELCHAIR_GLYPH } from '@/lib/markers';
 import { dedupeSpotsByProximity } from '@/lib/dedupeSpots';
 import { SpotMarker } from '@/components/SpotMarker';
 import { SpotPreviewCard } from '@/components/SpotPreviewCard';
+import { RouteLayer } from '@/components/RouteLayer';
+import { RoutePanel, type RoutePanelState } from '@/components/RoutePanel';
 import { useT } from '@/components/i18n/I18nProvider';
-import type { Bbox, SpotStatus } from '@/types';
+import type { Bbox, SpotDTO, SpotStatus } from '@/types';
 
 // Icono de cluster: anillo en degradado cónico con la proporción real de
 // plazas libres / ocupadas / sin datos, y el total en el centro con el color
@@ -369,6 +372,36 @@ export function MapView({ visible = true }: { visible?: boolean }) {
     [visibleSpots, selectedSpotId],
   );
 
+  // «Cómo llegar» integrado: ruta en coche dibujada en el propio mapa (OSRM
+  // vía /api/route). Si no hay GPS concedido se pide al pulsar el botón; si
+  // el usuario lo deniega, el panel ofrece el fallback de Google Maps.
+  const [routeTarget, setRouteTarget] = useState<SpotDTO | null>(null);
+  const { locate, loading: locating } = useUserLocation();
+
+  const routeFrom = userLocation
+    ? { lat: userLocation.latitude, lon: userLocation.longitude }
+    : null;
+  const routeTo = routeTarget ? { lat: routeTarget.lat, lon: routeTarget.lon } : null;
+  const routeQuery = useRoute(routeFrom, routeTo);
+
+  const handleNavigate = useCallback(
+    (spot: SpotDTO) => {
+      setRouteTarget(spot);
+      if (!userLocation) locate();
+    },
+    [userLocation, locate],
+  );
+
+  const routeState: RoutePanelState = !routeFrom
+    ? locating
+      ? 'locating'
+      : 'error'
+    : routeQuery.isPending
+      ? 'loading'
+      : routeQuery.isError
+        ? 'error'
+        : 'ready';
+
   return (
     <div className="relative h-full w-full">
       {/* keyboard es true por defecto en Leaflet (pan/zoom con teclado y
@@ -414,12 +447,27 @@ export function MapView({ visible = true }: { visible?: boolean }) {
               />
             ))}
         </MarkerClusterGroup>
+
+        {routeQuery.data ? <RouteLayer route={routeQuery.data} /> : null}
       </MapContainer>
       {/* Tarjeta flotante de la plaza seleccionada: overlay hermano del
           MapContainer (no queda recortada por Leaflet). Un clic en el pin la
           abre; otro pin la sustituye; X / Escape la cierran. */}
       {selectedSpot ? (
-        <SpotPreviewCard spot={selectedSpot} onClose={() => setSelectedSpot(null)} />
+        <SpotPreviewCard
+          spot={selectedSpot}
+          onClose={() => setSelectedSpot(null)}
+          onNavigate={handleNavigate}
+        />
+      ) : null}
+      {routeTarget ? (
+        <RoutePanel
+          state={routeState}
+          route={routeQuery.data}
+          street={routeTarget.street}
+          googleHref={`https://www.google.com/maps/dir/?api=1&destination=${routeTarget.lat},${routeTarget.lon}&travelmode=driving`}
+          onClose={() => setRouteTarget(null)}
+        />
       ) : null}
       <BaseLayerControl />
       <LocateButton />

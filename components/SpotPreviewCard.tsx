@@ -2,24 +2,33 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { Brain, X } from 'lucide-react';
+import { Brain, Navigation2, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { NavigationButton } from '@/components/NavigationButton';
 import { useSpotPhotos } from '@/hooks/useSpotPhotos';
 import { usePrediction } from '@/hooks/usePredictions';
 import { useT } from '@/components/i18n/I18nProvider';
+import { fmt } from '@/lib/i18n/format';
 import { formatDistance, formatWalkTime } from '@/lib/utils';
 import type { SpotDTO } from '@/types';
 
 /**
  * Tarjeta flotante de plaza: aparece con UN solo clic/toque en el pin
  * (antes hacía falta abrir el popup y luego «Ver detalles»). Muestra foto
- * (si la comunidad subió alguna), calle, estado, distancia y «Cómo llegar»
- * con Google Maps. Se cierra con la X, con Escape o al tocar otro pin.
+ * (si la comunidad subió alguna), calle, estado, distancia y «Cómo llegar»,
+ * que dibuja la ruta en coche DENTRO del mapa de Aparkeo (onNavigate).
+ * Se cierra con la X, con Escape o al tocar otro pin.
  */
-export function SpotPreviewCard({ spot, onClose }: { spot: SpotDTO; onClose: () => void }) {
+export function SpotPreviewCard({
+  spot,
+  onClose,
+  onNavigate,
+}: {
+  spot: SpotDTO;
+  onClose: () => void;
+  onNavigate: (spot: SpotDTO) => void;
+}) {
   const t = useT();
   const { data: photos } = useSpotPhotos(spot.id);
   const { data: prediction } = usePrediction(spot.id);
@@ -82,13 +91,16 @@ export function SpotPreviewCard({ spot, onClose }: { spot: SpotDTO; onClose: () 
         </div>
 
         <div className="flex gap-2">
-          <NavigationButton
-            lat={spot.lat}
-            lon={spot.lon}
-            street={spot.street}
-            label={t.map.howToGet}
-            className="h-11 flex-1 text-sm"
-          />
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => onNavigate(spot)}
+            aria-label={fmt(t.map.howToGetInAppAria, { street: spot.street })}
+            className="h-11 flex-1 gap-2 text-sm"
+          >
+            <Navigation2 className="h-5 w-5" aria-hidden />
+            {t.map.howToGet}
+          </Button>
           <Button asChild variant="outline" className="h-11 flex-1 text-sm">
             <Link href={`/spots/${spot.id}`}>{t.map.viewDetails}</Link>
           </Button>

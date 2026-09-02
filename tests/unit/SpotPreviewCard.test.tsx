@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SpotPreviewCard } from '@/components/SpotPreviewCard';
 import type { SpotDTO } from '@/types';
@@ -47,11 +47,11 @@ function mockFetch(predictionSource: 'live' | 'historical' | 'blended' | 'none')
   );
 }
 
-function renderCard() {
+function renderCard(onNavigate: (spot: SpotDTO) => void = () => {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <SpotPreviewCard spot={SPOT} onClose={() => {}} />
+      <SpotPreviewCard spot={SPOT} onClose={() => {}} onNavigate={onNavigate} />
     </QueryClientProvider>,
   );
 }
@@ -68,14 +68,24 @@ describe('SpotPreviewCard', () => {
     expect(screen.getByRole('dialog', { name: 'Rúa do Príncipe' })).toBeInTheDocument();
     expect(screen.getByText('Libre')).toBeInTheDocument();
     expect(screen.getByText(/350\s*m/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Cómo llegar a Rúa do Príncipe/ })).toHaveAttribute(
-      'href',
-      'https://www.google.com/maps/dir/?api=1&destination=42.24,-8.72&travelmode=driving',
-    );
+    expect(
+      screen.getByRole('button', { name: /Cómo llegar a Rúa do Príncipe/ }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver detalles' })).toHaveAttribute(
       'href',
       '/spots/42',
     );
+  });
+
+  it('«Cómo llegar» lanza la ruta interna con la plaza (no abre Google Maps)', () => {
+    mockFetch('none');
+    const onNavigate = vi.fn();
+    renderCard(onNavigate);
+
+    fireEvent.click(screen.getByRole('button', { name: /Cómo llegar a Rúa do Príncipe/ }));
+
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    expect(onNavigate).toHaveBeenCalledWith(SPOT);
   });
 
   it('muestra la predicción de la IA cuando el modelo tiene señal', async () => {
