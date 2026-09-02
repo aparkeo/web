@@ -2,12 +2,13 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { Brain, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { NavigationButton } from '@/components/NavigationButton';
 import { useSpotPhotos } from '@/hooks/useSpotPhotos';
+import { usePrediction } from '@/hooks/usePredictions';
 import { useT } from '@/components/i18n/I18nProvider';
 import { formatDistance, formatWalkTime } from '@/lib/utils';
 import type { SpotDTO } from '@/types';
@@ -21,6 +22,7 @@ import type { SpotDTO } from '@/types';
 export function SpotPreviewCard({ spot, onClose }: { spot: SpotDTO; onClose: () => void }) {
   const t = useT();
   const { data: photos } = useSpotPhotos(spot.id);
+  const { data: prediction } = usePrediction(spot.id);
   const photo = photos?.[0];
   const walk = spot.distanceM !== undefined ? formatWalkTime(spot.distanceM, t.time) : null;
 
@@ -91,6 +93,21 @@ export function SpotPreviewCard({ spot, onClose }: { spot: SpotDTO; onClose: () 
             <Link href={`/spots/${spot.id}`}>{t.map.viewDetails}</Link>
           </Button>
         </div>
+
+        {/* Predicción de la IA en una línea: % probabilidad libre a esta
+            hora + confianza. Solo se muestra si el modelo tiene señal. */}
+        {prediction && prediction.source !== 'none' ? (
+          <div className="flex items-center gap-2 rounded-xl bg-secondary/60 px-3 py-2 text-sm">
+            <Brain className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+            <span className="min-w-0 truncate">
+              <b className="text-primary">{Math.round(prediction.probabilityFree * 100)}%</b>{' '}
+              {t.prediction.probabilityFree}
+            </span>
+            <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+              {t.prediction.confidence[prediction.confidenceLabel]}
+            </span>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
