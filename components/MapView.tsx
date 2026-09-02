@@ -21,12 +21,15 @@ import { SpotMarker } from '@/components/SpotMarker';
 import { useT } from '@/components/i18n/I18nProvider';
 import type { Bbox, SpotStatus } from '@/types';
 
-// Icono de cluster: círculo con el color del estado dominante entre sus hijos.
-// El estado se detecta por el color del divIcon de cada marcador hijo.
+// Icono de cluster: anillo en degradado cónico con la proporción real de
+// plazas libres / ocupadas / sin datos, y el total en el centro con el color
+// del estado dominante. El estado de cada hijo se detecta por el hex de su
+// divIcon (el pin lleva fill="${color}").
 function clusterIcon(cluster: L.MarkerCluster): L.DivIcon {
   const counts: Record<SpotStatus, number> = { FREE: 0, OCCUPIED: 0, UNKNOWN: 0 };
   const freeColor = colorForStatus('FREE');
   const occupiedColor = colorForStatus('OCCUPIED');
+  const unknownColor = colorForStatus('UNKNOWN');
 
   for (const marker of cluster.getAllChildMarkers()) {
     const html = (marker.options.icon as L.DivIcon | undefined)?.options?.html;
@@ -44,11 +47,20 @@ function clusterIcon(cluster: L.MarkerCluster): L.DivIcon {
 
   const color = colorForStatus(dominant);
   const count = cluster.getChildCount();
-  const size = count < 10 ? 38 : count < 100 ? 44 : 50;
+  const size = count < 10 ? 42 : count < 100 ? 48 : 54;
+
+  // Anillo de proporción: verde = libres, rojo = ocupadas, gris = sin datos.
+  // Si todo el cluster es "sin datos", el anillo es gris sólido.
+  const freePct = (counts.FREE / count) * 100;
+  const occupiedPct = (counts.OCCUPIED / count) * 100;
+  const ring =
+    counts.FREE + counts.OCCUPIED === 0
+      ? unknownColor
+      : `conic-gradient(${freeColor} 0 ${freePct}%, ${occupiedColor} ${freePct}% ${freePct + occupiedPct}%, ${unknownColor} ${freePct + occupiedPct}% 100%)`;
 
   return L.divIcon({
     className: '',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:999px;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${count < 100 ? 14 : 12}px;font-family:inherit;">${count}</div>`,
+    html: `<div class="cluster-badge" style="width:${size}px;height:${size}px;background:${ring}"><span style="color:${color};font-size:${count < 100 ? 14 : 12}px">${count}</span></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
@@ -330,7 +342,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
     () =>
       L.divIcon({
         className: '',
-        html: `<div style="width:16px;height:16px;border-radius:50%;background:#2563EB;border:3px solid white;box-shadow:0 0 0 6px rgba(37,99,235,0.25)"></div>`,
+        html: `<div class="user-dot"></div>`,
         iconSize: [16, 16],
         iconAnchor: [8, 8],
       }),

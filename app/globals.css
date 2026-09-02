@@ -94,13 +94,125 @@
   min-height: 24px;
 }
 
-.spot-marker {
+/* ---- Marcadores del mapa: pins PMR, clusters y punto de usuario ---- */
+
+/* Pin de plaza: gota de color con el símbolo de accesibilidad. El SVG va
+   dentro del divIcon; transform/filter van al div HIJO para no interferir
+   con el posicionamiento por transform que Leaflet aplica al contenedor. */
+.spot-pin {
+  position: relative;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+  transition: transform 0.15s ease;
+  transform-origin: 50% 100%;
+}
+
+.spot-pin:hover {
+  transform: scale(1.15);
+}
+
+.spot-pin svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Anillo pulsante alrededor de la plaza seleccionada */
+.spot-pin--selected::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 72%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  border: 3px solid currentColor;
+  opacity: 0.9;
+  animation: spot-pin-ring 1.6s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes spot-pin-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.55);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Cluster: anillo cónico (verde/rojo/gris según proporción) + centro con
+   el total sobre fondo de tarjeta, legible en claro y oscuro */
+.cluster-badge {
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  display: flex;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.cluster-badge:hover {
+  transform: scale(1.08);
+}
+
+.cluster-badge > span {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: hsl(var(--card));
   border-radius: 999px;
-  border: 2px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-weight: 700;
+  font-family: inherit;
+}
+
+/* Punto de ubicación del usuario con halo pulsante */
+.user-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 3px solid white;
+  position: relative;
+}
+
+.user-dot::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 3px solid rgba(37, 99, 235, 0.5);
+  animation: user-dot-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes user-dot-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Respeta usuarios con reducción de movimiento: pins estáticos, sin halos */
+@media (prefers-reduced-motion: reduce) {
+  .spot-pin--selected::after,
+  .user-dot::after {
+    animation: none;
+    display: none;
+  }
+
+  .spot-pin,
+  .cluster-badge {
+    transition: none;
+  }
 }
 
 /* Tiles del mapa en modo oscuro: se invierten los colores del tile OSM
