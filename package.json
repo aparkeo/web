@@ -19,7 +19,8 @@
     "gen:synthetic": "tsx scripts/gen-synthetic-reports.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:prod": "cross-env E2E_BASE_URL=https://www.aparkeo.com playwright test smoke csp map-tiles"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.7.4",
@@ -71,6 +72,7 @@
     "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "10.4.20",
+    "cross-env": "^10.1.0",
     "dotenv": "^16.6.1",
     "eslint": "^9.39.0",
     "eslint-config-next": "^15.5.0",

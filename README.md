@@ -80,6 +80,21 @@ El seed crea `admin@minusvigo.dev` sin contraseña (OAuth-only) solo como
 referencia de datos; para probar el panel admin de verdad, registra una
 cuenta propia y promociónala.
 
+## Tests
+
+```bash
+npm test                # unitarios (vitest, 428 tests)
+npm run test:e2e        # e2e contra local (levanta `npm run dev` solo)
+npm run test:e2e:prod   # e2e de SOLO LECTURA contra https://www.aparkeo.com
+```
+
+`test:e2e:prod` ejecuta únicamente los specs seguros contra producción
+(`smoke`, `csp`, `map-tiles`): validan que las páginas clave cargan, que no
+hay violaciones CSP y que los tiles del mapa pintan (regresiones del
+watermark de CARTO y del service worker, 02-09-2026). **Nunca** incluyas en
+ese script specs que escriben en la base de datos (`auth`,
+`report-consensus`): producción usa la misma Supabase que desarrollo.
+
 ## Sistema de predicción (resumen — detalle en `lib/prediction.ts`)
 
 Dos señales combinadas:
