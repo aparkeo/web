@@ -1,12 +1,10 @@
 'use client';
 
 import { memo, useCallback } from 'react';
-import { Marker, Popup } from 'react-leaflet';
+import { Marker } from 'react-leaflet';
 import L from 'leaflet';
-import Link from 'next/link';
-import { colorForStatus, statusTextClass, formatDistance } from '@/lib/utils';
+import { colorForStatus } from '@/lib/utils';
 import { WHEELCHAIR_GLYPH } from '@/lib/markers';
-import { Button } from '@/components/ui/button';
 import { useT } from '@/components/i18n/I18nProvider';
 import { fmt } from '@/lib/i18n/format';
 import type { Dictionary } from '@/lib/i18n';
@@ -38,7 +36,6 @@ function spotIcon(status: SpotStatus, selected: boolean): L.DivIcon {
     iconSize: [w, h],
     // La punta del pin marca el punto exacto de la plaza.
     iconAnchor: [w / 2, h],
-    popupAnchor: [0, -h],
   });
   iconCache.set(key, icon);
   return icon;
@@ -61,30 +58,14 @@ export const SpotMarker = memo(function SpotMarker({ spot, selected, onSelect }:
   const label = statusLabel(t, spot.status);
 
   return (
-    // title da nombre accesible al marcador: Leaflet pone tabindex=0 +
-    // role="button" al icono (keyboard: true por defecto) y title actúa como
-    // accessible name; con Enter se abre el popup y el foco entra en él.
+    // Un solo clic/toque abre la tarjeta flotante (SpotPreviewCard en
+    // MapView). title da nombre accesible al marcador: Leaflet pone
+    // tabindex=0 + role="button" al icono y con Enter se selecciona igual.
     <Marker
       position={[spot.lat, spot.lon]}
       icon={icon}
       title={fmt(t.map.markerTitle, { street: spot.street, status: label })}
       eventHandlers={{ click: handleClick }}
-    >
-      {/* El contenido del popup solo se monta para el marcador seleccionado */}
-      {selected ? (
-        <Popup>
-          <div className="flex flex-col gap-1 text-sm">
-            <span className="font-semibold">{spot.street}</span>
-            <span className={`font-medium ${statusTextClass(spot.status)}`}>{label}</span>
-            {spot.distanceM !== undefined ? (
-              <span className="text-muted-foreground">{formatDistance(spot.distanceM)}</span>
-            ) : null}
-            <Button asChild size="sm" className="mt-1">
-              <Link href={`/spots/${spot.id}`}>{t.map.viewDetails}</Link>
-            </Button>
-          </div>
-        </Popup>
-      ) : null}
-    </Marker>
+    />
   );
 });

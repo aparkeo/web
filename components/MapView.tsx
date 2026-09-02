@@ -19,6 +19,7 @@ import { colorForStatus } from '@/lib/utils';
 import { WHEELCHAIR_GLYPH } from '@/lib/markers';
 import { dedupeSpotsByProximity } from '@/lib/dedupeSpots';
 import { SpotMarker } from '@/components/SpotMarker';
+import { SpotPreviewCard } from '@/components/SpotPreviewCard';
 import { useT } from '@/components/i18n/I18nProvider';
 import type { Bbox, SpotStatus } from '@/types';
 
@@ -362,6 +363,12 @@ export function MapView({ visible = true }: { visible?: boolean }) {
     return dedupeSpotsByProximity(merged);
   }, [spots, queriedSpot]);
 
+  // Plaza seleccionada para la tarjeta flotante (1 clic en el pin).
+  const selectedSpot = useMemo(
+    () => visibleSpots.find((s) => s.id === selectedSpotId) ?? null,
+    [visibleSpots, selectedSpotId],
+  );
+
   return (
     <div className="relative h-full w-full">
       {/* keyboard es true por defecto en Leaflet (pan/zoom con teclado y
@@ -408,6 +415,12 @@ export function MapView({ visible = true }: { visible?: boolean }) {
             ))}
         </MarkerClusterGroup>
       </MapContainer>
+      {/* Tarjeta flotante de la plaza seleccionada: overlay hermano del
+          MapContainer (no queda recortada por Leaflet). Un clic en el pin la
+          abre; otro pin la sustituye; X / Escape la cierran. */}
+      {selectedSpot ? (
+        <SpotPreviewCard spot={selectedSpot} onClose={() => setSelectedSpot(null)} />
+      ) : null}
       <BaseLayerControl />
       <LocateButton />
     </div>
