@@ -33,7 +33,8 @@ export default function OpenGraphImage() {
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- next/og no usa next/image */}
-        <img src={logoSrc} alt="Aparkeo" style={{ width: 880, height: 'auto' }} />
+        {/* satori exige ancho y alto explícitos; 'auto' descarta la imagen */}
+        <img src={logoSrc} alt="Aparkeo" width={880} height={357} />
         <div
           style={{
             display: 'flex',
