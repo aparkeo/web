@@ -8,7 +8,7 @@
  *
  * Estrategia por tipo de recurso:
  *   a. _next/static/** y fuentes/media  -> cache-first
- *   b. Tiles de cartocdn.com            -> cache-first con límite FIFO
+ *   b. Tiles de openstreetmap.org y Esri -> cache-first con límite FIFO
  *   c. /api/spots                       -> network-first con fallback a caché
  *   d. Navegaciones                     -> network-first, fallback a caché y a '/'
  *   e. Resto de /api/**                 -> solo red (auth y mutaciones no se cachean)
@@ -18,15 +18,15 @@
  * ========================================================================== */
 
 // Cambiar esta versión fuerza la sustitución de todas las cachés en activate.
-const VERSION = '3';
+const VERSION = '4';
 const CACHE_NAME = `minusvigo-v${VERSION}`;
 
 // App shell mínimo precacheado en install.
 const APP_SHELL = ['/', '/map', '/manifest.webmanifest', '/icon.svg'];
 
-// Hosts de tiles del mapa (CARTO temático y Esri satélite) y límite de
+// Hosts de tiles del mapa (OpenStreetMap temático y Esri satélite) y límite de
 // entradas (expulsión FIFO simple).
-const TILE_HOSTS = ['basemaps.cartocdn.com', 'server.arcgisonline.com'];
+const TILE_HOSTS = ['tile.openstreetmap.org', 'server.arcgisonline.com'];
 const TILE_CACHE_MAX = 600;
 
 /* --------------------------------------------------------------------------

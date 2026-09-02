@@ -103,6 +103,14 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
+/* Tiles del mapa en modo oscuro: se invierten los colores del tile OSM
+   estándar y se atenúa brillo/saturación para un dark map sin API key.
+   Leaflet aplica className al contenedor de la capa de tiles; los marcadores
+   viven en panes aparte y NO se ven afectados por el filtro. */
+.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55);
+}
+
 /* Controles y popups de Leaflet en modo oscuro (leaflet.css usa fondos blancos fijos) */
 .dark .leaflet-bar a,
 .dark .leaflet-bar a:hover,

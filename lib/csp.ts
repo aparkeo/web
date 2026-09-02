@@ -21,13 +21,13 @@
  *   política de producción NO lo incluye.
  * - style-src 'unsafe-inline': Tailwind/shadcn/React Leaflet generan
  *   atributos style inline (posicionamiento del mapa, divIcons, recharts).
- * - img-src: tiles CARTO (Voyager + Dark Matter, subdominios a/b/c/d),
+ * - img-src: tiles OpenStreetMap estándar (capa temática clara/oscura; el
+ *   modo oscuro se logra con filtro CSS sobre los mismos tiles, sin API
+ *   key — CARTO pasó a exigirla y devolvía watermark "API KEY REQUIRED"),
  *   satélite Esri (World Imagery + etiquetas de referencia) y fotos de
  *   plazas en Supabase Storage (bucket público spot-photos); data: y blob:
  *   los usa Leaflet para markers/previews y el cliente para previsualizar
- *   fotos antes de subirlas. OpenStreetMap NO se carga como tile (solo hay
- *   atribución de copyright y geocoding server-side vía /api/geocode), así
- *   que no figura: mínima exposición.
+ *   fotos antes de subirlas.
  * - connect-src 'self' + Supabase (https REST y wss Realtime): el feed en
  *   tiempo real abre wss://<proyecto>.supabase.co/realtime. No hay Vercel
  *   Analytics ni Speed Insights instalados (no se añaden orígenes de
@@ -55,7 +55,7 @@ export function buildContentSecurityPolicy(options?: { isDev?: boolean }): strin
     "default-src 'self'",
     scriptSrc.join(' '),
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://*.supabase.co",
+    "img-src 'self' data: blob: https://tile.openstreetmap.org https://server.arcgisonline.com https://*.supabase.co",
     "font-src 'self' data:",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
     "worker-src 'self'",

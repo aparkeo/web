@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-// Capa base del mapa: "map" = CARTO temático (Voyager/Dark Matter según el tema),
+// Capa base del mapa: "map" = tiles OpenStreetMap (modo oscuro vía filtro CSS),
 // "satellite" = Esri World Imagery + etiquetas de referencia (sin variante de tema:
 // las fotos aéreas son las fotos).
 export type BaseLayer = 'map' | 'satellite';

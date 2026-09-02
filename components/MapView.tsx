@@ -54,27 +54,28 @@ function clusterIcon(cluster: L.MarkerCluster): L.DivIcon {
   });
 }
 
-// Tiles CARTO: Voyager (claro) y Dark Matter (oscuro). Misma atribución en ambos.
-const TILE_URLS = {
-  light: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-} as const;
+// Tiles OpenStreetMap estándar (sin API key). CARTO migró sus basemaps
+// públicos a exigir clave (los tiles devolvían el watermark "API KEY
+// REQUIRED"), así que se sirven los tiles oficiales de OSM.
+// En modo oscuro se reutilizan los mismos tiles con un filtro CSS
+// (.map-tiles-dark en globals.css) que invierte y atenúa la paleta.
+const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 // Capa de tiles reactiva al tema: la key fuerza el remount SOLO del TileLayer
-// (React Leaflet no actualiza la URL en caliente), sin tocar el MapContainer.
+// (React Leaflet no actualiza className en caliente), sin tocar el MapContainer.
 function ThemedTileLayer() {
   const { resolvedTheme } = useTheme();
-  const mode = resolvedTheme === 'dark' ? 'dark' : 'light';
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <TileLayer
-      key={mode}
+      key={isDark ? 'dark' : 'light'}
       attribution={TILE_ATTRIBUTION}
-      url={TILE_URLS[mode]}
-      subdomains="abcd"
-      maxZoom={20}
+      url={OSM_TILE_URL}
+      className={isDark ? 'map-tiles-dark' : undefined}
+      maxZoom={19}
     />
   );
 }
@@ -108,7 +109,7 @@ function SatelliteTileLayers() {
   );
 }
 
-// Capa base según la preferencia persistida: CARTO temático o satélite Esri.
+// Capa base según la preferencia persistida: OSM temático o satélite Esri.
 function BaseLayers() {
   const baseLayer = useBaseLayerStore((s) => s.baseLayer);
   return baseLayer === 'satellite' ? <SatelliteTileLayers /> : <ThemedTileLayer />;
@@ -271,7 +272,7 @@ function LocateButton() {
   );
 }
 
-// Selector de capa base: "Mapa" (CARTO temático) o "Satélite" (Esri).
+// Selector de capa base: "Mapa" (OSM temático) o "Satélite" (Esri).
 // Esquina superior derecha: no colisiona con el ZoomControl (abajo derecha)
 // ni con "Mi ubicación" (bottom-28 right-3). Botones reales con aria-pressed
 // y tap target >= 44px (h-11), estilos con tokens (válidos en ambos temas).

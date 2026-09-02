@@ -27,8 +27,8 @@ describe('Content-Security-Policy (enforce)', () => {
     }
   });
 
-  it('producción: img-src cubre tiles CARTO, satélite Esri y fotos Supabase', () => {
-    expect(prod).toContain('https://*.basemaps.cartocdn.com');
+  it('producción: img-src cubre tiles OSM, satélite Esri y fotos Supabase', () => {
+    expect(prod).toContain('https://tile.openstreetmap.org');
     expect(prod).toContain('https://server.arcgisonline.com');
     expect(prod).toMatch(/img-src[^;]*https:\/\/\*\.supabase\.co/);
     expect(prod).toMatch(/img-src[^;]*data:/);
