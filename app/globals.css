@@ -162,8 +162,11 @@
 .cluster-badge > span {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1px;
+  line-height: 1;
   background: hsl(var(--card));
   border-radius: 999px;
   font-weight: 700;

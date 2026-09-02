@@ -16,6 +16,7 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import { useMapStore } from '@/store/useMapStore';
 import { useBaseLayerStore } from '@/store/useBaseLayerStore';
 import { colorForStatus } from '@/lib/utils';
+import { WHEELCHAIR_GLYPH } from '@/lib/markers';
 import { dedupeSpotsByProximity } from '@/lib/dedupeSpots';
 import { SpotMarker } from '@/components/SpotMarker';
 import { useT } from '@/components/i18n/I18nProvider';
@@ -58,9 +59,13 @@ function clusterIcon(cluster: L.MarkerCluster): L.DivIcon {
       ? unknownColor
       : `conic-gradient(${freeColor} 0 ${freePct}%, ${occupiedColor} ${freePct}% ${freePct + occupiedPct}%, ${unknownColor} ${freePct + occupiedPct}% 100%)`;
 
+  // Mismo glifo de accesibilidad que los pins individuales + total debajo.
+  const glyphSize = Math.round(size * 0.3);
+  const fontSize = count < 100 ? 13 : 11;
+
   return L.divIcon({
     className: '',
-    html: `<div class="cluster-badge" style="width:${size}px;height:${size}px;background:${ring}"><span style="color:${color};font-size:${count < 100 ? 14 : 12}px">${count}</span></div>`,
+    html: `<div class="cluster-badge" style="width:${size}px;height:${size}px;background:${ring}"><span style="color:${color};font-size:${fontSize}px"><svg width="${glyphSize}" height="${glyphSize}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${WHEELCHAIR_GLYPH}</svg>${count}</span></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
