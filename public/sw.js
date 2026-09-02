@@ -8,26 +8,25 @@
  *
  * Estrategia por tipo de recurso:
  *   a. _next/static/** y fuentes/media  -> cache-first
- *   b. Tiles de openstreetmap.org y Esri -> cache-first con límite FIFO
- *   c. /api/spots                       -> network-first con fallback a caché
- *   d. Navegaciones                     -> network-first, fallback a caché y a '/'
- *   e. Resto de /api/**                 -> solo red (auth y mutaciones no se cachean)
+ *   b. /api/spots                       -> network-first con fallback a caché
+ *   c. Navegaciones                     -> network-first, fallback a caché y a '/'
+ *   d. Resto de /api/**                 -> solo red (auth y mutaciones no se cachean)
+ *
+ * Los tiles del mapa NO se interceptan (desde v5): el proxy a través del SW
+ * hacía fallar las peticiones a tile.openstreetmap.org (los <img> recibían
+ * error y el mapa desaparecía al moverlo). El navegador ya los cachea por
+ * HTTP; la app sigue funcionando offline con app shell y datos en caché.
  *
  * Solo se manejan peticiones GET y nunca se cachean respuestas no-ok.
  * Todo el código es defensivo: un fallo aquí NUNCA debe romper una request.
  * ========================================================================== */
 
 // Cambiar esta versión fuerza la sustitución de todas las cachés en activate.
-const VERSION = '4';
+const VERSION = '5';
 const CACHE_NAME = `minusvigo-v${VERSION}`;
 
 // App shell mínimo precacheado en install.
 const APP_SHELL = ['/', '/map', '/manifest.webmanifest', '/icon.svg'];
-
-// Hosts de tiles del mapa (OpenStreetMap temático y Esri satélite) y límite de
-// entradas (expulsión FIFO simple).
-const TILE_HOSTS = ['tile.openstreetmap.org', 'server.arcgisonline.com'];
-const TILE_CACHE_MAX = 600;
 
 /* --------------------------------------------------------------------------
  * install: precache del app shell y activación inmediata.
@@ -104,35 +103,6 @@ async function cacheFirst(request) {
   } catch (err) {
     console.warn('[SW] cacheFirst falló:', request.url, err);
     // Último recurso: reintentar la red tal cual (respuesta de error, no excepción).
-    return fetch(request);
-  }
-}
-
-// Tiles: cache-first con límite de entradas; al superarlo expulsa las más
-// antiguas (FIFO según orden de inserción de cache.keys()).
-async function tileCacheFirst(request) {
-  try {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-
-    const response = await fetch(request);
-    if (isCacheable(response)) {
-      try {
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put(request, response.clone());
-        const keys = await cache.keys();
-        const tileKeys = keys.filter((req) => TILE_HOSTS.includes(new URL(req.url).host));
-        if (tileKeys.length > TILE_CACHE_MAX) {
-          const excess = tileKeys.length - TILE_CACHE_MAX;
-          await Promise.all(tileKeys.slice(0, excess).map((req) => cache.delete(req)));
-        }
-      } catch (err) {
-        console.warn('[SW] No se pudo cachear tile:', err);
-      }
-    }
-    return response;
-  } catch (err) {
-    console.warn('[SW] tileCacheFirst falló:', request.url, err);
     return fetch(request);
   }
 }
@@ -276,12 +246,8 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    // b. Tiles del mapa (únicos orígenes externos permitidos).
-    if (TILE_HOSTS.includes(url.host)) {
-      event.respondWith(tileCacheFirst(request));
-      return;
-    }
-
+    // Los tiles del mapa (OpenStreetMap, Esri) van directos a red: interceptarlos
+    // rompía la carga de imágenes en producción (v4). El navegador los cachea.
     // Todo lo demás: solo same-origin.
     if (url.origin !== self.location.origin) return;
 
@@ -294,13 +260,13 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
-    // c. Datos de plazas (con o sin query string).
+    // b. Datos de plazas (con o sin query string).
     if (url.pathname === '/api/spots') {
       event.respondWith(spotsNetworkFirst(request));
       return;
     }
 
-    // e. Resto de la API: solo red, nunca caché.
+    // c. Resto de la API: solo red, nunca caché.
     if (url.pathname.startsWith('/api/')) return;
 
     // d. Navegaciones entre páginas.
