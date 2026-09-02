@@ -52,6 +52,10 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
   manifest: '/manifest.webmanifest',
+  // darkreader-lock: la app tiene modo oscuro nativo; sin este meta, la
+  // extensión Dark Reader (activa en algunos navegadores) reescribe todos
+  // los colores y "double-darken" la UI, incluidos los tiles del mapa.
+  other: { 'darkreader-lock': 'true' },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
