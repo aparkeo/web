@@ -1,16 +1,12 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
+import { OG_LOGO_BASE64 } from './og-logo-data';
 
 // Tarjeta OG de marca (1200×630): la primera impresión al pegar el enlace en
 // WhatsApp, X o Telegram. SVG no vale: esas plataformas exigen PNG/JPG.
-// Logo definitivo (pin + wordmark) sobre tarjeta clara. La imagen se lee de
-// disco y se incrusta como data URI: en build aún no existe en producción, así
-// que una URL absoluta daría "Can't load image" y rompería el despliegue.
-const logoBase64 = readFileSync(
-  join(process.cwd(), 'public/brand/aparkeo-logo-og.png'),
-).toString('base64');
-const logoSrc = `data:image/png;base64,${logoBase64}`;
+// El logo viaja en base64 dentro del bundle: una URL absoluta rompe la build
+// ("Can't load image") y leer de public/ rompe el runtime serverless de
+// Vercel (ENOENT: public/ no se copia a la función).
+const logoSrc = `data:image/png;base64,${OG_LOGO_BASE64}`;
 
 export const runtime = 'nodejs';
 export const alt = 'Aparkeo — Plazas PMR en vivo';
