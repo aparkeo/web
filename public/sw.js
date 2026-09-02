@@ -22,11 +22,11 @@
  * ========================================================================== */
 
 // Cambiar esta versión fuerza la sustitución de todas las cachés en activate.
-const VERSION = '5';
+const VERSION = '6';
 const CACHE_NAME = `minusvigo-v${VERSION}`;
 
 // App shell mínimo precacheado en install.
-const APP_SHELL = ['/', '/map', '/manifest.webmanifest', '/icon.svg'];
+const APP_SHELL = ['/', '/map', '/manifest.webmanifest', '/icon.png'];
 
 /* --------------------------------------------------------------------------
  * install: precache del app shell y activación inmediata.

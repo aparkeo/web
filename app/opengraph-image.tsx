@@ -1,7 +1,10 @@
 import { ImageResponse } from 'next/og';
+import { SITE_URL } from '@/lib/site';
 
 // Tarjeta OG de marca (1200×630): la primera impresión al pegar el enlace en
 // WhatsApp, X o Telegram. SVG no vale: esas plataformas exigen PNG/JPG.
+// Logo definitivo (pin + wordmark) sobre tarjeta clara, servido como asset
+// estático desde /brand/aparkeo-logo.png.
 export const runtime = 'edge';
 export const alt = 'Aparkeo — Plazas PMR en vivo';
 export const size = { width: 1200, height: 630 };
@@ -16,39 +19,28 @@ export default function OpenGraphImage() {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          alignItems: 'center',
           justifyContent: 'center',
-          padding: 80,
-          background: '#0D776B',
+          background: 'linear-gradient(135deg, #F2FBF8 0%, #E3F2FD 100%)',
           fontFamily: 'system-ui, sans-serif',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
-          <div
-            style={{
-              width: 160,
-              height: 160,
-              borderRadius: 36,
-              background: '#F2FBF8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 96,
-              fontWeight: 800,
-              color: '#0D776B',
-            }}
-          >
-            A
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 100, fontWeight: 800, color: '#FFFFFF', letterSpacing: -3, lineHeight: 1 }}>
-              Aparkeo
-            </div>
-            <div style={{ fontSize: 42, fontWeight: 600, color: '#CFF2EA', marginTop: 16 }}>
-              Plazas PMR en vivo · Galicia y España
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', marginTop: 72, fontSize: 30, fontWeight: 500, color: '#9FE3D5' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- next/og no usa next/image */}
+        <img
+          src={`${SITE_URL}/brand/aparkeo-logo.png`}
+          alt="Aparkeo"
+          style={{ width: 880, height: 'auto' }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            marginTop: 48,
+            fontSize: 30,
+            fontWeight: 600,
+            color: '#0D4E6E',
+            letterSpacing: 0.5,
+          }}
+        >
           Mapa · Predicciones · Reportes de la comunidad
         </div>
       </div>

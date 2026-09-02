@@ -40,9 +40,9 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-            A
-          </span>
+          {/* Pin de la marca definitiva (fondo transparente) */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- logo estático servido tal cual */}
+          <img src="/brand/pin.png" alt="" className="h-9 w-auto" />
           Aparkeo
         </Link>
 

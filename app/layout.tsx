@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     title: 'Aparkeo',
   },
   icons: {
-    icon: { url: '/icon.svg', type: 'image/svg+xml' },
+    icon: { url: '/icon.png', type: 'image/png' },
     apple: '/icons/icon-192.png',
   },
 };
