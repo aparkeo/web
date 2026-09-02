@@ -118,6 +118,7 @@ export const gl: Dictionary = {
     routeByCar: '{distance} · {duration} en coche',
     openInGoogle: 'Abrir no Google Maps',
     closeRoute: 'Quitar a ruta',
+    recenter: 'Centrar na miña posición',
     addFavorite: 'Engadir a favoritas',
     removeFavorite: 'Quitar de favoritas',
     offline: 'Sen conexión — amosando os últimos datos gardados',

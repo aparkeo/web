@@ -125,6 +125,7 @@ export const es = {
     routeByCar: '{distance} · {duration} en coche',
     openInGoogle: 'Abrir en Google Maps',
     closeRoute: 'Quitar la ruta',
+    recenter: 'Centrar en mi posición',
     addFavorite: 'Añadir a favoritas',
     removeFavorite: 'Quitar de favoritas',
     offline: 'Sin conexión — mostrando los últimos datos guardados',

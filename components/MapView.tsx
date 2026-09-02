@@ -6,13 +6,14 @@ import { MapContainer, TileLayer, Marker, ZoomControl, useMap, useMapEvents } fr
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { useTheme } from 'next-themes';
-import { LocateFixed, Loader2, Map as MapIcon, Satellite } from 'lucide-react';
+import { LocateFixed, Loader2, Map as MapIcon, Navigation2, Satellite } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { useSpots } from '@/hooks/useSpots';
 import { useSpot } from '@/hooks/useSpot';
 import { useUserLocation } from '@/hooks/useUserLocation';
+import { useWatchLocation } from '@/hooks/useWatchLocation';
 import { useRoute } from '@/hooks/useRoute';
 import { useMapStore } from '@/store/useMapStore';
 import { useBaseLayerStore } from '@/store/useBaseLayerStore';
@@ -136,15 +137,48 @@ function BaseLayers() {
   return baseLayer === 'satellite' ? <SatelliteTileLayers /> : <ThemedTileLayer />;
 }
 
-function RecenterOnUser() {
+function RecenterOnUser({ enabled = true }: { enabled?: boolean }) {
   const map = useMap();
   const userLocation = useMapStore((s) => s.userLocation);
 
   useEffect(() => {
-    if (userLocation) {
+    if (enabled && userLocation) {
       map.setView([userLocation.latitude, userLocation.longitude], 16, { animate: true });
     }
-  }, [userLocation, map]);
+  }, [enabled, userLocation, map]);
+
+  return null;
+}
+
+// Zoom de navegación: suficiente para leer los nombres de las calles por
+// las que se pasa, sin perder el contexto de la manzana.
+const NAV_ZOOM = 17;
+
+/**
+ * Modo seguimiento (ruta activa): el mapa se mantiene centrado en la
+ * posición GPS en vivo, como en Google Maps. Arrastrar el mapa pausa el
+ * seguimiento; se reactiva con el botón «Centrar en mi posición».
+ */
+function FollowUser({
+  following,
+  onUserPan,
+}: {
+  following: boolean;
+  onUserPan: () => void;
+}) {
+  const map = useMap();
+  const userLocation = useMapStore((s) => s.userLocation);
+
+  useMapEvents({
+    dragstart: () => onUserPan(),
+  });
+
+  useEffect(() => {
+    if (!following || !userLocation) return;
+    map.setView([userLocation.latitude, userLocation.longitude], Math.max(map.getZoom(), NAV_ZOOM), {
+      animate: true,
+    });
+  }, [following, userLocation, map]);
 
   return null;
 }
@@ -347,16 +381,29 @@ export function MapView({ visible = true }: { visible?: boolean }) {
   const userLocation = useMapStore((s) => s.userLocation);
   const t = useT();
 
-  const userIcon = useMemo(
-    () =>
-      L.divIcon({
+  // Marcador del usuario: punto azul fijo; con rumbo GPS (modo navegación)
+  // se envuelve en el cono de orientación. Se redondea a 5° para no
+  // regenerar el icono con cada tembleque del sensor.
+  const headingDeg =
+    userLocation?.heading != null && !Number.isNaN(userLocation.heading)
+      ? Math.round(userLocation.heading / 5) * 5
+      : null;
+  const userIcon = useMemo(() => {
+    if (headingDeg === null) {
+      return L.divIcon({
         className: '',
         html: `<div class="user-dot"></div>`,
         iconSize: [16, 16],
         iconAnchor: [8, 8],
-      }),
-    [],
-  );
+      });
+    }
+    return L.divIcon({
+      className: '',
+      html: `<div class="user-nav" style="transform:rotate(${headingDeg}deg)"><div class="user-nav__cone"></div><div class="user-dot"></div></div>`,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+    });
+  }, [headingDeg]);
 
   // La plaza de ?spot= se muestra aunque esté fuera del viewport cargado, y
   // se eliminan los duplicados físicos Vigo-oficial vs OSM (solo visual).
@@ -375,11 +422,20 @@ export function MapView({ visible = true }: { visible?: boolean }) {
   // «Cómo llegar» integrado: ruta en coche dibujada en el propio mapa (OSRM
   // vía /api/route). Si no hay GPS concedido se pide al pulsar el botón; si
   // el usuario lo deniega, el panel ofrece el fallback de Google Maps.
+  // Con ruta activa el GPS se sigue en vivo (watchPosition) y el mapa se
+  // mantiene centrado en el usuario — modo navegación tipo Google Maps.
   const [routeTarget, setRouteTarget] = useState<SpotDTO | null>(null);
+  const [following, setFollowing] = useState(true);
   const { locate, loading: locating } = useUserLocation();
+  useWatchLocation(routeTarget !== null);
 
+  // Origen redondeado a 3 decimales (~111 m): mientras el usuario avanza,
+  // la ruta se recalcula de vez en cuando, no con cada fix del GPS.
   const routeFrom = userLocation
-    ? { lat: userLocation.latitude, lon: userLocation.longitude }
+    ? {
+        lat: Number(userLocation.latitude.toFixed(3)),
+        lon: Number(userLocation.longitude.toFixed(3)),
+      }
     : null;
   const routeTo = routeTarget ? { lat: routeTarget.lat, lon: routeTarget.lon } : null;
   const routeQuery = useRoute(routeFrom, routeTo);
@@ -387,6 +443,7 @@ export function MapView({ visible = true }: { visible?: boolean }) {
   const handleNavigate = useCallback(
     (spot: SpotDTO) => {
       setRouteTarget(spot);
+      setFollowing(true);
       if (!userLocation) locate();
     },
     [userLocation, locate],
@@ -416,7 +473,11 @@ export function MapView({ visible = true }: { visible?: boolean }) {
       >
         <BaseLayers />
         <ZoomControl position="bottomright" />
-        <RecenterOnUser />
+        <RecenterOnUser enabled={!routeTarget} />
+        <FollowUser
+          following={routeTarget !== null && following}
+          onUserPan={() => setFollowing(false)}
+        />
         <ViewportSync />
         <FlyToCenter />
         <InvalidateSizeOnVisible visible={visible} />
@@ -468,6 +529,20 @@ export function MapView({ visible = true }: { visible?: boolean }) {
           googleHref={`https://www.google.com/maps/dir/?api=1&destination=${routeTarget.lat},${routeTarget.lon}&travelmode=driving`}
           onClose={() => setRouteTarget(null)}
         />
+      ) : null}
+      {/* Botón de recentrado: aparece cuando el usuario ha arrastrado el
+          mapa durante la navegación (seguimiento en pausa), como en
+          Google Maps. Encima del botón «Mi ubicación» (bottom-28). */}
+      {routeTarget && !following && userLocation ? (
+        <button
+          type="button"
+          onClick={() => setFollowing(true)}
+          aria-label={t.map.recenter}
+          className="absolute bottom-44 right-3 z-[1000] flex h-11 items-center gap-2 rounded-full border border-border bg-background px-4 text-sm font-medium shadow-lg transition-colors hover:bg-secondary"
+        >
+          <Navigation2 className="h-4 w-4 text-primary" aria-hidden />
+          {t.map.recenter}
+        </button>
       ) : null}
       <BaseLayerControl />
       <LocateButton />

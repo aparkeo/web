@@ -44,6 +44,12 @@ export interface ReportInput {
 export interface UserLocation {
   latitude: number;
   longitude: number;
+  /**
+   * Rumbo del dispositivo en grados (0 = norte, sentido horario), si el
+   * GPS lo informa. Lo usa el marcador de navegación para orientar la
+   * flecha; en escritorio suele venir null.
+   */
+  heading?: number | null;
 }
 
 /**

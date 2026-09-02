@@ -204,6 +204,29 @@
   }
 }
 
+/* Marcador de navegación (ruta activa): punto azul + cono que apunta al
+   rumbo del GPS, girado con transform inline desde MapView */
+.user-nav {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-nav__cone {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 28px;
+  height: 32px;
+  transform: translateX(-50%);
+  background: linear-gradient(rgba(37, 99, 235, 0.55), rgba(37, 99, 235, 0));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
 /* Respeta usuarios con reducción de movimiento: pins estáticos, sin halos */
 @media (prefers-reduced-motion: reduce) {
   .spot-pin--selected::after,
