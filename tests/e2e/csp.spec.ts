@@ -31,7 +31,7 @@ async function expectNoCspViolations(page: import('@playwright/test').Page, rout
 }
 
 test.describe('CSP enforce', () => {
-  test('/map carga sin violaciones CSP (tiles CARTO/Esri + Supabase)', async ({ page }) => {
+  test('/map carga sin violaciones CSP (tiles OSM/Esri + Supabase)', async ({ page }) => {
     await expectNoCspViolations(page, '/map');
   });
 
