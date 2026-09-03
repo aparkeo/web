@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSpots } from '@/hooks/useSpots';
 import { useRealtimeSpots } from '@/hooks/useRealtimeSpots';
+import { useMapStore } from '@/store/useMapStore';
 import { spotsCountAnnouncement } from '@/lib/a11y';
 import { useT } from '@/components/i18n/I18nProvider';
 
@@ -30,6 +31,7 @@ export default function MapPage() {
   const { data: spots = [], isLoading } = useSpots({ viewport: true });
   const live = useRealtimeSpots();
   const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
+  const selectedSpotId = useMapStore((s) => s.selectedSpotId);
   const t = useT();
 
   return (
@@ -76,21 +78,26 @@ export default function MapPage() {
         </MapErrorBoundary>
       </div>
 
-      <Button
-        className="shadow-elevated fixed bottom-4 left-1/2 z-30 min-h-12 -translate-x-1/2 gap-2 rounded-full px-5 text-sm font-bold transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 md:hidden"
-        onClick={() => setMobileView((v) => (v === 'map' ? 'list' : 'map'))}
-        aria-label={mobileView === 'map' ? t.map.viewListAria : t.map.viewMapAria}
-      >
-        {mobileView === 'map' ? (
-          <>
-            <List className="h-4 w-4" /> {t.map.viewList}
-          </>
-        ) : (
-          <>
-            <MapIcon className="h-4 w-4" /> {t.map.viewMap}
-          </>
-        )}
-      </Button>
+      {/* Botón «Ver lista/mapa» (solo móvil): vive en bottom-4 centrado,
+          la misma zona que la tarjeta flotante de la plaza, así que cuando
+          hay una plaza seleccionada se esconde para no montarse encima. */}
+      {selectedSpotId === null || mobileView === 'list' ? (
+        <Button
+          className="shadow-elevated fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 min-h-12 -translate-x-1/2 gap-2 rounded-full px-5 text-sm font-bold transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 md:hidden"
+          onClick={() => setMobileView((v) => (v === 'map' ? 'list' : 'map'))}
+          aria-label={mobileView === 'map' ? t.map.viewListAria : t.map.viewMapAria}
+        >
+          {mobileView === 'map' ? (
+            <>
+              <List className="h-4 w-4" /> {t.map.viewList}
+            </>
+          ) : (
+            <>
+              <MapIcon className="h-4 w-4" /> {t.map.viewMap}
+            </>
+          )}
+        </Button>
+      ) : null}
     </div>
   );
 }

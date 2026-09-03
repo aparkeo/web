@@ -36,11 +36,17 @@ describe('GET /api/analytics', () => {
   it('devuelve agregados con caché de CDN y sin datos personales', async () => {
     reportCount.mockResolvedValue(42);
     reportGroupBy.mockResolvedValue([{ userId: 'a' }, { userId: 'b' }, { userId: 'c' }]);
+    // Día dentro de la ventana de 30 días, calculado en tiempo de test: una
+    // fecha fija (p. ej. '2026-08-04') acaba saliendo de la ventana y el
+    // test moriría de viejo — ya pasó una vez.
+    const recentDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(
+      new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    );
     queryRaw
       .mockResolvedValueOnce([{ street: 'Gran Vía', reports: 8, free: 3, occupied: 5 }]) // streets
       .mockResolvedValueOnce([{ hour: 10, free: 3, occupied: 5 }]) // hourly
       .mockResolvedValueOnce([{ dow: 3, free: 3, occupied: 5 }]) // weekday
-      .mockResolvedValueOnce([{ day: '2026-08-04', free: 3, occupied: 5 }]) // daily
+      .mockResolvedValueOnce([{ day: recentDay, free: 3, occupied: 5 }]) // daily
       .mockResolvedValueOnce([{ id: 1, street: 'Gran Vía', reports: 8, free: 3, occupied: 5 }]) // top
       .mockResolvedValueOnce([
         { source: 'cartel', visits: 12 },

@@ -48,7 +48,7 @@ export function SpotPreviewCard({
     <Card
       role="dialog"
       aria-label={spot.street}
-      className="shadow-elevated absolute bottom-4 left-1/2 z-10 w-[min(22rem,calc(100%-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl py-0"
+      className="shadow-elevated absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-10 w-[min(22rem,calc(100%-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl py-0"
     >
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element -- URL externa de Supabase con dimensiones variables
